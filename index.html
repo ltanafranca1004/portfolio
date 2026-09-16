@@ -144,6 +144,9 @@
 
     .card-image {
       width: 100%;
+      /* Beat the height attribute's presentational hint, which max-height
+         would otherwise clamp into a horizontal object-fit crop. */
+      height: auto;
       max-height: 260px;
       object-fit: cover;
       border-radius: 8px;
@@ -243,7 +246,7 @@
 <body>
   <main>
     <section class="hero">
-      <img class="avatar" src="profile.jpg" alt="Luis Tanafranca" />
+      <img class="avatar" src="profile.webp" alt="Luis Tanafranca" width="190" height="190" />
       <h1>Luis Tanafranca</h1>
       <p class="bio">Computing Science student at SFU building real-world software.</p>
       <div class="links">
@@ -257,7 +260,7 @@
       <h2>Projects</h2>
 
       <article class="card">
-        <img class="card-image" src="unify-web.png" alt="Unify Social Web Platform screenshot" />
+        <img class="card-image" src="unify-web.webp" alt="Unify Social Web Platform screenshot" width="1600" height="843" decoding="async" />
         <div class="card-header">
           <h3>Unify Social — Web Platform</h3>
         </div>
@@ -275,7 +278,7 @@
       </article>
 
       <article class="card">
-        <img class="card-image" src="lens.png" alt="Lens session review screen with per-question scores" />
+        <img class="card-image" src="lens.webp" alt="Lens session review screen with per-question scores" width="1600" height="812" loading="lazy" decoding="async" />
         <div class="card-header">
           <h3>Lens — AI Interview Prep Tool</h3>
         </div>
@@ -294,7 +297,7 @@
       </article>
 
       <article class="card">
-        <img class="card-image" src="unify-landing.png" alt="Unify Social Landing Page screenshot" />
+        <img class="card-image" src="unify-landing.webp" alt="Unify Social Landing Page screenshot" width="1600" height="794" loading="lazy" decoding="async" />
         <div class="card-header">
           <h3>Unify Social — Landing Page</h3>
         </div>
@@ -311,7 +314,7 @@
       </article>
 
       <article class="card">
-        <img class="card-image" src="turtle-trips.png" alt="Turtle Trips AI screenshot" />
+        <img class="card-image" src="turtle-trips.webp" alt="Turtle Trips AI screenshot" width="1600" height="859" loading="lazy" decoding="async" />
         <div class="card-header">
           <h3>Turtle Trips AI</h3>
         </div>
@@ -327,7 +330,7 @@
       </article>
 
       <article class="card">
-        <img class="card-image" src="vancouver-amenity.png" alt="Vancouver Amenity Recommender screenshot" />
+        <img class="card-image" src="vancouver-amenity.webp" alt="Vancouver Amenity Recommender screenshot" width="1600" height="774" loading="lazy" decoding="async" />
         <div class="card-header">
           <h3>Vancouver Amenity Recommender</h3>
         </div>
@@ -344,7 +347,7 @@
       </article>
 
       <article class="card">
-        <img class="card-image" src="nutrifit.png" alt="NutriFit screenshot" />
+        <img class="card-image" src="nutrifit.webp" alt="NutriFit screenshot" width="1600" height="788" loading="lazy" decoding="async" />
         <div class="card-header">
           <h3>NutriFit</h3>
         </div>
