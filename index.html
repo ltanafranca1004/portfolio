@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0d0f14" />
   <title>Luis Tanafranca</title>
   <meta name="description" content="Luis Tanafranca — Computing Science student at SFU. Building Unify Social." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -23,6 +24,9 @@
     *, *::before, *::after { box-sizing: border-box; }
 
     html, body { margin: 0; padding: 0; }
+
+    /* Overscroll paints the root background colour, not the gradient image. */
+    html { background-color: #0f0d12; color-scheme: dark; }
 
     body {
       background: linear-gradient(to bottom, #0d0f14 0%, #0f0d12 100%);
