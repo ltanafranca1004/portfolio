@@ -105,6 +105,20 @@
       margin-right: auto;
     }
 
+    .availability {
+      margin-top: 0.5rem;
+      font-size: 0.9375rem;
+      color: var(--muted);
+    }
+
+    .bullets {
+      margin: 0.625rem 0 0;
+      padding-left: 1.1rem;
+      font-size: 0.9375rem;
+      color: var(--muted);
+    }
+    .bullets li + li { margin-top: 0.35rem; }
+
     .links {
       margin-top: 1.5rem;
       display: flex;
@@ -249,6 +263,7 @@
       <img class="avatar" src="profile.webp" alt="Luis Tanafranca" width="190" height="190" />
       <h1>Luis Tanafranca</h1>
       <p class="bio">Computing Science student at SFU building real-world software.</p>
+      <p class="availability">Seeking SWE internships and co-op for 2027 · Vancouver, BC</p>
       <div class="links">
         <a href="https://github.com/ltanafranca1004" target="_blank" rel="noopener">GitHub</a>
         <a href="https://linkedin.com/in/luistanafranca" target="_blank" rel="noopener">LinkedIn</a>
@@ -301,7 +316,7 @@
         <div class="card-header">
           <h3>Unify Social — Landing Page</h3>
         </div>
-        <p class="desc">Marketing site and waitlist for Unify Social. Built with Astro and TypeScript on Cloudflare Workers, with Sanity CMS, Resend forms, and a full SEO layer.</p>
+        <p class="desc">Marketing site for Unify Social. Built with Astro and TypeScript on Cloudflare Workers, with Sanity CMS, Resend forms, and a full SEO layer.</p>
         <div class="chip-row">
           <span class="chip">Astro</span>
           <span class="chip">TypeScript</span>
@@ -388,6 +403,21 @@
           <h3>Unify Social · Software Engineer</h3>
           <span class="meta">Feb 2026 – Present</span>
         </div>
+        <ul class="bullets">
+          <li>Settlement app for newcomers to Canada, now at 400+ mobile and web users. Won the RBC Foundation Best Project Award and the Desjardins Community Empowerment Challenge at Enactus Canada Nationals.</li>
+          <li>Built an AI assistant on retrieval-augmented generation: a pgvector knowledge base with recency-weighted similarity search, served through a Supabase edge function with rate limiting and provider fallback.</li>
+          <li>Shipped AI resume and cover letter generators with server-side quota enforcement, on a 21-table PostgreSQL schema with PL/pgSQL functions, triggers, and custom RPCs.</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <div class="card-header">
+          <h3>Spotwork · SEO &amp; Technical Specification</h3>
+          <span class="meta">Jul 2026 – Sep 2026</span>
+        </div>
+        <ul class="bullets">
+          <li>Student placement through Riipen Level UP. Diagnosed why a 40+ listing job board surfaced only 1–2 Google results, tracing it to URL structure and metadata, and verified the findings against the structured data on live listings.</li>
+        </ul>
       </article>
 
       <article class="card">
@@ -395,6 +425,21 @@
           <h3>STEMA Learning · Classroom Facilitator</h3>
           <span class="meta">Jan 2025 – Present</span>
         </div>
+        <ul class="bullets">
+          <li>Teach coding (Python, Scratch), robotics, and STEM to 20+ students per session. Designed the curriculum from scratch and adapt pacing for mixed skill levels across weekly lessons.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section>
+      <h2>Education</h2>
+
+      <article class="card">
+        <div class="card-header">
+          <h3>Simon Fraser University · BSc Computing Science</h3>
+          <span class="meta">Expected Spring 2027</span>
+        </div>
+        <p class="desc">Relevant coursework: Data Structures &amp; Algorithms, Database Systems I &amp; II, Systems Programming, Computer Networks, Software Engineering, Intro to Artificial Intelligence.</p>
       </article>
     </section>
 
