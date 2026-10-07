@@ -3,9 +3,14 @@
 // Lines that ended at the 1440 x 900 artboard edge are extended so they keep going when the
 // window is wider or taller than the stage. One dotted orbit is moved: it used to run
 // through the Amenity Recommender label, and now passes between the worlds instead.
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
 ---
 
-<svg class="orbits only-desktop" viewBox="0 0 1440 900" width="1440" height="900" fill="none" aria-hidden="true">
+<svg class={`orbits ${className}`} viewBox="0 0 1440 900" width="1440" height="900" preserveAspectRatio="xMidYMid slice" fill="none" aria-hidden="true">
   <g stroke="#D9B46A" stroke-linecap="round">
     <circle cx="760" cy="420" r="560" stroke-width="1.6" opacity="0.55"></circle>
     <circle cx="760" cy="420" r="548" stroke-width="0.8" opacity="0.3"></circle>
@@ -62,8 +67,26 @@
 <style>
   .orbits {
     position: absolute;
-    inset: 0;
+    left: 0;
+    top: 0;
     overflow: visible;
     pointer-events: none;
+  }
+
+  /* Behind a normal page: faint, centred at the top, and stretched to cover on wide screens. */
+  .orbits-backdrop {
+    left: 50%;
+    z-index: -1;
+    margin-left: -720px;
+    opacity: 0.3;
+  }
+
+  @media (min-width: 1000px) {
+    .orbits-backdrop {
+      left: 0;
+      width: 100%;
+      height: 100%;
+      margin-left: 0;
+    }
   }
 </style>
