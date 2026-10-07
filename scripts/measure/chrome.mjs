@@ -200,8 +200,11 @@ if (passes.includes('screen')) {
   const stop = record(video);
   await s.page.waitForTimeout(1500);
   const windows = [];
-  await walk(s.page, s.base, (step, from, to) => windows.push({ step: step.name, from, to }));
-  await stop();
+  try {
+    await walk(s.page, s.base, (step, from, to) => windows.push({ step: step.name, from, to }));
+  } finally {
+    await stop();
+  }
   result.passes.screen = { file: video, leadIn: 1500, windows };
   await s.close();
 }

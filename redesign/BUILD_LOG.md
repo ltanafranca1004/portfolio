@@ -577,12 +577,14 @@ Pages change.
 | | State |
 |---|---|
 | Real Chrome 155 on this Mac (1470 x 751 at 2x) | Driven and measured. Frame times come from Chrome's own trace (every frame it presented). |
-| Screen recording | **Blocked.** macOS gave Claude the wallpaper only (no windows), which is what it does without Screen Recording permission. The Chrome videos are every frame Chrome painted (DevTools screencast) instead. |
-| Real Safari 26.5.2 | **Blocked.** "Allow remote automation" is still off (Safari > Settings > Developer). `scripts/measure/safari.mjs` is written and waiting. |
+| Screen recording | Allowed late in the session. No usable screen recording was kept: see "Real Safari" below. The Chrome videos are every frame Chrome painted (DevTools screencast). |
+| Real Safari 26.5.2 | Driven after `sudo safaridriver --enable`, for numbers only (see "Real Safari" below). |
 | iPhone simulator | **Not available.** Xcode is not installed (Command Line Tools only). About 30 GB with a simulator runtime; not installed. |
-| WebKit instead of both | Playwright WebKit 18.4, 26.0, a build between, and 26.6, at iPhone size (390 x 664 at 3x, taps) and at this laptop's window size. It is WebKit on a Mac, not Safari and not a phone. |
+| WebKit as a stand-in | Playwright WebKit 18.4, 26.0, a build between, and 26.6, at iPhone size (390 x 664 at 3x, taps) and at this laptop's window size. It is WebKit on a Mac, not Safari and not a phone. |
 
-So every Safari and iPhone statement below is from WebKit builds, not from your devices.
+Every iPhone statement below is from WebKit builds, not from your phone. The transition
+decision was made on Chrome and WebKit data, before Safari could be driven.
+
 
 ### What flickered, exactly (Session 6 build)
 Real Chrome, from the recorded frames (`recordings/sheets/before-chrome-*.png`, `zoomout-detail.png`):
@@ -698,6 +700,30 @@ this Mac, so the times are not like for like. Run it again after deploying.
 | `/profile/` | mobile | 99 / 100 / 100 / 69, 1.82s | 100 / 100 / 100 / 69, 1.66s |
 | `/profile/` | desktop | 100 / 100 / 100 / 69, 0.44s | 100 / 100 / 100 / 69, 0.37s |
 
+Real Safari 26.5.2 (1470 x 786 at 2x), the page's own frame clock, local builds at 40ms latency.
+**Read these as a comparison, not as absolute numbers:** the Mac was on battery in Low Power
+Mode (Safari then draws 30 frames a second, so a normal frame is 33ms) and Luis was using it
+at the same time.
+
+| Real Safari | Session 5 | Session 6 | Now |
+|---|---|---|---|
+| Worst frame in each of the 8 transitions | 226 to 968ms | 94 to 529ms | 99 to 123ms |
+| Frames after that first one | up to 335ms | 89 to 145ms, repeatedly | 20 to 41ms |
+| Transition length | 329 to 977ms | 333 to 699ms | 262 to 292ms |
+| Cold load, map: every first-screen picture in | 799ms | 686ms | 269ms |
+| Cold load, map: things changing after first paint | 25 | 25 | 15 |
+| Cold load, map: first paint | 116ms | 116ms | 122ms |
+
+So Safari was already worse in Session 5 than Chrome ever was, Session 6 did not fix it, and
+it is now one long first frame (about 100 to 120ms, the new page setting up) followed by
+steady frames. **That first frame is over the 33ms target.** I did not chase it: the numbers
+were taken in Low Power Mode with the Mac in use, and a clean run is needed first.
+
+No Safari screen recording was kept. The two I made caught another window you were working in
+instead of the site, so I deleted them. The before and after Safari numbers above come from
+this session's printed report; their JSON files were overwritten by that video run
+(`s5-safari.json` is intact, and the driver no longer overwrites).
+
 After the deploy, on the preview itself (Lighthouse, then real Chrome):
 
 | Page | Form | Session 6: Perf / A11y / BP / SEO, LCP | Now: Perf / A11y / BP / SEO, LCP |
@@ -725,9 +751,13 @@ transitions 28, transition frames 24, accessibility 63, analytics, phone, worlds
 keep-out).
 
 ### Things that are not perfect, and judgment calls
-1. **The target is not confirmed in real Safari.** It could not be driven. The cross-fade is
-   clean in WebKit 18.4, a build after 26.0, and 26.6 at desktop size
-   (`sheets/webkit-*-desktop-crossfade.png`).
+1. **The target is not met in real Safari, and not confirmed by a recording.** Real Safari
+   shows one frame of about 100 to 120ms at the start of each transition (table above), taken
+   in Low Power Mode with the Mac in use. There is no Safari recording. The cross-fade is clean
+   in WebKit 18.4, a build after 26.0, and 26.6 at desktop size
+   (`sheets/webkit-*-desktop-crossfade.png`). A clean Safari run needs the Mac plugged in, Low
+   Power Mode off, and nobody using it:
+   `npm run measure:safari -- --build=dist --label=after`.
 2. **WebKit 26.0 blinks during any view transition,** zoom or cross-fade: page content drops out
    for a frame or two (`sheets/webkit-26.0-desktop-crossfade-blinks.png`). With transitions
    switched off that build is clean. At iPhone size the final build shows one faint frame, on
@@ -758,6 +788,6 @@ keep-out).
 ### Files for review (`redesign/recordings/`, git-ignored)
 - `before-chrome.mov`, `after-chrome.mov`: every frame Chrome painted, real Chrome.
 - `before-iphone.mov`, `after-iphone.mov`: WebKit 26.0 at iPhone size. `after-iphone-wk26.6.mov`.
-- No `before-safari.mov` or `after-safari.mov` (blocked, see the top of this section).
+- No `before-safari.mov` or `after-safari.mov` (see "Real Safari" above).
 - `*.json`: the numbers behind every table. `sheets/`: the contact sheets named above, and
   `phone-profile.png` (the four tabs at phone size).

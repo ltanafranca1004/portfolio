@@ -1,6 +1,7 @@
 // Records the real screen at 60 frames a second, at full resolution, with ffmpeg (hardware
 // encoder). macOS's own `screencapture -v` stops after a second when it has no terminal.
-// Needs Screen Recording permission for the app this runs in.
+// Needs Screen Recording permission for the app this runs in. A recording stops by itself
+// after 90 seconds, so a driver that dies cannot leave it filling the disk.
 import { spawn } from 'node:child_process';
 import { rmSync } from 'node:fs';
 
@@ -9,7 +10,7 @@ export function record(file) {
   rmSync(file, { force: true });
   const ffmpeg = spawn(
     'ffmpeg',
-    ['-hide_banner', '-loglevel', 'error', '-y', '-f', 'avfoundation', '-framerate', '60', '-capture_cursor', '1', '-pixel_format', 'nv12', '-i', 'Capture screen 0:none', '-c:v', 'h264_videotoolbox', '-b:v', '30M', '-pix_fmt', 'yuv420p', '-video_track_timescale', '60000', file],
+    ['-hide_banner', '-loglevel', 'error', '-y', '-f', 'avfoundation', '-framerate', '60', '-capture_cursor', '1', '-pixel_format', 'nv12', '-i', 'Capture screen 0:none', '-t', '90', '-c:v', 'h264_videotoolbox', '-b:v', '30M', '-pix_fmt', 'yuv420p', '-video_track_timescale', '60000', file],
     { stdio: ['pipe', 'ignore', 'pipe'] },
   );
   let complaint = '';

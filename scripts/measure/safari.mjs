@@ -1,7 +1,9 @@
 // Drives the real Safari through the journey with safaridriver (WebDriver).
 //   node scripts/measure/safari.mjs --build=dist --label=after [--latency=40 --kbps=20000]
 //   node scripts/measure/safari.mjs --url=https://redesign.luistanafranca.pages.dev --label=live --passes=video
-// Needs Safari > Settings > Developer > "Allow remote automation". The video pass records the
+// Needs Safari > Settings > Developer > "Allow remote automation" (or `sudo safaridriver --enable`).
+// It takes over the screen: run it when nobody is using the Mac, plugged in, with Low Power
+// Mode off (Safari draws 30 frames a second in Low Power Mode). The video pass records the
 // whole screen (record.mjs), which needs Screen Recording permission for the app
 // this runs in.
 // Passes (each in a fresh automation window, which starts with an empty cache):
@@ -11,7 +13,7 @@
 //   video    the journey recorded from the screen, written as <out>/<label>-safari.mov
 // The probe only exists on builds served from here, so a --url run can only do the video pass.
 import { spawn } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { STEPS, summarise } from './journey.mjs';
 import { record } from './record.mjs';
@@ -41,7 +43,16 @@ async function wd(method, url, body) {
 
 async function open(probe) {
   const server = args.url ? null : await serve({ root: path.resolve(args.build ?? 'dist'), port: PORT, latency: Number(args.latency ?? 0), kbps: Number(args.kbps ?? 0), probe });
-  const session = (await wd('POST', '/session', { capabilities: { alwaysMatch: { browserName: 'safari' } } })).sessionId;
+  // pairing with Safari sometimes fails on the first try
+  let session;
+  for (let attempt = 1; !session; attempt++) {
+    try {
+      session = (await wd('POST', '/session', { capabilities: { alwaysMatch: { browserName: 'safari' } } })).sessionId;
+    } catch (error) {
+      if (attempt === 4) throw error;
+      await sleep(2000);
+    }
+  }
   const s = `/session/${session}`;
   await wd('POST', `${s}/window/maximize`, {}).catch(() => {});
   const run = (script, ...a) => wd('POST', `${s}/execute/sync`, { script, args: a });
@@ -53,9 +64,15 @@ async function open(probe) {
     back: () => wd('POST', `${s}/back`, {}),
     // the first match that is actually showing (phones and wide screens each have their own pager)
     click: async (selector) => {
-      const el = await run('return [...document.querySelectorAll(arguments[0])].find((el) => el.getClientRects().length > 0) || null', selector);
-      if (!el) throw new Error(`nothing showing matches ${selector}`);
-      await wd('POST', `${s}/element/${el[ELEMENT]}/click`, {});
+      let el = null;
+      for (let i = 0; i < 40 && !el; i++) {
+        el = await run('return [...document.querySelectorAll(arguments[0])].find((el) => el.getClientRects().length > 0) || null', selector).catch(() => null);
+        if (!el) await sleep(100);
+      }
+      if (!el) throw new Error(`nothing showing matches ${selector} on ${await run('return location.pathname + " " + innerWidth + "x" + innerHeight')}`);
+      // Safari refuses a click on a link it cannot hit in the middle (a world's link is its
+      // title, stretched over the ring by a pseudo-element): click it from the page then.
+      await wd('POST', `${s}/element/${el[ELEMENT]}/click`, {}).catch(() => run('arguments[0].click()', el));
     },
     path: () => run('return location.pathname'),
     close: async () => {
@@ -72,7 +89,13 @@ async function walk(s, each = () => {}) {
     if (step.back) await s.back();
     else if (step.click) await s.click(step.click);
     else await s.go(s.base + step.to);
-    for (let i = 0; i < 100 && (await s.path()) !== step.to; i++) await sleep(50);
+    for (let i = 0; i < 60 && (await s.path()) !== step.to; i++) await sleep(50);
+    if ((await s.path()) !== step.to && step.click) {
+      // the click did not take (seen in Safari right after a Back): follow the link from the page
+      console.error(`${step.name}: the click did not navigate, following the link directly`);
+      await s.run('const el = [...document.querySelectorAll(arguments[0])].find((el) => el.getClientRects().length > 0); if (el) el.click();', step.click);
+      for (let i = 0; i < 60 && (await s.path()) !== step.to; i++) await sleep(50);
+    }
     await sleep(step.click || step.back ? PAUSE : 3200);
     each(step, from, Date.now() - began);
   }
@@ -84,7 +107,9 @@ const readProbe = (s) =>
     const cur = window.__probe && window.__probe();
     return cur ? [...log.filter((n) => n.id !== cur.id), cur] : log;`);
 
-const result = { label, browser: null, window: null, passes: {} };
+// keep the passes of earlier runs under this label: a later video-only run must not drop the numbers
+const file = path.join(out, `${label}-safari.json`);
+const result = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : { label, browser: null, window: null, passes: {} };
 
 if (passes.includes('loads')) {
   result.passes.loads = {};
@@ -132,12 +157,15 @@ if (passes.includes('video')) {
   await sleep(1500);
   const began = Date.now();
   const windows = [];
-  await walk(s, (step, from, to) => windows.push({ step: step.name, from, to }));
-  await stop();
+  try {
+    await walk(s, (step, from, to) => windows.push({ step: step.name, from, to }));
+  } finally {
+    await stop();
+  }
   result.passes.video = { file: video, began, windows, leadIn: 1500 };
   await s.close();
 }
 
-writeFileSync(path.join(out, `${label}-safari.json`), JSON.stringify(result, null, 2));
-console.log(`wrote ${path.join(out, `${label}-safari.json`)}`);
+writeFileSync(file, JSON.stringify(result, null, 2));
+console.log(`wrote ${file}`);
 driver.kill();
