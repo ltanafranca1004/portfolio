@@ -665,24 +665,24 @@ Real Chrome, local builds served with 40ms latency at 20 Mbps (`npm run measure:
 
 | | Session 5 | Session 6 | Now |
 |---|---|---|---|
-| Worst frame during a zoom or fade into a page | 18ms | 243 to 453ms | 18ms |
+| Worst frame going from the map into a project | 18ms | 243 to 453ms | 19ms |
 | Worst frame on the way back to the map | 18ms | 67 to 85ms | 19ms |
 | Frames over 33ms during any transition | 0 | 1 to 2 on every zoom | 0 |
 | Click to the new page's first frame | 60 to 127ms | 60 to 128ms | 12 to 78ms |
 | First click into a project, click to settled | 0.63s | 0.62s (1.2s live) | 0.32s |
-| Things that change after first paint, arriving on a page | 1 to 4 | 1 to 10 | 0 to 2 |
-| Mask rebuilds per page load | 2 or more | 4 to 5 | 1 |
+| Things that change after first paint, arriving on a page | 1 to 4 | 1 to 10 | 0 to 4 |
+| Mask rebuilds per page load | not counted | 4 to 5 | 1 |
 | Cold first paint: map / Unify / profile | 160 / 152 / 168ms | 148 / 144 / 160ms | 184 / 180 / 180ms |
 
-The "0 to 2" left are the cube switching from its still picture to the live canvas, and
-screenshots still arriving on a first visit.
+What is left: the cube switching from its still picture to the live canvas (2), and on a
+first visit to a project its two screenshots still arriving (2).
 
 WebKit at iPhone size (the page's own frame clock, 8 transitions):
 
 | | Session 6, 18.4 | Now, 18.4 | Session 6, 26.0 | Now, 26.0 | Now, 26.6 |
 |---|---|---|---|---|---|
 | Worst frame | 132ms | 23ms | 131ms | 20ms | 21ms |
-| Frames over 33ms | 22 | 0 | 16 | 0 | 0 |
+| Frames over 33ms | 22 | 0 | 13 | 0 | 0 |
 | First-screen pictures in, project page | 228ms | 102ms | 229ms | 103ms | |
 
 Lighthouse 13.5. "Before" is the deployed Session 6 preview; "now" is the new build served from
