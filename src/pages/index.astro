@@ -49,6 +49,29 @@ const jsonLd = {
     } catch {
       /* no storage: the route simply draws in each time */
     }
+    // Leaving the map: remember how far down it was scrolled and which world was opened, so
+    // coming back lands on the same spot (the script at the end of this page puts it back).
+    // "pagehide", never "unload": an unload handler keeps a page out of the back/forward cache.
+    (() => {
+      const save = (slug) => {
+        if (document.prerendering) return; // a page rendered ahead of a click has no position yet
+        try {
+          const was = JSON.parse(sessionStorage.getItem('map-pos') || '{}');
+          sessionStorage.setItem('map-pos', JSON.stringify({ y: Math.round(scrollY), slug: slug ?? was.slug ?? '' }));
+        } catch {
+          /* no storage: the browser's own scroll restoration is all there is */
+        }
+      };
+      document.addEventListener(
+        'click',
+        (event) => {
+          const link = event.target instanceof Element ? event.target.closest('.world-link, .mini-link') : null;
+          if (link) save(link.dataset.slug ?? 'about');
+        },
+        true,
+      );
+      addEventListener('pagehide', () => save());
+    })();
   </script>
   <div class="page map staged">
     <Sky />
@@ -157,6 +180,51 @@ const jsonLd = {
       </div>
     </div>
   </div>
+  <script is:inline>
+    // Coming back to the map: put the page where it was left, before the first paint, so
+    // there is no jump. This runs for the browser's Back and Forward buttons (the browser
+    // restores the position itself as well; this only makes sure it is there in the first
+    // frame) and for the header's back control when it had to load the map afresh
+    // (components/SiteHeader.astro sets "map-return"). A reload or a new visit is left alone.
+    // A map served from the back/forward cache never runs this: it is shown as it was left.
+    (() => {
+      const restore = () => {
+        let pos = null;
+        let asked = false;
+        try {
+          pos = JSON.parse(sessionStorage.getItem('map-pos') || 'null');
+          asked = sessionStorage.getItem('map-return') !== null;
+          sessionStorage.removeItem('map-return');
+        } catch {
+          return;
+        }
+        const type = performance.getEntriesByType('navigation')[0]?.type;
+        if (!pos || !(asked || type === 'back_forward')) return;
+        const go = () => {
+          scrollTo({ left: 0, top: pos.y, behavior: 'instant' });
+          // The world that was opened has to be in view. It is unless the layout changed in
+          // between (a phone turned on its side), and then it is brought to the middle.
+          const world = pos.slug ? document.querySelector(`.world-${pos.slug}, .mini:has([data-slug="${pos.slug}"])`) : null;
+          const box = world?.getBoundingClientRect();
+          if (box && (box.bottom < 0 || box.top > innerHeight)) world.scrollIntoView({ block: 'center', behavior: 'instant' });
+        };
+        go();
+        // Safari lays this page out once in the fallback font even when the real one is cached,
+        // which wraps two lines differently and leaves the page 44px shorter for a moment: a
+        // position near the bottom is then cut short. So it is put back again just before the
+        // first frame is painted, and once more when the fonts are in, unless the visitor has
+        // started scrolling by then.
+        let touched = false;
+        for (const type of ['touchstart', 'wheel', 'keydown']) addEventListener(type, () => (touched = true), { once: true, passive: true });
+        const again = () => touched || go();
+        requestAnimationFrame(again);
+        document.fonts?.ready.then(again, () => {});
+      };
+      // Chrome renders the map ahead of a click on the back control; it is shown later
+      if (document.prerendering) document.addEventListener('prerenderingchange', restore, { once: true });
+      else restore();
+    })();
+  </script>
 </Base>
 
 <style is:global>

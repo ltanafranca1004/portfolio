@@ -22,6 +22,7 @@
     "test:phone": "node scripts/check-phone.mjs",
     "test:tabs": "node scripts/check-tabs.mjs",
     "test:worlds": "node scripts/check-worlds.mjs",
+    "test:return": "node scripts/check-return.mjs",
     "perf:phone": "node scripts/perf-phone.mjs",
     "measure:chrome": "node scripts/measure/chrome.mjs",
     "measure:safari": "node scripts/measure/safari.mjs",

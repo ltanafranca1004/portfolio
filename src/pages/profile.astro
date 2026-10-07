@@ -318,7 +318,7 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
       if (to === undefined || !target) return;
       event.preventDefault();
       target.focus();
-      history.replaceState(null, '', target.hash); // arrowing through tabs does not pile up history
+      history.replaceState(history.state, '', target.hash); // arrowing through tabs does not pile up history
       show(to, true);
     });
   });

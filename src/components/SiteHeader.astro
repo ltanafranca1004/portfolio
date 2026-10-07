@@ -57,12 +57,65 @@ const { home = false, slim = false } = Astro.props;
 </header>
 
 <script>
+  // The back control returns to the map where it was left.
+  //
+  // When the page before this one in the tab's history is the map, the control goes back to
+  // it (history.back()) instead of loading "/" again: the browser then shows the map as it
+  // was, at the same scroll position, from its back/forward cache when it can. Otherwise
+  // (this page was opened directly, or reached from another project) it loads "/" as a link
+  // and asks the map to restore the position it saved (pages/index.astro).
+  //
+  // "Is the page before this one the map?" is answered by the Navigation API where there is
+  // one (Chrome, Edge, Safari 26.2 and later, Firefox 147 and later). Elsewhere a page that
+  // was opened by a link on the map marks its own history entry when it loads.
+  interface NavigationEntryLike {
+    url: string | null;
+    index: number;
+  }
+  interface NavigationLike {
+    currentEntry: NavigationEntryLike | null;
+    entries(): NavigationEntryLike[];
+  }
+  const navigation = (window as { navigation?: NavigationLike }).navigation;
+  const isMap = (url: string | null): boolean => {
+    if (!url) return false;
+    const parsed = new URL(url, location.href);
+    return parsed.origin === location.origin && parsed.pathname === '/';
+  };
+
+  try {
+    const arrival = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+    if (arrival?.type === 'navigate' && isMap(document.referrer) && !isMap(location.href)) history.replaceState({ ...history.state, fromMap: true }, '');
+  } catch {
+    /* the back control then loads the map afresh */
+  }
+
+  const mapIsBehind = (): boolean => {
+    const entry = navigation?.currentEntry;
+    if (navigation && entry) return entry.index > 0 && isMap(navigation.entries()[entry.index - 1]?.url ?? null);
+    return history.length > 1 && (history.state as { fromMap?: boolean } | null)?.fromMap === true;
+  };
+
+  document.querySelector<HTMLAnchorElement>('[data-back]')?.addEventListener('click', (event) => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (mapIsBehind()) {
+      event.preventDefault();
+      history.back();
+      return;
+    }
+    try {
+      sessionStorage.setItem('map-return', '1');
+    } catch {
+      /* no storage: the map opens at its top */
+    }
+  });
+
   // Esc goes back to the map from any page with the back control. While the contact panel is
   // open Esc only closes the panel (the browser does that itself).
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape' || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
     if (document.querySelector('dialog[open]')) return;
-    // a click on the link itself, so the same zoom-out transition runs
+    // a click on the control itself, so Esc goes back exactly as it does
     document.querySelector<HTMLAnchorElement>('[data-back]')?.click();
   });
 </script>
