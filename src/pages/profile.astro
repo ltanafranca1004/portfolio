@@ -1,0 +1,821 @@
+---
+import { Picture } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Orbits from '../components/Orbits.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import Sky from '../components/Sky.astro';
+import frame from '../assets/frame.svg';
+import { asset, content, person, projectUrl, RESUME_URL } from '../lib/content';
+
+const { experience, skills, education } = content;
+
+const TABS = [
+  ['profile', 'Profile'],
+  ['experience', 'Experience'],
+  ['skills', 'Skills'],
+  ['education', 'Education'],
+] as const;
+
+// The skills tree: four hubs around the centre, four skills fanned out from each.
+const HUBS = [
+  { x: 206, y: 165, side: -1 },
+  { x: 506, y: 165, side: 1 },
+  { x: 206, y: 395, side: -1 },
+  { x: 506, y: 395, side: 1 },
+];
+const FAN = [
+  { dx: 80, dy: -72 },
+  { dx: 90, dy: -24 },
+  { dx: 90, dy: 24 },
+  { dx: 80, dy: 72 },
+];
+const tree = Object.entries(skills).map(([group, items], i) => {
+  const hub = HUBS[i % HUBS.length]!;
+  return {
+    group,
+    hub,
+    // the group name sits above the upper clusters and below the lower ones
+    labelX: hub.x + hub.side * 40,
+    labelY: hub.y < 280 ? hub.y - 100 : hub.y + 116,
+    leaves: items.map((name, j) => {
+      const fan = FAN[j % FAN.length]!;
+      return { name, x: hub.x + hub.side * fan.dx, y: hub.y + fan.dy };
+    }),
+  };
+});
+const treeLabel = `Skills. ${Object.entries(skills)
+  .map(([group, items]) => `${group}: ${items.join(', ')}`)
+  .join('. ')}.`;
+
+const description = `${person.bio} ${person.status}.`;
+---
+
+<Base title={`About ${person.name} | ${person.title}`} description={description}>
+  <div class="page profile">
+    <Sky />
+    <Orbits class="orbits-backdrop orbits-top" />
+
+    <SiteHeader />
+
+    <div class="profile-body">
+      <aside class="profile-side">
+        <div class="ring float profile-ring">
+          <img class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
+          <Picture class="profile-photo" src={asset(person.photo)} formats={['avif', 'webp']} fallbackFormat="webp" width={660} height={660} alt={person.name} loading="eager" />
+        </div>
+        <div class="identity">
+          <h1>{person.name}</h1>
+          <p class="identity-title">{person.title}</p>
+          <p class="identity-where">{person.location} · <a href={`mailto:${person.email}`}>{person.email}</a></p>
+        </div>
+        <a class="back profile-back back-wide" href="/">
+          <span class="back-btn" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 6l-6 6 6 6M4 12h16"></path></svg>
+          </span>
+          <span class="back-text">
+            <span class="back-note">Profile</span>
+            <span class="back-label">Back to the map</span>
+          </span>
+        </a>
+      </aside>
+
+      <div class="profile-main">
+        <nav class="tabs" aria-label="Profile sections">
+          {TABS.map(([id, label], i) => <a href={`#${id}`} aria-current={i === 0 ? 'true' : undefined}>{label}</a>)}
+        </nav>
+
+        <main>
+          <section id="profile" data-tab="profile">
+            <p class="kicker">Profile</p>
+            <h2>About me</h2>
+            <div class="gold-rule" aria-hidden="true"></div>
+            <p class="bio">{person.bio}</p>
+            <dl class="quick-facts">
+              {
+                person.facts.map((fact) => (
+                  <div>
+                    <dt>{fact.label}</dt>
+                    <dd>{fact.value}</dd>
+                  </div>
+                ))
+              }
+            </dl>
+          </section>
+
+          <section id="experience" data-tab="experience">
+            <p class="kicker">Experience</p>
+            <h2>Where I work</h2>
+            <div class="gold-rule" aria-hidden="true"></div>
+            {
+              experience.map((job, i) => (
+                <article class="job">
+                  <div class="job-head">
+                    <h3 class={i === 0 ? 'job-lead' : undefined}>
+                      {job.role}, <span class="gold">{job.org}</span>
+                    </h3>
+                    <span class="job-when">{job.when}</span>
+                  </div>
+                  <p class="job-summary">{job.summary}</p>
+                  {job.bullets.length > 0 && (
+                    <ul class={job.bullets.length > 1 ? 'job-bullets two' : 'job-bullets'}>
+                      {job.bullets.map((bullet) => (
+                        <li>
+                          <span class="gold" aria-hidden="true">◇</span>
+                          <span>{bullet}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {'awards' in job && job.awards && (
+                    <div class="job-awards">
+                      {job.awards.map((award) => <span class="chip award">{award}</span>)}
+                      {'project' in job && job.project && (
+                        <a class="see-project" href={projectUrl(job.project)}>
+                          See the project <span aria-hidden="true">→</span>
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </article>
+              ))
+            }
+            <a class="resume-link" href={RESUME_URL} data-track="resume">
+              View full resume (PDF) <span aria-hidden="true">→</span>
+            </a>
+          </section>
+
+          <div class="skills-row" data-tab="skills">
+            <section id="skills">
+              <p class="kicker">Skills</p>
+              <h2>What I build with</h2>
+              <div class="gold-rule" aria-hidden="true"></div>
+              <svg class="skills-tree" viewBox="-24 36 760 488" role="img" aria-label={treeLabel}>
+                <circle cx="356" cy="280" r="150" fill="none" stroke="#E8C27A" stroke-opacity="0.15"></circle>
+                <circle cx="356" cy="280" r="250" fill="none" stroke="#E8C27A" stroke-opacity="0.08" stroke-dasharray="2 6"></circle>
+                {
+                  tree.map(({ hub, leaves }) => (
+                    <>
+                      <path class="trace" d={`M356 280 L${hub.x} ${hub.y}`} stroke="#E8C27A" stroke-width="1.6" />
+                      {leaves.map((leaf) => <path class="trace" d={`M${hub.x} ${hub.y} L${leaf.x} ${leaf.y}`} stroke="#E8C27A" stroke-opacity="0.6" stroke-width="1.1" />)}
+                    </>
+                  ))
+                }
+                {
+                  tree.map(({ group, hub, labelX, labelY, leaves }) => (
+                    <g>
+                      <circle cx={hub.x} cy={hub.y} r="26" fill="#0b1430" stroke="#E8C27A" stroke-width="2" />
+                      <circle cx={hub.x} cy={hub.y} r="8" fill="#E8C27A" />
+                      <text class="hub-label" x={labelX} y={labelY} text-anchor="middle">{group.toUpperCase()}</text>
+                      {leaves.map((leaf) => (
+                        <>
+                          <circle cx={leaf.x} cy={leaf.y} r="9" fill="#101a3a" stroke="#F3D99A" stroke-width="1.5" />
+                          <circle cx={leaf.x} cy={leaf.y} r="3" fill="#F3D99A" />
+                          <text class="leaf-label" x={leaf.x + hub.side * 18} y={leaf.y + 8} text-anchor={hub.side < 0 ? 'end' : 'start'}>{leaf.name}</text>
+                        </>
+                      ))}
+                    </g>
+                  ))
+                }
+                <circle cx="356" cy="280" r="40" fill="#0b1430" stroke="#E8C27A" stroke-width="2.5"></circle>
+                <circle cx="356" cy="280" r="48" fill="none" stroke="#E8C27A" stroke-opacity="0.4"></circle>
+                <text class="leaf-label" x="356" y="288" text-anchor="middle">{person.name.split(' ')[0]}</text>
+              </svg>
+            </section>
+
+            <section id="education" data-tab="education">
+              <p class="kicker">Education</p>
+              <h2>Where I study</h2>
+              <div class="gold-rule" aria-hidden="true"></div>
+              <div class="school">
+                <h3>{education.school}</h3>
+                <p>{education.degree} · expected {education.expected}</p>
+              </div>
+              <h4>Relevant courses</h4>
+              <ul class="courses">
+                {
+                  education.courses.map(([code, title, flag]) => (
+                    <li>
+                      <span class="gold">{code}</span>
+                      <span>
+                        {title}
+                        {flag === 'current' && <span class="muted"> (now)</span>}
+                      </span>
+                    </li>
+                  ))
+                }
+              </ul>
+            </section>
+          </div>
+        </main>
+
+        <section class="cta" aria-labelledby="cta-heading">
+          <div>
+            <h2 id="cta-heading">{person.status}.</h2>
+            <p>The fastest way to reach me is email.</p>
+          </div>
+          <a class="pill pill-solid" href={`mailto:${person.email}`} data-track="email">Email me</a>
+          <a class="pill pill-ghost" href={RESUME_URL} data-track="resume">Resume</a>
+        </section>
+        <a class="back profile-back back-narrow" href="/">
+          <span class="back-btn" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 6l-6 6 6 6M4 12h16"></path></svg>
+          </span>
+          <span class="back-text">
+            <span class="back-note">Profile</span>
+            <span class="back-label">Back to the map</span>
+          </span>
+        </a>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<script>
+  // The tab bar follows the section in view. Skills and Education share a row on wide
+  // screens, so Education only wins there when it was the tab last chosen.
+  const tabs = [...document.querySelectorAll<HTMLAnchorElement>('.tabs a')];
+  const sections = [...document.querySelectorAll<HTMLElement>('[data-tab]')];
+  let chosen = location.hash.slice(1);
+
+  const mark = (id: string): void => {
+    for (const tab of tabs) {
+      if (tab.hash === `#${id}`) tab.setAttribute('aria-current', 'true');
+      else tab.removeAttribute('aria-current');
+    }
+  };
+
+  const update = (): void => {
+    const top = (id: string): number => sections.find((s) => s.dataset.tab === id)?.getBoundingClientRect().top ?? 0;
+    // side by side, Skills and Education are one stop: keep whichever was chosen last
+    const sameRow = Math.abs(top('skills') - top('education')) < 80;
+    const stops = sections.filter((s) => !sameRow || s.dataset.tab !== (chosen === 'education' ? 'skills' : 'education'));
+    // the stop whose top has most recently passed under the tab bar
+    const line = 140;
+    let current = stops[0];
+    for (const stop of stops) if (stop.getBoundingClientRect().top <= line) current = stop;
+    const atEnd = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+    if (atEnd) current = stops[stops.length - 1];
+    mark(current?.dataset.tab ?? 'profile');
+  };
+
+  for (const tab of tabs) tab.addEventListener('click', () => (chosen = tab.hash.slice(1)));
+  let queued = false;
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        update();
+      });
+    },
+    { passive: true },
+  );
+  window.addEventListener('hashchange', () => {
+    chosen = location.hash.slice(1);
+    update();
+  });
+  update();
+
+  // Draw the skills tree when it first scrolls into view.
+  const tree = document.querySelector('.skills-tree');
+  if (tree && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    tree.classList.add('is-waiting');
+    new IntersectionObserver(
+      (entries, observer) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        tree.classList.replace('is-waiting', 'is-drawing');
+        observer.disconnect();
+      },
+      { threshold: 0.3 },
+    ).observe(tree);
+  }
+</script>
+
+<style is:global>
+  html:has(.profile) {
+    scroll-behavior: smooth;
+  }
+
+  .profile-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 20px 20px 48px;
+  }
+
+  .profile-side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .profile-ring {
+    --d: min(72vw, 300px);
+    --float-rise: -10px;
+    height: auto;
+    aspect-ratio: 1;
+  }
+
+  .profile-photo {
+    position: absolute;
+    left: 10.95%;
+    top: 10.95%;
+    width: 78.1%;
+    height: 78.1%;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow:
+      0 0 0 2px rgb(var(--gold-rgb) / 0.85),
+      0 0 50px rgb(var(--gold-rgb) / 0.35);
+  }
+
+  .identity {
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  .identity h1 {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 500;
+  }
+
+  .identity-title {
+    margin: 6px 0 0;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .identity-where {
+    margin: 4px 0 0;
+    font-size: 15px;
+    color: var(--text-muted);
+  }
+
+  .identity-where a {
+    color: inherit;
+  }
+
+  .identity-where a:hover {
+    color: var(--gold);
+  }
+
+  .profile-back {
+    margin-top: 36px;
+  }
+
+  /* the back link is at the end of the page on narrow screens, under the photo on wide ones */
+  .back-wide {
+    display: none;
+  }
+
+  .profile-main {
+    min-width: 0;
+  }
+
+  /* pinned while the page scrolls */
+  .tabs {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    gap: 22px;
+    margin: 0 -20px;
+    padding: 0 20px;
+    overflow-x: auto;
+    background: rgb(var(--sky-rgb) / 0.9);
+    border-bottom: 1px solid rgb(var(--gold-rgb) / 0.25);
+    scrollbar-width: none;
+  }
+
+  .tabs a {
+    display: flex;
+    flex: none;
+    align-items: center;
+    min-height: 48px;
+    margin-bottom: -1px;
+    border-bottom: 2px solid transparent;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .tabs a:hover {
+    color: var(--text);
+  }
+
+  .tabs a[aria-current] {
+    color: var(--text);
+    border-bottom-color: var(--gold);
+  }
+
+  .tabs a:focus-visible {
+    outline-offset: -3px;
+  }
+
+  .profile section[id],
+  .skills-row {
+    scroll-margin-top: 72px;
+  }
+
+  .profile main > * {
+    padding-top: 32px;
+  }
+
+  .kicker {
+    margin: 0;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .profile main h2 {
+    margin: 4px 0 18px;
+    font-size: 32px;
+    font-weight: 500;
+  }
+
+  .profile main .gold-rule {
+    margin-bottom: 22px;
+  }
+
+  .bio {
+    margin: 0 0 22px;
+    padding-left: 16px;
+    border-left: 2px solid var(--gold);
+    font-size: 18px;
+    line-height: 1.65;
+    color: var(--body);
+  }
+
+  .quick-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 12px;
+    margin: 0;
+    border-top: 1px solid rgb(var(--gold-rgb) / 0.2);
+    border-bottom: 1px solid rgb(var(--gold-rgb) / 0.2);
+  }
+
+  .quick-facts div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 0;
+  }
+
+  .quick-facts dt {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .quick-facts dd {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  .job {
+    padding: 22px 0;
+    border-bottom: 1px solid rgb(var(--gold-rgb) / 0.18);
+  }
+
+  .job:first-of-type {
+    padding-top: 0;
+  }
+
+  .job:last-of-type {
+    border-bottom: 0;
+  }
+
+  .job-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 20px;
+  }
+
+  .job h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  .job h3.job-lead {
+    font-size: 23px;
+  }
+
+  .job-when {
+    font-size: 14px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .job-summary {
+    margin: 6px 0 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--body);
+  }
+
+  .job-bullets {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px 28px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .job-bullets li {
+    display: flex;
+    gap: 10px;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--body);
+  }
+
+  .job-awards {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .chip.award {
+    padding: 4px 11px;
+    border-radius: 13px;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+  }
+
+  .see-project {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-left: auto;
+    font-size: 14px;
+    color: var(--gold);
+  }
+
+  .see-project:hover,
+  .resume-link:hover {
+    color: var(--text);
+  }
+
+  .resume-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    margin-top: 6px;
+    font-size: 16px;
+    color: var(--gold);
+  }
+
+  .skills-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+
+  .skills-row .gold-rule {
+    margin-bottom: 18px;
+  }
+
+  .skills-tree {
+    display: block;
+    width: 100%;
+    max-width: 440px;
+    height: auto;
+    margin: 0 auto;
+    overflow: visible;
+    font-family: var(--font);
+  }
+
+  /* a dark edge keeps the branch lines from cutting through the labels */
+  .skills-tree text {
+    font-size: 24px;
+    fill: var(--text);
+    paint-order: stroke;
+    stroke: var(--sky);
+    stroke-width: 5px;
+    stroke-linejoin: round;
+  }
+
+  .skills-tree .hub-label {
+    fill: var(--gold);
+    letter-spacing: 2px;
+  }
+
+  /* the tree is drawn smaller on a phone, so its labels are set larger to stay readable */
+  @media (max-width: 520px) {
+    .skills-tree text {
+      font-size: 30px;
+    }
+  }
+
+  .skills-tree.is-waiting .trace {
+    stroke-dasharray: 600;
+    stroke-dashoffset: 600;
+  }
+
+  .skills-tree.is-drawing .trace {
+    stroke-dasharray: 600;
+    stroke-dashoffset: 600;
+    animation: trace 1.4s cubic-bezier(0.65, 0, 0.35, 1) 0.2s forwards;
+  }
+
+  @keyframes trace {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  .school {
+    margin-bottom: 12px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgb(var(--gold-rgb) / 0.2);
+  }
+
+  .school h3 {
+    margin: 0;
+    font-size: 21px;
+    font-weight: 500;
+  }
+
+  .school p {
+    margin: 0;
+    font-size: 15px;
+    color: var(--body);
+  }
+
+  #education h4 {
+    margin: 0 0 6px;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.16em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .courses {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .courses li {
+    display: flex;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--body);
+  }
+
+  .courses li > .gold {
+    flex: none;
+    width: 70px;
+  }
+
+  .muted {
+    color: var(--text-muted);
+  }
+
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 24px;
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid rgb(var(--gold-rgb) / 0.3);
+  }
+
+  .cta div {
+    flex: 1 1 100%;
+  }
+
+  .cta h2 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1.25;
+  }
+
+  .cta p {
+    margin: 4px 0 0;
+    font-size: 15px;
+    color: var(--text-muted);
+  }
+
+  .cta .pill {
+    min-height: 48px;
+    padding: 0 24px;
+    border-radius: 24px;
+    font-size: 16px;
+  }
+
+  @media (min-width: 640px) {
+    .profile-body {
+      padding: 28px 40px 56px;
+    }
+
+    .tabs {
+      gap: 40px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .tabs a {
+      font-size: 18px;
+    }
+
+    .quick-facts {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .job-bullets.two {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .cta div {
+      flex: 1;
+    }
+  }
+
+  /* ===== wide screens: photo column pinned on the left (design/ProfileOne.html) ===== */
+
+  @media (min-width: 1000px) {
+    .profile-body {
+      display: grid;
+      grid-template-columns: minmax(280px, 420px) minmax(0, 796px);
+      align-items: start;
+      justify-content: space-between;
+      gap: 0 clamp(32px, 4.4vw, 64px);
+      padding: 32px 64px 60px clamp(40px, 6.6vw, 96px);
+    }
+
+    .profile-side {
+      position: sticky;
+      top: 20px;
+      padding-top: 64px;
+    }
+
+    /* shrink the photo on short windows so the pinned column always fits */
+    .profile-ring {
+      --d: clamp(200px, min(100%, 100vh - 330px), 420px);
+    }
+
+    .identity {
+      margin-top: 30px;
+    }
+
+    .back-wide {
+      display: inline-flex;
+      align-self: flex-start;
+      margin: 32px 0 0 -32px;
+    }
+
+    .back-narrow {
+      display: none;
+    }
+
+    .profile main > *:first-child {
+      padding-top: 32px;
+    }
+
+    .profile main > * {
+      padding-top: 48px;
+    }
+
+    .skills-row {
+      grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+      gap: 30px;
+    }
+
+    .skills-tree {
+      margin: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html:has(.profile) {
+      scroll-behavior: auto;
+    }
+  }
+</style>

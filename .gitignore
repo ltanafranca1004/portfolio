@@ -22,3 +22,6 @@ npm-debug.log*
 
 # 2.6 MB animated mockup fallback, replaced by the live cube
 redesign/assets/cubic-spin48.webp
+
+# review screenshots
+redesign/screenshots/
