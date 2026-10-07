@@ -62,3 +62,39 @@ shows exactly one account and it is `3a459a47f63c6f049c3217b090c824dd`.
     on a tall page.
 13. **`redesign/assets/cubic-spin48.webp`** is git-ignored as asked, so `Main.html` and
     `DetailCubic.html` will show a missing image on a fresh clone.
+
+## Session 2: project pages (2026-10-06)
+
+Preview: https://redesign.luistanafranca.pages.dev/projects/unify/ (and `/cubic/`, `/lens/`,
+`/turtle-trips/`, `/amenity-recommender/`, `/pipeline-simulator/`, `/nutrifit/`)
+
+### Built
+- One template, `src/pages/projects/[slug].astro`, for all seven pages. `src/lib/projects.ts`
+  evens out the two shapes in `content.json` (destinations and other projects).
+- Wide screens follow the mockups: hero in the spinning ring on the left, text column on the
+  right, back link and actions along the bottom. The hero is drawn at the mockup's 520px and
+  scaled to the space it has.
+- Five hero kinds: flat image (Unify), live cube (Cubic), tilted Lens card with the loupe (Lens),
+  tilted screenshot (Turtle Trips, Amenity, NutriFit), animated pipeline (Pipeline Simulator).
+- Phone layout: header, label pill, hero, text, screenshots, primary button, back link.
+- Copy comes from `content.json` everywhere: "web lead", "Software Engineer (Web Lead)",
+  "500+ USERS", "EVIDENCE-CHECKED SCORES", NutriFit "4 people" and "Team of 4".
+- "Back to the map" only, no previous or next. The Resume link works on every page.
+
+### Judgment calls and things I was unsure about
+1. **New `content.json` fields.** Besides `highlights` and `heroAlt` (approved), I added
+   `heroKind` to every project and `hero` to Unify, so the template needs no per-project code.
+2. **URLs** are `/projects/<slug>/` using the slugs in `content.json`.
+3. **Unify role wraps the facts row.** "Software Engineer (Web Lead)" is longer than the
+   mockup's "Sole web developer", so the first facts column is allowed to grow. On phones the
+   role gets its own row.
+4. **Unify page is about 40px taller than 900px** at 1440 wide, because of the awards line and
+   longer copy. Every other page fits one screen at 1440 x 900.
+5. **Accessibility fixes applied:** the problem label is a real `h2`, facts are a description
+   list, the footnote and "Back to the map" are inside the back link, and the secondary links
+   are underlined so they read as links.
+6. **Cubic screenshots** are pixel art, so they are resized less aggressively (quality 82) and
+   drawn with `image-rendering: pixelated`, as in the mockup.
+7. **Screenshot thumbnails keep the mockup's 294:150 framing at every size** (they are not
+   cropped tighter on phones).
+8. **Primary button hover** turns gold. The mockups define no hover state for it.
