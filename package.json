@@ -12,7 +12,13 @@
     "preview": "astro preview",
     "check": "astro check",
     "lint": "eslint .",
-    "deploy": "bash scripts/deploy.sh"
+    "deploy": "bash scripts/deploy.sh",
+    "test:viewports": "node scripts/check-viewports.mjs",
+    "test:a11y": "node scripts/check-a11y.mjs",
+    "test:analytics": "node scripts/check-analytics.mjs",
+    "screenshots": "node scripts/screenshots.mjs",
+    "lighthouse": "node scripts/lighthouse.mjs",
+    "og": "node scripts/make-og.mjs"
   },
   "allowScripts": {
     "esbuild": true
@@ -20,6 +26,7 @@
   "dependencies": {
     "@fontsource-variable/jost": "^5.3.0",
     "astro": "^7.3.6",
+    "posthog-js": "^1.438.2",
     "sharp": "^0.35.5"
   },
   "devDependencies": {
@@ -28,6 +35,8 @@
     "@typescript-eslint/parser": "^8.71.1",
     "eslint": "^10.12.0",
     "eslint-plugin-astro": "^1.7.0",
+    "lighthouse": "^13.5.0",
+    "playwright": "^1.63.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.71.1",
     "wrangler": "^4.148.0"
