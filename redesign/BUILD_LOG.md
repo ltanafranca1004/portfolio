@@ -564,3 +564,177 @@ SEO is 69 because of the intended noindex on the preview. CLS 0 and blocking tim
   `-webkit-iphone.png` (rows: map to project, next, previous, project to map, map to profile,
   profile to map)
 - `perf-phone-before.json`, `perf-phone-after.json`
+
+## Session 7: stability (2026-10-07)
+
+No new features. Measured first, then fixed or removed. `content.json` is untouched. Pushed to
+`redesign` (`40a6593` to `e8b2614`). **Not deployed:** the deploy step was refused by the
+session's permission check, so the preview still shows Session 6. Run `npm run deploy` yourself
+(`wrangler whoami` showed only `3a459a47f63c6f049c3217b090c824dd` when I checked).
+
+### What could and could not be measured
+| | State |
+|---|---|
+| Real Chrome 155 on this Mac (1470 x 751 at 2x) | Driven and measured. Frame times come from Chrome's own trace (every frame it presented). |
+| Screen recording | **Blocked.** macOS gave Claude the wallpaper only (no windows), which is what it does without Screen Recording permission. The Chrome videos are every frame Chrome painted (DevTools screencast) instead. |
+| Real Safari 26.5.2 | **Blocked.** "Allow remote automation" is still off (Safari > Settings > Developer). `scripts/measure/safari.mjs` is written and waiting. |
+| iPhone simulator | **Not available.** Xcode is not installed (Command Line Tools only). About 30 GB with a simulator runtime; not installed. |
+| WebKit instead of both | Playwright WebKit 18.4, 26.0, a build between, and 26.6, at iPhone size (390 x 664 at 3x, taps) and at this laptop's window size. It is WebKit on a Mac, not Safari and not a phone. |
+
+So every Safari and iPhone statement below is from WebKit builds, not from your devices.
+
+### What flickered, exactly (Session 6 build)
+Real Chrome, from the recorded frames (`recordings/sheets/before-chrome-*.png`, `zoomout-detail.png`):
+- **Map to a project:** the map froze for 375ms (453ms in the trace; 852ms on the live preview),
+  then the whole 500ms zoom was squeezed into about 70ms.
+- **Back to the map:** a 118ms freeze, then two frames (about 70ms) with the lower half of the
+  sky missing, then the zoom with no orbit lines on the map, then **one frame of flat page
+  colour with only the cube and two small icons on it**, then the map with its lines popping in.
+- **After every page load:** the orbit lines were hidden and faded in over 300ms, and their mask
+  was rebuilt 4 or 5 times in the first 300 to 500ms (counted in WebKit). Pictures below the
+  first world were lazy and arrived 45 to 80ms after the first frame.
+
+WebKit 26.0 at iPhone size (`recordings/sheets/iphone-before-*.png`):
+- **Map to a project:** the sky went black with only the hero showing for about 200ms, the page
+  appeared, then the header and text vanished again for about 160ms.
+- **Next:** two black frames, then about 160ms of sky with no content.
+
+### Causes, with numbers
+1. **Choppy zooms in Chrome: commit `7e4f4cb`** (Session 6, "no transition blinks dark"). It gave
+   the whole 1440 x 900 stage a view-transition-name, with the masked route and orbit drawings
+   inside it. Each Session 6 commit was built and measured:
+
+   | Build | Zoom in, worst frame | Zoom out, worst frame | Frames over 33ms |
+   |---|---|---|---|
+   | Session 5 (`2047c23`) | 18ms | 18ms | 0 |
+   | `6cf3177`, `b248fa7`, `8b5255b`, `243659a`, `d5e7d6b`, `cbe6f8b` | 18 to 20ms | 17 to 19ms | 0 |
+   | `7e4f4cb` and after | 234 to 453ms | 67 to 85ms | 1 to 3 per transition |
+
+   No other Session 6 commit changed frame times in Chrome. Cold-load first paint was the same in
+   Session 5 and Session 6 (160 and 148ms locally).
+2. **The blank frame after a zoom:** removing the stage's name at the end of the transition.
+3. **Lines appearing after the page, and repainting:** the keep-out ran from a deferred script
+   after first paint, then again on fonts, load, resize observer and font events.
+4. **Slow phone transitions (older than Session 6):** the keep-out mask covered the whole
+   2840 x 1700 orbit drawing, about 8500 x 5100 pixels on a 3x phone, with a second CSS mask on
+   top. WebKit 18.4 at iPhone size: about 120ms per frame during every transition into a project
+   page or the profile. Session 5 was worse there than Session 6 (200 to 420ms frames).
+5. **Text blinking out on phones:** the masked orbit backdrop on project pages. With it gone the
+   same transitions had no blank frames.
+6. **"Seconds to load":** cold first paint is 150 to 300ms in Chrome (304ms on the live preview).
+   What took a second was the first click into a project: 1036ms from click to settled, 852ms of
+   it frozen. The first map visit also brings the worlds in over 1.9s by design (item 4 below).
+
+### What changed
+1. **Transitions: one 200ms cross-fade for everything** (map to project, back, previous, next,
+   About me). Nothing has a view-transition-name. The sky is the same picture in the same place
+   on every page (project pages used a different sky position), so it stands still.
+   - I made one attempt at a cheap zoom first (only the small ring named). Real Chrome: every
+     frame within 19ms. WebKit 26.0 at desktop size: on the way back the map vanished and the
+     screen was black with only the ring for about 200ms
+     (`sheets/webkit-26.0-desktop-zoom-attempt-back-to-map.png`). That fails "no flicker", so
+     per the rule it was replaced, not tuned.
+2. **Keep-out masks are made before the first paint,** by an inline script at the end of the
+   content, once. They are only remade when the layout really changes (resize, a profile tab).
+   The mask is now the size of the page, not of the whole drawing.
+3. **Nothing is shown before it is settled.** The stage and the lines stay hidden until the text
+   is in its real font and the lines are masked. When the font is cached (every page after the
+   first) that is before the first paint. On a first visit they fade in once, 200ms.
+4. **Pictures:** the sky and every first-screen picture are eager, high priority and decoded
+   with the frame. Pictures that are on the first screen only on wide windows (Lens, the small
+   worlds, project screenshots) are made eager there by a three-line inline script and stay lazy
+   on phones, so the phone map is not heavier (237 KB, was 240 KB).
+5. **Speculation rules:** Chrome prerenders `/`, `/profile/` and `/projects/*` on hover or press.
+   Confirmed from the server log (requests marked `prefetch;prerender`). Other browsers fetch the
+   page and its high-priority pictures on hover, focus or touch (`src/scripts/prefetch.ts`).
+   Analytics waits until a prerendered page is actually shown.
+6. **`rel="expect"` stays.** Measured with and without it, 9 cold loads per page:
+
+   | Connection | With | Without | Things changing after first paint (map), with / without |
+   |---|---|---|---|
+   | 40ms, 20 Mbps | 176ms | 180ms | 15 / 15 |
+   | 150ms, 1.6 Mbps | 476ms | 468ms | 17 / 33 |
+
+   It costs 0 to 16ms, and without it a slow connection paints the page in pieces.
+7. **Phones: no orbit lines behind project pages and the profile.** Removed, see cause 5.
+8. **Profile tabs on phones:** the same four tabs. Header, tab bar (not pinned), then the one
+   panel, which scrolls with the page. Addresses and the Back button work as on desktop.
+
+### Before and after
+Real Chrome, local builds served with 40ms latency at 20 Mbps (`npm run measure:report`):
+
+| | Session 5 | Session 6 | Now |
+|---|---|---|---|
+| Worst frame during a zoom or fade into a page | 18ms | 243 to 453ms | 18ms |
+| Worst frame on the way back to the map | 18ms | 67 to 85ms | 19ms |
+| Frames over 33ms during any transition | 0 | 1 to 2 on every zoom | 0 |
+| Click to the new page's first frame | 60 to 127ms | 60 to 128ms | 12 to 78ms |
+| First click into a project, click to settled | 0.63s | 0.62s (1.2s live) | 0.32s |
+| Things that change after first paint, arriving on a page | 1 to 4 | 1 to 10 | 0 to 2 |
+| Mask rebuilds per page load | 2 or more | 4 to 5 | 1 |
+| Cold first paint: map / Unify / profile | 160 / 152 / 168ms | 148 / 144 / 160ms | 184 / 180 / 180ms |
+
+The "0 to 2" left are the cube switching from its still picture to the live canvas, and
+screenshots still arriving on a first visit.
+
+WebKit at iPhone size (the page's own frame clock, 8 transitions):
+
+| | Session 6, 18.4 | Now, 18.4 | Session 6, 26.0 | Now, 26.0 | Now, 26.6 |
+|---|---|---|---|---|---|
+| Worst frame | 132ms | 23ms | 131ms | 20ms | 21ms |
+| Frames over 33ms | 22 | 0 | 16 | 0 | 0 |
+| First-screen pictures in, project page | 228ms | 102ms | 229ms | 103ms | |
+
+Lighthouse 13.5. "Before" is the deployed Session 6 preview; "now" is the new build served from
+this Mac, so the times are not like for like. Run it again after deploying.
+
+| Page | Form | Before: Perf / A11y / BP / SEO, LCP | Now (local): Perf / A11y / BP / SEO, LCP |
+|---|---|---|---|
+| `/` | mobile | 99 / 100 / 100 / 69, 1.99s | 100 / 100 / 100 / 69, 1.66s |
+| `/` | desktop | 100 / 100 / 100 / 69, 0.62s | 100 / 100 / 100 / 69, 0.51s |
+| `/projects/unify/` | mobile | 100 / 100 / 100 / 69, 1.76s | 100 / 100 / 100 / 69, 1.58s |
+| `/projects/unify/` | desktop | 100 / 100 / 100 / 69, 0.52s | 100 / 100 / 100 / 69, 0.37s |
+| `/profile/` | mobile | 99 / 100 / 100 / 69, 1.82s | 100 / 100 / 100 / 69, 1.66s |
+| `/profile/` | desktop | 100 / 100 / 100 / 69, 0.44s | 100 / 100 / 100 / 69, 0.37s |
+
+CLS 0 everywhere. `astro check` and `eslint` clean. All nine check scripts pass (tabs 60,
+transitions 28, transition frames 24, accessibility 63, analytics, phone, worlds, viewports,
+keep-out).
+
+### Things that are not perfect, and judgment calls
+1. **The target is not confirmed in real Safari.** It could not be driven. The cross-fade is
+   clean in WebKit 18.4, a build after 26.0, and 26.6 at desktop size
+   (`sheets/webkit-*-desktop-crossfade.png`).
+2. **WebKit 26.0 blinks during any view transition,** zoom or cross-fade: page content drops out
+   for a frame or two (`sheets/webkit-26.0-desktop-crossfade-blinks.png`). With transitions
+   switched off that build is clean. At iPhone size the final build shows one faint frame, on
+   the browser's Back button. If your iPhone is on an early iOS 26 and still flickers, the fix
+   is to turn transitions off for Safari; I did not do that without evidence from a real device.
+3. **A held frame at the click in Chrome.** The old page stands still for 40 to 93ms while the
+   next page takes over (2 to 5 frames), then the fade runs at 60 frames a second. It is before
+   the transition, not in it, but it is a frame over 33ms. Session 6 had 243 to 453ms there.
+4. **The first map visit still brings the worlds in one by one over 1.9s** (the route draw-in
+   you asked for in Session 5). It moves things after first paint by design. Say so and I will
+   remove it.
+5. **Cold first paint is about 35ms later** (148 to 184ms on the map). Nothing is painted until
+   the font is in, instead of painting text in a fallback font and swapping it.
+6. **The zoom is gone,** including the About me zoom from Session 6.
+7. **Phones: the photo and name are on the Profile tab only,** so the other tabs start straight
+   under the bar. Tell me if the photo should stay above every tab.
+8. **Phones lose the faint orbit lines** at the top of project pages and the profile.
+9. **The Safari prefetch fallback is untested in Safari.** It type-checks and runs in WebKit
+   without errors; whether it makes Safari feel faster is not measured.
+10. **Prerendering means a hovered page is loaded before the click.** Nothing is counted or
+    sent until the page is shown.
+11. **`scripts/measure/`** is new tooling: a throttled static server, a probe injected into
+    served pages (never shipped), drivers for Chrome, Safari and WebKit, and a report.
+    `npm run measure:chrome -- --build=dist --label=x`, then `npm run measure:report -- file...`.
+12. **Older WebKit builds** were installed in the session's temp folder, outside the repo.
+    Nothing was added to `package.json` for them.
+
+### Files for review (`redesign/recordings/`, git-ignored)
+- `before-chrome.mov`, `after-chrome.mov`: every frame Chrome painted, real Chrome.
+- `before-iphone.mov`, `after-iphone.mov`: WebKit 26.0 at iPhone size. `after-iphone-wk26.6.mov`.
+- No `before-safari.mov` or `after-safari.mov` (blocked, see the top of this section).
+- `*.json`: the numbers behind every table. `sheets/`: the contact sheets named above, and
+  `phone-profile.png` (the four tabs at phone size).
