@@ -1,6 +1,8 @@
 // Checks the page transitions and records them.
 //   node scripts/check-transitions.mjs
-// - Chromium and WebKit: map to project zooms in, back zooms out, previous/next slide.
+// - Chromium and WebKit: map to project zooms in, back zooms out, previous/next slide; About me
+//   zooms into the profile and back; Esc returns to the map, except with the contact panel
+//   open, when it only closes the panel.
 // - Firefox (no cross-document view transitions yet): plain navigation, no errors.
 // - Reduced motion: plain navigation everywhere.
 // Output in redesign/screenshots/: transition-chromium.webm, transition-webkit.webm, and
@@ -77,6 +79,25 @@ async function run(engine, { reducedMotion = 'no-preference', video = false, fra
   await landed(page, '/projects/nutrifit/');
   seen.wrap = await kind(page);
 
+  // Esc: with the contact panel open it only closes the panel; otherwise it goes back to the map
+  await page.click('[data-contact-open]');
+  await page.waitForTimeout(300);
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(500);
+  seen.escPanel = await page.evaluate(() => `${location.pathname} panel ${document.querySelector('#contact-panel').open ? 'open' : 'closed'}`);
+  await page.keyboard.press('Escape');
+  await landed(page, '/');
+  seen.esc = await kind(page);
+
+  // About me: the photo world grows into the profile's photo ring, and back
+  await page.click('.world-about .ring', { force: true }); // the photo, not the title (it floats, so do not wait for it to hold still)
+  await landed(page, '/profile/');
+  seen.about = await kind(page);
+  seen.aboutNamed = await page.evaluate(() => getComputedStyle(document.querySelector('.profile-ring')).viewTransitionName);
+  await page.keyboard.press('Escape');
+  await landed(page, '/');
+  seen.aboutBack = await kind(page);
+
   await context.close();
   await browser.close();
   if (video) {
@@ -87,6 +108,7 @@ async function run(engine, { reducedMotion = 'no-preference', video = false, fra
 }
 
 mkdirSync(OUT, { recursive: true });
+const KINDS = ['in', 'out', 'next', 'prev', 'wrap', 'esc', 'about', 'aboutBack'];
 const frames = [];
 for (const engine of ['chromium', 'webkit']) {
   const { seen, errors } = await run(engine, { video: true, frames: engine === 'chromium' ? frames : null });
@@ -95,16 +117,20 @@ for (const engine of ['chromium', 'webkit']) {
   report(seen.settled, `${engine}: the map is shown settled on return (no second draw-in)`);
   report(seen.next === 'slide-next' && seen.prev === 'slide-prev', `${engine}: Right arrow is "${seen.next}", Left arrow is "${seen.prev}"`);
   report(seen.wrap === 'slide-prev', `${engine}: previous from the first project wraps to the last ("${seen.wrap}")`);
+  report(seen.escPanel === '/projects/nutrifit/ panel closed', `${engine}: Esc with the contact panel open only closes the panel (${seen.escPanel})`);
+  report(seen.esc === 'zoom-out', `${engine}: Esc on a project page goes back to the map ("${seen.esc}")`);
+  report(seen.about === 'zoom-in' && seen.aboutBack === 'zoom-out', `${engine}: About me to the profile is "${seen.about}", Esc back is "${seen.aboutBack}"`);
+  report(seen.aboutNamed === 'none', `${engine}: nothing stays named after a transition (${seen.aboutNamed})`);
   report(errors.length === 0, `${engine}: ${errors.length} errors ${errors.slice(0, 2).join(' | ')}`);
 }
 {
   const { seen, errors } = await run('firefox');
-  report(Object.values(seen).filter((v) => typeof v === 'string').every((v) => v === 'none'), `firefox: plain navigation everywhere (${[...new Set(Object.values(seen).filter((v) => typeof v === 'string'))]})`);
+  report(KINDS.every((k) => seen[k] === 'none'), `firefox: plain navigation everywhere (${[...new Set(KINDS.map((k) => seen[k]))]})`);
   report(errors.length === 0, `firefox: ${errors.length} errors ${errors.slice(0, 2).join(' | ')}`);
 }
 for (const engine of ['chromium', 'webkit']) {
   const { seen, errors } = await run(engine, { reducedMotion: 'reduce' });
-  report(Object.values(seen).filter((v) => typeof v === 'string').every((v) => v === 'none'), `${engine}, reduced motion: plain navigation everywhere`);
+  report(KINDS.every((k) => seen[k] === 'none') && seen.escPanel.endsWith('closed'), `${engine}, reduced motion: plain navigation everywhere, Esc still works`);
   report(errors.length === 0, `${engine}, reduced motion: ${errors.length} errors`);
 }
 

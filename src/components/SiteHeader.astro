@@ -55,3 +55,14 @@ const { home = false, slim = false } = Astro.props;
     <a class="pill pill-solid" href={`mailto:${person.email}`} data-contact-open data-event="contact_open" data-placement="header">Contact</a>
   </nav>
 </header>
+
+<script>
+  // Esc goes back to the map from any page with the back control. While the contact panel is
+  // open Esc only closes the panel (the browser does that itself).
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    if (document.querySelector('dialog[open]')) return;
+    // a click on the link itself, so the same zoom-out transition runs
+    document.querySelector<HTMLAnchorElement>('[data-back]')?.click();
+  });
+</script>

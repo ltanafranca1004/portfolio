@@ -86,11 +86,12 @@ const imageAlt = `${person.name}, ${person.title}: a gold route map over a navy 
       })();
     </script>
     <!--
-      Page transitions use the browser's own cross-document view transitions (switched on in
-      global.css), not a client-side router: every navigation is a normal page load.
-        map to project      the clicked world grows into the hero ring; the sky zooms in
-        project to map      the reverse
-        project to project  a short sideways slide, in route order
+      Page transitions use the browser's own cross-document view transitions, not a
+      client-side router: every navigation is a normal page load.
+        map to project or profile   the clicked world grows into the hero ring (or the photo)
+        back to the map             the reverse
+        project to project          the hero and text cross-fade with a short sideways shift
+      The sky never moves in any of them (see global.css).
       The script is inline and the page waits for #page-end before its first paint, because
       the browser asks which transition to run at that first paint: the listener and the
       elements it names must both exist by then. Browsers without the feature just navigate.

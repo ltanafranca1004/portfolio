@@ -489,40 +489,6 @@ img {
   color: var(--gold);
 }
 
-.back {
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  gap: 20px;
-}
-
-.back-btn {
-  display: flex;
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: rgb(var(--cream-rgb) / 0.12);
-  border: 1px solid rgb(var(--cream-rgb) / 0.35);
-}
-
-.back-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.back-note {
-  font-size: 13px;
-  color: var(--gold);
-}
-
-.back-label {
-  font-size: 17px;
-}
-
 
 /* ---------- orbit lines stay clear of text ----------
    src/scripts/keepout.ts cuts a hole in the lines around every line of text. Until it has
@@ -578,18 +544,21 @@ img {
 }
 
 /* ---------- page transitions ----------
-   Native cross-document view transitions (no client-side router). src/scripts/transitions.ts
-   picks the kind (zoom-in, zoom-out, slide-next, slide-prev) and names the element that
-   travels between pages ("hero"). Off entirely for reduced motion; browsers without the
-   feature just navigate. The opt-in itself (@view-transition) is inline in layouts/Base.astro. */
+   Native cross-document view transitions (no client-side router). src/scripts/transitions.js
+   picks the kind (zoom-in, zoom-out, slide-next, slide-prev, fade) and names the parts that
+   move. Off entirely for reduced motion; browsers without the feature just navigate. The
+   opt-in itself (@view-transition) is inline in layouts/Base.astro.
+
+   The page (root) holds the sky. It only ever cross-fades in place, old over new at full
+   strength, so no frame can show the empty backdrop: nothing slides or scales away from it.
+   The named parts animate above it with mix-blend-mode: normal, as plain fades. */
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 0.25s;
-  transform-origin: var(--vt-origin, 50% 50%);
+  animation-duration: 0.28s;
 }
 
-/* the world that travels: above the page, moving on one eased curve */
+/* the world that travels: above everything, moving on one eased curve */
 ::view-transition-group(hero) {
   z-index: 2;
   animation-duration: 0.5s;
@@ -605,42 +574,64 @@ img {
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* map to project: the sky comes towards you and fades, the project page settles in */
-html:active-view-transition-type(zoom-in)::view-transition-old(root) {
+/* the stage, or a project's hero and text: the box stays put, only its picture animates */
+::view-transition-group(map),
+::view-transition-group(content) {
+  animation: none;
+}
+
+::view-transition-old(map),
+::view-transition-new(map),
+::view-transition-old(content),
+::view-transition-new(content) {
+  mix-blend-mode: normal;
+  transform-origin: var(--vt-origin, 50% 50%);
+}
+
+/* map to a project or the profile: the map comes towards you and fades, the page settles in */
+html:active-view-transition-type(zoom-in)::view-transition-old(map) {
   animation: 0.5s cubic-bezier(0.4, 0, 0.2, 1) both vt-pass;
 }
 
-html:active-view-transition-type(zoom-in)::view-transition-new(root) {
+html:active-view-transition-type(zoom-in)::view-transition-new(content) {
   animation: 0.5s cubic-bezier(0.4, 0, 0.2, 1) both vt-arrive;
 }
 
-/* project to map: the same, backwards */
-html:active-view-transition-type(zoom-out)::view-transition-old(root) {
+/* back to the map: the same, backwards */
+html:active-view-transition-type(zoom-out)::view-transition-old(content) {
   animation: 0.5s cubic-bezier(0.4, 0, 0.2, 1) both reverse vt-arrive;
 }
 
-html:active-view-transition-type(zoom-out)::view-transition-new(root) {
+html:active-view-transition-type(zoom-out)::view-transition-new(map) {
   animation: 0.5s cubic-bezier(0.4, 0, 0.2, 1) both reverse vt-pass;
 }
 
-/* project to project: a short slide in route order */
-html:active-view-transition-type(slide-next)::view-transition-old(root) {
-  animation: 0.3s cubic-bezier(0.4, 0, 0.2, 1) both vt-out-left;
+/* project to project: the hero and text cross-fade with a 20px shift in the direction of travel */
+html:active-view-transition-type(slide-next)::view-transition-old(content) {
+  animation: 0.28s cubic-bezier(0.4, 0, 0.2, 1) both vt-out-left;
 }
 
-html:active-view-transition-type(slide-next)::view-transition-new(root) {
-  animation: 0.3s cubic-bezier(0.4, 0, 0.2, 1) both reverse vt-out-right;
+html:active-view-transition-type(slide-next)::view-transition-new(content) {
+  animation: 0.28s cubic-bezier(0.4, 0, 0.2, 1) both reverse vt-out-right;
 }
 
-html:active-view-transition-type(slide-prev)::view-transition-old(root) {
-  animation: 0.3s cubic-bezier(0.4, 0, 0.2, 1) both vt-out-right;
+html:active-view-transition-type(slide-prev)::view-transition-old(content) {
+  animation: 0.28s cubic-bezier(0.4, 0, 0.2, 1) both vt-out-right;
 }
 
-html:active-view-transition-type(slide-prev)::view-transition-new(root) {
-  animation: 0.3s cubic-bezier(0.4, 0, 0.2, 1) both reverse vt-out-left;
+html:active-view-transition-type(slide-prev)::view-transition-new(content) {
+  animation: 0.28s cubic-bezier(0.4, 0, 0.2, 1) both reverse vt-out-left;
 }
 
+/* The two fades overlap (the old page holds for a moment, the new one is solid before the
+   end), so the picture never thins out to bare sky half way through. */
 @keyframes vt-pass {
+  25% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 0;
+  }
   to {
     opacity: 0;
     transform: scale(1.12);
@@ -652,19 +643,25 @@ html:active-view-transition-type(slide-prev)::view-transition-new(root) {
     opacity: 0;
     transform: scale(0.94);
   }
+  15% {
+    opacity: 0;
+  }
+  75% {
+    opacity: 1;
+  }
 }
 
 @keyframes vt-out-left {
   to {
     opacity: 0;
-    transform: translateX(-56px);
+    transform: translateX(-20px);
   }
 }
 
 @keyframes vt-out-right {
   to {
     opacity: 0;
-    transform: translateX(56px);
+    transform: translateX(20px);
   }
 }
 

@@ -18,6 +18,7 @@
     "test:analytics": "node scripts/check-analytics.mjs",
     "test:keepout": "node scripts/check-keepout.mjs",
     "test:transitions": "node scripts/check-transitions.mjs",
+    "test:transition-frames": "node scripts/check-transition-frames.mjs",
     "test:phone": "node scripts/check-phone.mjs",
     "test:tabs": "node scripts/check-tabs.mjs",
     "test:worlds": "node scripts/check-worlds.mjs",
