@@ -1,7 +1,8 @@
 ---
-import { Picture } from 'astro:assets';
 import Base from '../layouts/Base.astro';
+import NewTab from '../components/NewTab.astro';
 import Orbits from '../components/Orbits.astro';
+import Pic from '../components/Pic.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import Sky from '../components/Sky.astro';
 import frame from '../assets/frame.svg';
@@ -62,7 +63,7 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
       <aside class="profile-side">
         <div class="ring float profile-ring">
           <img class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
-          <Picture class="profile-photo" src={asset(person.photo)} formats={['avif', 'webp']} fallbackFormat="webp" width={660} height={660} alt={person.name} loading="eager" fetchpriority="high" />
+          <Pic class="profile-photo" src={asset(person.photo)} width={328} alt={person.name} loading="eager" fetchpriority="high" />
         </div>
         <div class="identity">
           <h1>{person.name}</h1>
@@ -74,7 +75,7 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 6l-6 6 6 6M4 12h16"></path></svg>
           </span>
           <span class="back-text">
-            <span class="back-note">Profile</span>
+            <span class="back-note">Map</span>
             <span class="back-label">Back to the map</span>
           </span>
         </a>
@@ -87,7 +88,6 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
 
         <main>
           <section id="profile" data-tab="profile">
-            <p class="kicker">Profile</p>
             <h2>About me</h2>
             <div class="gold-rule" aria-hidden="true"></div>
             <p class="bio">{person.bio}</p>
@@ -104,7 +104,6 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
           </section>
 
           <section id="experience" data-tab="experience">
-            <p class="kicker">Experience</p>
             <h2>Where I work</h2>
             <div class="gold-rule" aria-hidden="true"></div>
             {
@@ -140,14 +139,11 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
                 </article>
               ))
             }
-            <a class="resume-link" href={RESUME_URL} data-event="resume_open" data-placement="profile">
-              View full resume (PDF) <span aria-hidden="true">→</span>
-            </a>
+            <a class="resume-link" href={RESUME_URL} target="_blank" rel="noopener noreferrer" data-event="resume_open" data-placement="profile">View full resume (PDF)<NewTab /></a>
           </section>
 
           <div class="skills-row" data-tab="skills">
             <section id="skills">
-              <p class="kicker">Skills</p>
               <h2>What I build with</h2>
               <div class="gold-rule" aria-hidden="true"></div>
               <svg class="skills-tree" viewBox="-24 36 760 488" role="img" aria-label={treeLabel}>
@@ -184,7 +180,6 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
             </section>
 
             <section id="education" data-tab="education">
-              <p class="kicker">Education</p>
               <h2>Where I study</h2>
               <div class="gold-rule" aria-hidden="true"></div>
               <div class="school">
@@ -215,14 +210,14 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
             <p>The fastest way to reach me is email.</p>
           </div>
           <a class="pill pill-solid" href={`mailto:${person.email}`} data-event="email_click" data-placement="profile_cta">Email me</a>
-          <a class="pill pill-ghost" href={RESUME_URL} data-event="resume_open" data-placement="profile_cta">Resume</a>
+          <a class="pill pill-ghost" href={RESUME_URL} target="_blank" rel="noopener noreferrer" data-event="resume_open" data-placement="profile_cta">Resume<NewTab /></a>
         </section>
         <a class="back profile-back back-narrow" href="/">
           <span class="back-btn" aria-hidden="true">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 6l-6 6 6 6M4 12h16"></path></svg>
           </span>
           <span class="back-text">
-            <span class="back-note">Profile</span>
+            <span class="back-note">Map</span>
             <span class="back-label">Back to the map</span>
           </span>
         </a>
@@ -392,9 +387,11 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
     margin: 0 -20px;
     padding: 0 20px;
     overflow-x: auto;
-    background: rgb(var(--sky-rgb) / 0.9);
     border-bottom: 1px solid rgb(var(--gold-rgb) / 0.25);
     scrollbar-width: none;
+    /* No panel behind the bar: whatever scrolls under it is blurred out of the way instead. */
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
   }
 
   .tabs a {
@@ -431,16 +428,8 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
     padding-top: 32px;
   }
 
-  .kicker {
-    margin: 0;
-    font-size: 12px;
-    letter-spacing: 0.2em;
-    color: var(--gold);
-    text-transform: uppercase;
-  }
-
   .profile main h2 {
-    margin: 4px 0 18px;
+    margin: 0 0 18px;
     font-size: 32px;
     font-weight: 500;
   }
@@ -579,7 +568,6 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
   .resume-link {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
     min-height: 44px;
     margin-top: 6px;
     font-size: 16px;
