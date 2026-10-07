@@ -1,0 +1,17 @@
+---
+// For links that open in a new tab: a small arrow, and the same fact for screen readers.
+interface Props {
+  /** Leave the arrow out where there is no room for it (icon buttons). */
+  icon?: boolean;
+}
+
+const { icon = true } = Astro.props;
+---
+
+{
+  icon && (
+    <svg class="newtab" width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+      <path d="M4.5 2H10v5.5M10 2 2.5 9.5" />
+    </svg>
+  )
+}<span class="sr-only"> (opens in new tab)</span>

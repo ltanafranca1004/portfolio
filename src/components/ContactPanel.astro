@@ -1,5 +1,6 @@
 ---
 import { getImage } from 'astro:assets';
+import NewTab from './NewTab.astro';
 import { asset, content, person, RESUME_URL } from '../lib/content';
 
 // The message-style contact panel (design/MainContact.html). A native modal dialog: the
@@ -27,15 +28,27 @@ const avatar = await getImage({ src: asset(person.photo), width: 132, height: 13
       {
         contactPanel.replies.map(([label, href]) => {
           const isResume = href?.endsWith('resume.pdf');
-          const event = href?.startsWith('mailto:') ? 'email_click' : isResume ? 'resume_open' : 'linkedin_click';
-          return (
-            <a href={isResume ? RESUME_URL : href} rel={event === 'linkedin_click' ? 'noopener' : undefined} data-event={event} data-placement="contact_panel">
+          const isEmail = href?.startsWith('mailto:');
+          const event = isEmail ? 'email_click' : isResume ? 'resume_open' : 'linkedin_click';
+          // email opens the mail app in place; everything else opens in a new tab
+          const link = (
+            <a href={isResume ? RESUME_URL : href} target={isEmail ? undefined : '_blank'} rel={isEmail ? undefined : 'noopener noreferrer'} data-event={event} data-placement="contact_panel">
               <span aria-hidden="true">◆</span>
               {label}
+              {!isEmail && <NewTab />}
             </a>
+          );
+          return isEmail ? (
+            <div class="reply-row">
+              {link}
+              <button type="button" class="copy-email" data-copy={person.email}>Copy email</button>
+            </div>
+          ) : (
+            link
           );
         })
       }
+      <span class="sr-only" role="status" aria-live="polite" data-copy-status></span>
     </div>
   </div>
 </dialog>
@@ -56,6 +69,27 @@ const avatar = await getImage({ src: asset(person.photo), width: 132, height: 13
     panel.addEventListener('click', (event) => {
       if (event.target === panel) panel.close();
     });
+    // Copy email: copy the address, say "Copied" for two seconds, and announce it.
+    const copy = panel.querySelector<HTMLButtonElement>('[data-copy]');
+    const status = panel.querySelector<HTMLElement>('[data-copy-status]');
+    let reset = 0;
+    copy?.addEventListener('click', async () => {
+      const email = copy.dataset.copy ?? '';
+      let ok = true;
+      try {
+        await navigator.clipboard.writeText(email);
+      } catch {
+        ok = false; // clipboard access refused: say so instead of pretending
+      }
+      copy.textContent = ok ? 'Copied' : 'Copy failed';
+      if (status) status.textContent = ok ? `Copied ${email}` : 'Could not copy the email address';
+      window.clearTimeout(reset);
+      reset = window.setTimeout(() => {
+        copy.textContent = 'Copy email';
+        if (status) status.textContent = '';
+      }, 2000);
+    });
+
     // The browser already keeps focus off the page behind. This also stops Tab from
     // leaving for the browser's own toolbar: it wraps from the last control to the first.
     panel.addEventListener('keydown', (event) => {
@@ -246,7 +280,39 @@ const avatar = await getImage({ src: asset(person.photo), width: 132, height: 13
     color: var(--gold);
   }
 
-  .contact-replies a span {
+  .reply-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .reply-row a {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .copy-email {
+    flex: none;
+    min-width: 104px;
+    min-height: 48px;
+    padding: 0 14px;
+    border: 1px solid rgb(27 33 64 / 0.45);
+    border-radius: 24px;
+    background: none;
+    color: #1b2140;
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .copy-email:hover {
+    background: rgb(27 33 64 / 0.08);
+  }
+
+  .copy-email:focus-visible {
+    outline-color: #1b2140;
+  }
+
+  .contact-replies a > span[aria-hidden] {
     color: var(--gold);
   }
 
