@@ -1,0 +1,41 @@
+---
+import type { ImageMetadata } from 'astro';
+import { getImage } from 'astro:assets';
+
+// A sharp image at every pixel density: AVIF and WebP, each with a srcset.
+// Fixed-size images pass `width` (the CSS width) and get 1x, 2x and 3x files.
+// Images that follow the layout pass `widths` and `sizes` instead.
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  /** The displayed CSS width (the largest it gets). */
+  width: number;
+  densities?: number[];
+  widths?: number[];
+  sizes?: string;
+  class?: string;
+  loading?: 'lazy' | 'eager';
+  fetchpriority?: 'high' | 'auto';
+  /** Pixel art and small text: compress less. */
+  crisp?: boolean;
+}
+
+const { src, alt, width, densities = [1, 2, 3], widths, sizes, class: className, loading = 'lazy', fetchpriority, crisp = false } = Astro.props;
+const quality = { avif: crisp ? 72 : 62, webp: crisp ? 90 : 84 };
+
+// never ask for more pixels than the source has
+const wanted = widths ? widths.map((w) => ({ w, tag: `${w}w` })) : densities.map((d) => ({ w: Math.round(width * d), tag: `${d}x` }));
+const steps = wanted.map((s) => ({ ...s, w: Math.min(s.w, src.width) })).filter((s, i, all) => all.findIndex((o) => o.w === s.w) === i);
+
+const srcset = async (format: 'avif' | 'webp') =>
+  (await Promise.all(steps.map((s) => getImage({ src, width: s.w, format, quality: quality[format] })))).map((img, i) => `${img.src} ${widths ? `${steps[i]!.w}w` : steps[i]!.tag}`).join(', ');
+const [avif, webp] = await Promise.all([srcset('avif'), srcset('webp')]);
+const fallback = await getImage({ src, width: Math.min(width * 2, src.width), format: 'webp', quality: quality.webp });
+const height = Math.round((width * src.height) / src.width);
+---
+
+<picture>
+  <source type="image/avif" srcset={avif} sizes={widths ? sizes : undefined} />
+  <source type="image/webp" srcset={webp} sizes={widths ? sizes : undefined} />
+  <img class={className} src={fallback.src} alt={alt} width={width} height={height} loading={loading} decoding="async" fetchpriority={fetchpriority} />
+</picture>

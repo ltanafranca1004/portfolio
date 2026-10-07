@@ -1,22 +1,32 @@
 ---
 import { getImage } from 'astro:assets';
-import { asset } from '../lib/content';
+import hd from '../assets/lens-hd.webp';
 
 // The real Lens screenshot with a gold loupe gliding over it. Decorative: the caller labels it.
+//
+// Both layers come from src/assets/lens-hd.webp (1340px wide), the full-size capture that
+// redesign/assets/lens-real.webp was shrunk from. The loupe shows the card at 1.8x, so it
+// gets its own files at three times the card's CSS size or more, not an enlarged copy.
 interface Props {
-  /** Load the images straight away: for a card that is on the first screen everywhere. */
-  eager?: boolean;
+  /** The big card on the Lens page: drawn 2.35x larger, and on the first screen everywhere. */
+  hero?: boolean;
 }
 
-const loading = Astro.props.eager ? 'eager' : 'lazy';
-const shot = asset('assets/lens-real.webp');
-const small = await getImage({ src: shot, width: 380, format: 'webp' });
-const large = await getImage({ src: shot, width: 684, format: 'webp' });
+const { hero = false } = Astro.props;
+const loading = hero ? 'eager' : 'lazy';
+const file = (width: number) => getImage({ src: hd, width, format: 'webp', quality: 88 });
+
+// card: 190 CSS px on the map (up to 238 when the map is scaled up), 446 on the Lens page
+const card = await Promise.all((hero ? [892, 1340] : [238, 476, 714]).map(file));
+const cardSet = hero ? `${card[0]!.src} 1x, ${card[1]!.src} 2x` : `${card[0]!.src} 1x, ${card[1]!.src} 2x, ${card[2]!.src} 3x`;
+// loupe layer: 342 CSS px on the map, 804 on the Lens page
+const loupe = await Promise.all((hero ? [1340] : [1026, 1340]).map(file));
+const loupeSet = hero ? undefined : `${loupe[0]!.src} 1x, ${loupe[1]!.src} 2x`;
 ---
 
 <div class="lens-card" aria-hidden="true">
   <div class="lens-tilt">
-    <img class="lens-shot" src={small.src} alt="" width="190" height="85" loading={loading} decoding="async" />
-    <div class="loupe"><img class="loupe-img" src={large.src} alt="" width="342" height="153" loading={loading} decoding="async" /></div>
+    <img class="lens-shot" src={card[0]!.src} srcset={cardSet} alt="" width="190" height="85" loading={loading} decoding="async" fetchpriority={hero ? 'high' : undefined} />
+    <div class="loupe"><img class="loupe-img" src={loupe[0]!.src} srcset={loupeSet} alt="" width="342" height="153" loading={loading} decoding="async" /></div>
   </div>
 </div>
