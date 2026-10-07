@@ -31,6 +31,16 @@ if printf '%s\n' "$WHOAMI" | grep -qi "unify"; then abort "wrangler whoami menti
 export CLOUDFLARE_ACCOUNT_ID="$EXPECTED_ACCOUNT_ID"
 echo "Account check passed: $EXPECTED_ACCOUNT_ID"
 
+# Only the production branch may be indexed by search engines. Every other deploy is built
+# with a noindex meta tag (public/_headers adds an X-Robots-Tag header for preview hosts too).
+PRODUCTION_BRANCH="main"
+if [ "$BRANCH" = "$PRODUCTION_BRANCH" ]; then
+  export PUBLIC_SITE_ENV="production"
+else
+  export PUBLIC_SITE_ENV="preview"
+fi
+echo "Building for: $PUBLIC_SITE_ENV (branch $BRANCH)"
+
 npm run check
 npm run lint
 npm run build

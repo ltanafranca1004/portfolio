@@ -1,0 +1,12 @@
+# Preview deployments (redesign.luistanafranca.pages.dev, <hash>.luistanafranca.pages.dev)
+# must never be indexed. The production host has no subdomain, so this rule skips it.
+https://:preview.luistanafranca.pages.dev/*
+  X-Robots-Tag: noindex, nofollow
+
+# Fingerprinted build files never change.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin

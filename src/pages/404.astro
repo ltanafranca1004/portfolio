@@ -1,0 +1,51 @@
+---
+import Base from '../layouts/Base.astro';
+import Orbits from '../components/Orbits.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import Sky from '../components/Sky.astro';
+import { person } from '../lib/content';
+---
+
+<Base title={`Page not found | ${person.name}`} description="This page is not on the map." noindex>
+  <div class="page lost">
+    <Sky />
+    <Orbits class="orbits-backdrop" />
+    <SiteHeader />
+    <main>
+      <p class="kicker">404</p>
+      <h1>This page is not on the map</h1>
+      <a class="pill pill-solid" href="/">Back to the map</a>
+    </main>
+  </div>
+</Base>
+
+<style>
+  .lost {
+    display: flex;
+    flex-direction: column;
+  }
+
+  main {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 48px 24px 96px;
+    text-align: center;
+  }
+
+  .kicker {
+    margin: 0;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+  }
+
+  h1 {
+    margin: 0 0 12px;
+    font-size: clamp(28px, 6vw, 40px);
+    font-weight: 500;
+  }
+</style>
