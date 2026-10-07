@@ -5,6 +5,59 @@ Preview (always the latest deploy of the `redesign` branch): https://redesign.lu
 Deploys go through `npm run deploy` (`scripts/deploy.sh`) only. It aborts unless `wrangler whoami`
 shows exactly one account and it is `3a459a47f63c6f049c3217b090c824dd`.
 
+## Current state (after Session 8, 2026-10-07)
+
+### What the site does
+- **Map** (`/`): About me, three destinations (Unify Social, Cubic, Lens) and four other
+  projects on a gold route over a star field. From 1200px wide it is one 1440 x 900 stage scaled
+  to the window; below that it is a stacked page. The Cubic cube is live (canvas, 15 fps).
+- **Seven project pages** (`/projects/<slug>/`) from one template: hero, role and facts,
+  buttons, hardest problem, two screenshots, stack, previous and next.
+- **Profile** (`/profile/`): four tabs (Profile, Experience, Skills, Education), each with its
+  own address. The Profile tab has the bio, four facts, four Highlights and the call to action.
+- **Contact panel** on every page (a native dialog), `/resume.pdf`, a real 404 page,
+  `sitemap.xml`, `robots.txt`, share tags and Person JSON-LD.
+- **Navigation:** every page change is a normal page load. Chrome and Edge cross-fade over
+  200ms and prerender the next page on hover; Safari (macOS and iOS) navigates plainly and
+  prefetches on hover or touch. Going back to the map returns to where it was left.
+- **Content:** every fact, number and link is in `redesign/content.json`; images come from
+  `redesign/assets/`. Nothing is duplicated in the source.
+- **Analytics:** PostHog, only on the host in `SITE_URL`, no cookies, `?ph_debug=1` to force.
+- **Not indexed yet:** every build except production carries noindex. There is no production
+  deploy and no domain. `redesign/LAUNCH.md` is the checklist for that session.
+
+### How to deploy
+`npm run deploy` (preview, https://redesign.luistanafranca.pages.dev). It runs `astro check`,
+`eslint` and the build, and refuses to run unless `wrangler whoami` shows only
+`3a459a47f63c6f049c3217b090c824dd`. Production is `npm run deploy -- main`: see `LAUNCH.md`
+first. Never deploy any other way.
+
+### How to run the tests
+1. `npm run check` and `npm run lint`.
+2. `npm run build`, then `npm run preview -- --port 4322` in another terminal (the tests read
+   `http://localhost:4322`; set `BASE_URL` to test another address).
+3. The ten checks, each a few minutes at most: `npm run test:viewports`, `test:a11y`,
+   `test:analytics`, `test:keepout`, `test:transitions`, `test:transition-frames`,
+   `test:phone`, `test:tabs`, `test:worlds`, `test:return`.
+4. `npm run lighthouse -- <label> [address]` (the deployed preview by default).
+Browsers are Playwright's, inside `node_modules` (`PLAYWRIGHT_BROWSERS_PATH=0`).
+
+### Known limits
+- **Never checked on a real iPhone.** Phone results are WebKit and Chromium with iPhone
+  emulation on a Mac. Real Safari on this Mac was measured once, in Session 7.
+- **Safari is recognised by a feature check** (`@supports (font: -apple-system-body)`). It is
+  right in every engine tested; a future Chrome that learned that keyword would lose its
+  cross-fade and nothing else.
+- **Lens page loupe is 1.7x on a 2x screen** and the Turtle Trips screenshots are soft: the
+  larger captures (`lens-capture-2x.png`, `turtle-capture-2x.png`) were never supplied.
+- **Lens on mobile is the page closest to the 2.5s LCP line** (about 2.0 to 2.4s).
+- **Text is smaller on small laptop windows** (the one-screen stage is 0.8x at 1280 x 720).
+- **Without JavaScript** the orbit lines cross text, the stage is not scaled, and the map
+  opens at its top on return.
+- **Share previews show no image yet,** and SEO is 69 in Lighthouse: both follow from there
+  being no production site. Both are fixed by the launch.
+- **PostHog has not received a real event yet.** It is only checked by intercepting requests.
+
 ## Session 1: setup, palette, fonts, map home (2026-10-06)
 
 ### Built
@@ -802,3 +855,135 @@ keep-out).
 - No `before-safari.mov` or `after-safari.mov` (see "Real Safari" above).
 - `*.json`: the numbers behind every table. `sheets/`: the contact sheets named above, and
   `phone-profile.png` (the four tabs at phone size).
+
+## Session 8: wrap-up (2026-10-07)
+
+No new features beyond the list. No measurement harness and no screen recording: the existing
+check scripts only, plus one new check for item 1. No production deploy, domain, DNS or GitHub
+Pages change. `wrangler whoami` showed only `3a459a47f63c6f049c3217b090c824dd`.
+
+### 1. Back to where you were on the map
+- **Cause.** The header's back control was a link to `/`: a new visit, which opens at the top.
+- **Header back control.** If the page before this one in the tab's history is the map, it now
+  calls `history.back()`, so the browser shows the map as it was left. Otherwise (the page was
+  opened directly, or reached with Previous or Next) it loads `/` and the map restores the
+  saved position. Esc does the same, since it presses the control.
+- **How "the page before is the map" is known.** The Navigation API where the browser has
+  one (Chrome and Edge do; older Safari and Firefox do not). Elsewhere, a page opened from a
+  link on the map marks its own history entry (`history.state.fromMap`) when it loads. Both
+  paths are tested.
+- **Saving.** The map stores its scroll position and the slug of the world opened in
+  `sessionStorage` (`map-pos`), on the click and again on `pagehide`.
+- **Restoring.** An inline script at the end of the map puts the position back before the
+  first paint, on Back and Forward and when the back control asked for it (`map-return`). A
+  reload or a fresh visit is left alone. If the opened world is somehow not in view afterwards
+  (a phone turned on its side) it is brought to the middle of the screen.
+- **Back/forward cache.** No `unload` or `beforeunload` handlers anywhere, no
+  `Cache-Control: no-store`, `history.scrollRestoration` is left on `auto`. Every picture on
+  the map has a fixed width and height; the page is the same height before and after they load.
+- **A Safari detail found by the test.** Loaded afresh, WebKit lays the map out once in the
+  fallback font even when Jost is cached, which leaves the page 44px shorter for a moment, so
+  a position near the bottom was cut short by 44px. The position is put back again just before
+  the first frame is painted.
+- **Test:** `npm run test:return` (`scripts/check-return.mjs`), iPhone emulation in WebKit and
+  Chromium at 390x844 and 390x664. For each of the seven worlds: scroll to it, tap it, come
+  back by the header control, by the browser's Back button, and by the header control after
+  Next (a fresh load of the map). One more pass hides the Navigation API to exercise the
+  fallback.
+
+### 2. Safari: no view transitions
+- Safari on macOS and every browser on iOS navigate plainly and at once. Chrome and Edge keep
+  the 200ms cross-fade. The prefetch on hover, focus and touch is unchanged.
+- **How Safari is detected:** by a feature, not by its name. Only Apple's WebKit understands
+  the system font keyword in `font: -apple-system-body`, so the opt-in is written as
+  `@supports not (font: -apple-system-body) { @view-transition { navigation: auto } }`, inline
+  in the head (`layouts/Base.astro`). Chrome for iPhone is WebKit, so it is covered; a user
+  agent check would have had to list every iOS browser by name. Checked: true in Playwright's
+  WebKit, false in Chromium and Firefox.
+- `npm run test:transitions` now fails if WebKit runs any view transition or Chromium stops.
+
+### 3. First-visit map intro
+The worlds now arrive in 1.0s in all (was 1.9s): each takes 0.5s and they start 0.1s apart,
+the last at 0.5s. The route and comet were shortened to match (0.9s, was 1.6s). Still the
+first visit in a tab only; a return from a project or the profile shows the map settled.
+
+### 4. Unify GitHub link
+**Kept.** `https://github.com/UnifyCN/web-app` is public: an unauthenticated request returns
+200, and GitHub's API reports `"private": false, "visibility": "public"`. Read only, nothing
+was changed there.
+
+### 5. Lens image
+**Skipped.** `redesign/assets/lens-capture-2x.png` and `turtle-capture-2x.png` do not exist.
+
+### 6. Profile tab
+- **Highlights row** between the four facts and the "Open to a software engineering co-op for
+  2027." line: 500+ users on Unify, 2 national awards, Best Design (StormHacks 2026, Cubic),
+  7 languages shipped. Each is a link to its project page.
+- **Right column centred against the photo.** The tab bar stays where it is on every tab. The
+  Profile panel's content is centred on the middle of the photo column (ring top to the end of
+  the name block): both middles are at 430px of the 900px stage. The spacing was set so the
+  content nearly fills its 470px, which leaves the "About me" heading 2px from where the other
+  tabs' headings sit, so nothing jumps when the tab changes.
+- **Phones:** the Highlights are a 2x2 grid under the facts.
+- Not merged with Experience.
+
+### 7. Launch checklist
+`redesign/LAUNCH.md`, written only. Steps that need Luis are marked.
+
+### 8. Checks
+`astro check` and `eslint` clean. All ten check scripts pass on the local build:
+
+| Check | Result |
+|---|---|
+| `test:viewports` | 75 of 75 page and size combinations fit one screen, nothing cut off (the Profile tab at all six sizes) |
+| `test:a11y` | 63 of 63; the four Highlights are in the keyboard order after the Profile tab |
+| `test:analytics` | 15 of 15 |
+| `test:keepout` | 72 page and size combinations |
+| `test:transitions` | 23 of 23: Chromium cross-fades, WebKit runs no view transition, Firefox plain |
+| `test:transition-frames` | 24 of 24, 0 dark frames (WebKit's plain navigation stays at 99 to 100% brightness) |
+| `test:phone` | 42 page, size and browser combinations |
+| `test:tabs` | 60 of 60 |
+| `test:worlds` | 26 of 26 |
+| `test:return` (new) | 34 world, size and browser combinations, three ways back each: all 0px from where the map was left, in the first frame. Chromium served the map from the back/forward cache on every history return; WebKit reloaded it and restored the position. |
+
+Deployed with `npm run deploy` (it ran this time; account check passed). `test:return` was
+run again against the deployed preview: the same 34 combinations pass. Lighthouse 13.5 on the
+deployed preview, two runs:
+
+| Page | Form | Run 1: Perf / A11y / BP / SEO, LCP | Run 2: Perf / A11y / BP / SEO, LCP | First load |
+|---|---|---|---|---|
+| `/` | mobile | 99 / 100 / 100 / 69, 1.99s | 100 / 100 / 100 / 69, 1.26s | 241 KB, 15 requests |
+| `/` | desktop | 100 / 100 / 100 / 69, 0.71s | 100 / 100 / 100 / 69, 0.71s | 255 KB, 19 requests |
+| `/projects/unify/` | mobile | 100 / 100 / 100 / 69, 1.74s | 100 / 100 / 100 / 69, 1.69s | 105 KB, 11 requests |
+| `/projects/unify/` | desktop | 100 / 100 / 100 / 69, 0.50s | 100 / 100 / 100 / 69, 0.49s | 96 KB, 11 requests |
+| `/profile/` | mobile | 97 / 100 / 100 / 69, 1.88s | 99 / 100 / 100 / 69, 1.84s | 104 KB, 9 requests |
+| `/profile/` | desktop | 100 / 100 / 100 / 69, 0.53s | 100 / 100 / 100 / 69, 0.48s | 91 KB, 9 requests |
+
+CLS 0 and blocking time 0ms on every run. SEO is 69 because of the intended noindex on the
+preview. The two runs differ by network noise (the map on mobile: 1.99s, then 1.26s).
+
+### Judgment calls and limits
+1. **`content.json` gained one field, `person.highlights`** (value, label, project slug). The
+   four values were already in the file (the Unify and Cubic chips, Unify's "Shipped in" fact)
+   but not the labels or which page each links to. The profile build fails if a value is no
+   longer stated somewhere in its project's entry, so the two cannot drift apart.
+2. **Centring keeps the tab bar still.** Centring the whole right column, tabs included, would
+   move the tab bar whenever the tab changed, because Experience is taller. So the bar stays and
+   the Profile panel's content is what is centred against the photo.
+3. **Highlights are 30px on wide screens and 28px on phones** (facts are 16px). "Best Design"
+   is the widest and has to fit a 190px column.
+4. **The return test never ran on a real iPhone.** WebKit here did not use its back/forward
+   cache under Playwright, so on WebKit the test exercises the reload-and-restore path; Chromium
+   exercises the cache path. Real Safari normally uses its cache for Back.
+5. **Chrome still prerenders `/` when the back control is hovered,** and then goes back in
+   history instead, so that prerender is unused. It costs one background page load.
+6. **The back control after Previous or Next returns to the world that was opened from the
+   map,** not to the project now on screen. That is what "restore the saved position" says.
+7. **Safari detection is a feature check** (see "Known limits" at the top).
+8. **The intro's route and comet were shortened too** (0.9s). Left at 1.6s they would have
+   finished after the worlds had arrived.
+9. **The Unify repository being public** is what the check found; I did not look at whether
+   it is meant to be.
+10. **Review screenshots** are in `redesign/screenshots/session8/` (git-ignored):
+    `profile-1512x860.png`, `profile-390x844.png` (the whole page) and
+    `profile-390x844-first-screen.png`.

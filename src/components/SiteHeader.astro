@@ -65,9 +65,9 @@ const { home = false, slim = false } = Astro.props;
   // (this page was opened directly, or reached from another project) it loads "/" as a link
   // and asks the map to restore the position it saved (pages/index.astro).
   //
-  // "Is the page before this one the map?" is answered by the Navigation API where there is
-  // one (Chrome, Edge, Safari 26.2 and later, Firefox 147 and later). Elsewhere a page that
-  // was opened by a link on the map marks its own history entry when it loads.
+  // "Is the page before this one the map?" is answered by the Navigation API where the
+  // browser has one (Chrome and Edge do; older Safari and Firefox do not). Elsewhere a page
+  // that was opened by a link on the map marks its own history entry when it loads.
   interface NavigationEntryLike {
     url: string | null;
     index: number;
