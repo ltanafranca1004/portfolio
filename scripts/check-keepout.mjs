@@ -21,7 +21,7 @@ const SIZES = [
   [768, 1024],
   [390, 844],
 ];
-const PAGES = ['/', '/profile/', '/projects/unify/', '/projects/cubic/', '/projects/lens/', '/projects/turtle-trips/', '/projects/amenity-recommender/', '/projects/pipeline-simulator/', '/projects/nutrifit/'];
+const PAGES = ['/', '/profile/', '/profile/#experience', '/profile/#skills', '/profile/#education', '/projects/unify/', '/projects/cubic/', '/projects/lens/', '/projects/turtle-trips/', '/projects/amenity-recommender/', '/projects/pipeline-simulator/', '/projects/nutrifit/'];
 const ONLY_LINES = 'body, body * { visibility: hidden !important; } svg[data-keepout], svg[data-keepout] *, .routewrap, .routewrap * { visibility: visible !important; }';
 const BACKGROUND = [5, 8, 21]; // --sky, the page background
 
@@ -65,8 +65,9 @@ for (const [width, height] of SIZES) {
           const node = walker.currentNode;
           const el = node.parentElement;
           if (!el || !node.data.trim() || el.closest('svg[data-keepout], script, style, noscript, dialog, .sr-only')) continue;
+          if (!el.checkVisibility({ visibilityProperty: true })) continue; // an inactive tab panel
           range.selectNodeContents(node);
-          for (const r of range.getClientRects()) {
+          for (const r of el instanceof SVGElement ? [el.getBoundingClientRect()] : range.getClientRects()) {
             if (r.width < 1 || r.height < 1 || r.bottom < 0 || r.top > innerHeight || r.right < 0 || r.left > innerWidth) continue;
             out.push({ left: r.left, top: r.top, right: r.right, bottom: r.bottom, text: node.data.trim().slice(0, 28) });
           }

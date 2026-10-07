@@ -53,240 +53,283 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
 ---
 
 <Base title={`About ${person.name} | Profile, experience and skills`} description={description} ogType="profile">
-  <div class="page profile">
+  <div class="page profile staged">
     <Sky />
-    <Orbits class="orbits-backdrop orbits-top" />
+    <Orbits class="orbits-backdrop" />
 
-    <SiteHeader />
+    <div class="stage-wrap">
+      <div class="stage">
+        <SiteHeader />
 
-    <div class="profile-body">
-      <aside class="profile-side">
-        <div class="ring float profile-ring">
-          <img class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
-          <Pic class="profile-photo" src={asset(person.photo)} width={328} alt={person.name} loading="eager" fetchpriority="high" />
-        </div>
-        <div class="identity">
-          <h1>{person.name}</h1>
-          <p class="identity-title">{person.title}</p>
-          <p class="identity-where">{person.location} · <a href={`mailto:${person.email}`} data-event="email_click" data-placement="profile">{person.email}</a></p>
-        </div>
-        <a class="back profile-back back-wide" href="/">
-          <span class="back-btn" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 6l-6 6 6 6M4 12h16"></path></svg>
-          </span>
-          <span class="back-text">
-            <span class="back-note">Map</span>
-            <span class="back-label">Back to the map</span>
-          </span>
-        </a>
-      </aside>
+        <div class="profile-body">
+          <aside class="profile-side">
+            <div class="ring float profile-ring">
+              <img class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
+              <Pic class="profile-photo" src={asset(person.photo)} width={328} alt={person.name} loading="eager" fetchpriority="high" />
+            </div>
+            <div class="identity">
+              <h1>{person.name}</h1>
+              <p class="identity-title">{person.title}</p>
+              <p class="identity-where">{person.location} · <a href={`mailto:${person.email}`} data-event="email_click" data-placement="profile">{person.email}</a></p>
+            </div>
+          </aside>
 
-      <div class="profile-main">
-        <nav class="tabs" aria-label="Profile sections">
-          {TABS.map(([id, label], i) => <a href={`#${id}`} aria-current={i === 0 ? 'true' : undefined}>{label}</a>)}
-        </nav>
-
-        <main>
-          <section id="profile" data-tab="profile">
-            <h2>About me</h2>
-            <div class="gold-rule" aria-hidden="true"></div>
-            <p class="bio">{person.bio}</p>
-            <dl class="quick-facts">
+          <div class="profile-main">
+            <!--
+              Four sections. On wide screens the script below turns this into tabs (one panel
+              showing at a time); on phones and without JavaScript the links jump down the page.
+              Every panel is always in the HTML.
+            -->
+            <nav class="tabs" aria-label="Profile sections">
               {
-                person.facts.map((fact) => (
-                  <div>
-                    <dt>{fact.label}</dt>
-                    <dd>{fact.value}</dd>
-                  </div>
+                TABS.map(([id, label]) => (
+                  <a href={`#${id}`} id={`tab-${id}`} data-tab={id}>
+                    {label}
+                  </a>
                 ))
               }
-            </dl>
-          </section>
+            </nav>
 
-          <section id="experience" data-tab="experience">
-            <h2>Where I work</h2>
-            <div class="gold-rule" aria-hidden="true"></div>
-            {
-              experience.map((job, i) => (
-                <article class="job">
-                  <div class="job-head">
-                    <h3 class={i === 0 ? 'job-lead' : undefined}>
-                      {job.role}, <span class="gold">{job.org}</span>
-                    </h3>
-                    <span class="job-when">{job.when}</span>
+            <main class="panels">
+              <section class="panel" id="profile" data-panel>
+                <h2>About me</h2>
+                <div class="gold-rule" aria-hidden="true"></div>
+                <p class="bio">{person.bio}</p>
+                <dl class="quick-facts">
+                  {
+                    person.facts.map((fact) => (
+                      <div>
+                        <dt>{fact.label}</dt>
+                        <dd>{fact.value}</dd>
+                      </div>
+                    ))
+                  }
+                </dl>
+                <div class="cta">
+                  <div>
+                    <h3>{person.status}.</h3>
+                    <p>The fastest way to reach me is email.</p>
                   </div>
-                  <p class="job-summary">{job.summary}</p>
-                  {job.bullets.length > 0 && (
-                    <ul class={job.bullets.length > 1 ? 'job-bullets two' : 'job-bullets'}>
-                      {job.bullets.map((bullet) => (
-                        <li>
-                          <span class="gold" aria-hidden="true">◇</span>
-                          <span>{bullet}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  {'awards' in job && job.awards && (
-                    <div class="job-awards">
-                      {job.awards.map((award) => <span class="chip award">{award}</span>)}
-                      {'project' in job && job.project && (
-                        <a class="see-project" href={projectUrl(job.project)} data-event="project_open" data-slug={job.project} data-placement="profile">
-                          See the project <span aria-hidden="true">→</span>
-                        </a>
-                      )}
-                    </div>
-                  )}
-                </article>
-              ))
-            }
-            <a class="resume-link" href={RESUME_URL} target="_blank" rel="noopener noreferrer" data-event="resume_open" data-placement="profile">View full resume (PDF)<NewTab /></a>
-          </section>
+                  <a class="pill pill-solid" href={`mailto:${person.email}`} data-event="email_click" data-placement="profile_cta">Email me</a>
+                  <a class="pill pill-ghost" href={RESUME_URL} target="_blank" rel="noopener noreferrer" data-event="resume_open" data-placement="profile_cta">Resume<NewTab /></a>
+                </div>
+              </section>
 
-          <div class="skills-row" data-tab="skills">
-            <section id="skills">
-              <h2>What I build with</h2>
-              <div class="gold-rule" aria-hidden="true"></div>
-              <svg class="skills-tree" viewBox="-24 36 760 488" role="img" aria-label={treeLabel}>
-                <circle cx="356" cy="280" r="150" fill="none" stroke="#E8C27A" stroke-opacity="0.15"></circle>
-                <circle cx="356" cy="280" r="250" fill="none" stroke="#E8C27A" stroke-opacity="0.08" stroke-dasharray="2 6"></circle>
-                {
-                  tree.map(({ hub, leaves }) => (
-                    <>
-                      <path class="trace" d={`M356 280 L${hub.x} ${hub.y}`} stroke="#E8C27A" stroke-width="1.6" />
-                      {leaves.map((leaf) => <path class="trace" d={`M${hub.x} ${hub.y} L${leaf.x} ${leaf.y}`} stroke="#E8C27A" stroke-opacity="0.6" stroke-width="1.1" />)}
-                    </>
-                  ))
-                }
-                {
-                  tree.map(({ group, hub, labelX, labelY, leaves }) => (
-                    <g>
-                      <circle cx={hub.x} cy={hub.y} r="26" fill="#0b1430" stroke="#E8C27A" stroke-width="2" />
-                      <circle cx={hub.x} cy={hub.y} r="8" fill="#E8C27A" />
-                      <text class="hub-label" x={labelX} y={labelY} text-anchor="middle">{group.toUpperCase()}</text>
-                      {leaves.map((leaf) => (
-                        <>
-                          <circle cx={leaf.x} cy={leaf.y} r="9" fill="#101a3a" stroke="#F3D99A" stroke-width="1.5" />
-                          <circle cx={leaf.x} cy={leaf.y} r="3" fill="#F3D99A" />
-                          <text class="leaf-label" x={leaf.x + hub.side * 18} y={leaf.y + 8} text-anchor={hub.side < 0 ? 'end' : 'start'}>{leaf.name}</text>
-                        </>
-                      ))}
-                    </g>
-                  ))
-                }
-                <circle cx="356" cy="280" r="40" fill="#0b1430" stroke="#E8C27A" stroke-width="2.5"></circle>
-                <circle cx="356" cy="280" r="48" fill="none" stroke="#E8C27A" stroke-opacity="0.4"></circle>
-                <text class="leaf-label" x="356" y="288" text-anchor="middle">{person.name.split(' ')[0]}</text>
-              </svg>
-            </section>
+              <section class="panel" id="experience" data-panel>
+                <h2>Where I work</h2>
+                <div class="gold-rule" aria-hidden="true"></div>
+                <div class="jobs">
+                  {
+                    experience.map((job, i) => (
+                      <article class={i === 0 ? 'job job-lead' : 'job'}>
+                        <div class="job-head">
+                          <h3>
+                            {job.role}, <span class="gold">{job.org}</span>
+                          </h3>
+                          <span class="job-when">{job.when}</span>
+                        </div>
+                        <p class="job-summary">{job.summary}</p>
+                        {job.bullets.length > 0 && (
+                          <ul class={job.bullets.length > 1 ? 'job-bullets two' : 'job-bullets'}>
+                            {job.bullets.map((bullet) => (
+                              <li>
+                                <span class="gold" aria-hidden="true">◇</span>
+                                <span>{bullet}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        {'awards' in job && job.awards && (
+                          <div class="job-awards">
+                            {job.awards.map((award) => <span class="chip award">{award}</span>)}
+                            {'project' in job && job.project && (
+                              <a class="see-project" href={projectUrl(job.project)} data-event="project_open" data-slug={job.project} data-placement="profile">
+                                See the project <span aria-hidden="true">→</span>
+                              </a>
+                            )}
+                          </div>
+                        )}
+                      </article>
+                    ))
+                  }
+                </div>
+                <a class="resume-link" href={RESUME_URL} target="_blank" rel="noopener noreferrer" data-event="resume_open" data-placement="profile">View full resume (PDF)<NewTab /></a>
+              </section>
 
-            <section id="education" data-tab="education">
-              <h2>Where I study</h2>
-              <div class="gold-rule" aria-hidden="true"></div>
-              <div class="school">
-                <h3>{education.school}</h3>
-                <p>{education.degree} · expected {education.expected}</p>
-              </div>
-              <h4>Relevant courses</h4>
-              <ul class="courses">
-                {
-                  education.courses.map(([code, title, flag]) => (
-                    <li>
-                      <span class="gold">{code}</span>
-                      <span>
-                        {title}
-                        {flag === 'current' && <span class="muted"> (now)</span>}
-                      </span>
-                    </li>
-                  ))
-                }
-              </ul>
-            </section>
+              <section class="panel" id="skills" data-panel>
+                <h2>What I build with</h2>
+                <div class="gold-rule" aria-hidden="true"></div>
+                <svg class="skills-tree" viewBox="-24 36 760 488" role="img" aria-label={treeLabel}>
+                  <circle cx="356" cy="280" r="150" fill="none" stroke="#E8C27A" stroke-opacity="0.15"></circle>
+                  <circle cx="356" cy="280" r="250" fill="none" stroke="#E8C27A" stroke-opacity="0.08" stroke-dasharray="2 6"></circle>
+                  {
+                    tree.map(({ hub, leaves }) => (
+                      <>
+                        <path class="trace" d={`M356 280 L${hub.x} ${hub.y}`} stroke="#E8C27A" stroke-width="1.6" />
+                        {leaves.map((leaf) => <path class="trace" d={`M${hub.x} ${hub.y} L${leaf.x} ${leaf.y}`} stroke="#E8C27A" stroke-opacity="0.6" stroke-width="1.1" />)}
+                      </>
+                    ))
+                  }
+                  {
+                    tree.map(({ group, hub, labelX, labelY, leaves }) => (
+                      <g>
+                        <circle cx={hub.x} cy={hub.y} r="26" fill="#0b1430" stroke="#E8C27A" stroke-width="2" />
+                        <circle cx={hub.x} cy={hub.y} r="8" fill="#E8C27A" />
+                        <text class="hub-label" x={labelX} y={labelY} text-anchor="middle">{group.toUpperCase()}</text>
+                        {leaves.map((leaf) => (
+                          <>
+                            <circle cx={leaf.x} cy={leaf.y} r="9" fill="#101a3a" stroke="#F3D99A" stroke-width="1.5" />
+                            <circle cx={leaf.x} cy={leaf.y} r="3" fill="#F3D99A" />
+                            <text class="leaf-label" x={leaf.x + hub.side * 18} y={leaf.y + 8} text-anchor={hub.side < 0 ? 'end' : 'start'}>{leaf.name}</text>
+                          </>
+                        ))}
+                      </g>
+                    ))
+                  }
+                  <circle cx="356" cy="280" r="40" fill="#0b1430" stroke="#E8C27A" stroke-width="2.5"></circle>
+                  <circle cx="356" cy="280" r="48" fill="none" stroke="#E8C27A" stroke-opacity="0.4"></circle>
+                  <text class="leaf-label" x="356" y="288" text-anchor="middle">{person.name.split(' ')[0]}</text>
+                </svg>
+              </section>
+
+              <section class="panel" id="education" data-panel>
+                <h2>Where I study</h2>
+                <div class="gold-rule" aria-hidden="true"></div>
+                <div class="school">
+                  <h3>{education.school}</h3>
+                  <p>{education.degree} · expected {education.expected}</p>
+                </div>
+                <h4>Relevant courses</h4>
+                <ul class="courses">
+                  {
+                    education.courses.map(([code, title, flag]) => (
+                      <li>
+                        <span class="gold">{code}</span>
+                        <span>
+                          {title}
+                          {flag === 'current' && <span class="muted"> (now)</span>}
+                        </span>
+                      </li>
+                    ))
+                  }
+                </ul>
+              </section>
+            </main>
           </div>
-        </main>
-
-        <section class="cta" aria-labelledby="cta-heading">
-          <div>
-            <h2 id="cta-heading">{person.status}.</h2>
-            <p>The fastest way to reach me is email.</p>
-          </div>
-          <a class="pill pill-solid" href={`mailto:${person.email}`} data-event="email_click" data-placement="profile_cta">Email me</a>
-          <a class="pill pill-ghost" href={RESUME_URL} target="_blank" rel="noopener noreferrer" data-event="resume_open" data-placement="profile_cta">Resume<NewTab /></a>
-        </section>
-        <a class="back profile-back back-narrow" href="/">
-          <span class="back-btn" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 6l-6 6 6 6M4 12h16"></path></svg>
-          </span>
-          <span class="back-text">
-            <span class="back-note">Map</span>
-            <span class="back-label">Back to the map</span>
-          </span>
-        </a>
+        </div>
       </div>
     </div>
   </div>
 </Base>
 
 <script>
-  // The tab bar follows the section in view. Skills and Education share a row on wide
-  // screens, so Education only wins there when it was the tab last chosen.
-  const tabs = [...document.querySelectorAll<HTMLAnchorElement>('.tabs a')];
-  const sections = [...document.querySelectorAll<HTMLElement>('[data-tab]')];
-  let chosen = location.hash.slice(1);
-
-  const mark = (id: string): void => {
-    for (const tab of tabs) {
-      if (tab.hash === `#${id}`) tab.setAttribute('aria-current', 'true');
-      else tab.removeAttribute('aria-current');
-    }
-  };
-
-  const update = (): void => {
-    const top = (id: string): number => sections.find((s) => s.dataset.tab === id)?.getBoundingClientRect().top ?? 0;
-    // side by side, Skills and Education are one stop: keep whichever was chosen last
-    const sameRow = Math.abs(top('skills') - top('education')) < 80;
-    const stops = sections.filter((s) => !sameRow || s.dataset.tab !== (chosen === 'education' ? 'skills' : 'education'));
-    // the stop whose top has most recently passed under the tab bar
-    const line = 140;
-    let current = stops[0];
-    for (const stop of stops) if (stop.getBoundingClientRect().top <= line) current = stop;
-    const atEnd = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
-    if (atEnd) current = stops[stops.length - 1];
-    mark(current?.dataset.tab ?? 'profile');
-  };
-
-  for (const tab of tabs) tab.addEventListener('click', () => (chosen = tab.hash.slice(1)));
-  let queued = false;
-  window.addEventListener(
-    'scroll',
-    () => {
-      if (queued) return;
-      queued = true;
-      requestAnimationFrame(() => {
-        queued = false;
-        update();
-      });
-    },
-    { passive: true },
-  );
-  window.addEventListener('hashchange', () => {
-    chosen = location.hash.slice(1);
-    update();
-  });
-  update();
-
-  // Draw the skills tree when it first scrolls into view.
+  // Tabs on wide screens (the one-screen layout), jump links below it.
+  //
+  // In tab mode this is the ARIA tabs pattern: the row is a tablist with one Tab stop, the
+  // arrow keys (and Home and End) move between tabs and show their panel, and each tab has
+  // its own address (/profile/#experience) that opens it directly and that the Back button
+  // returns to. Panels cross-fade with a 16px shift in the direction of travel, 250ms; with
+  // reduced motion they simply swap.
+  const WIDE = window.matchMedia('(min-width: 1200px)');
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const list = document.querySelector<HTMLElement>('.tabs');
+  const tabs = [...document.querySelectorAll<HTMLAnchorElement>('.tabs a[data-tab]')];
+  const panels = [...document.querySelectorAll<HTMLElement>('[data-panel]')];
   const tree = document.querySelector('.skills-tree');
-  if (tree && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    tree.classList.add('is-waiting');
-    new IntersectionObserver(
-      (entries, observer) => {
-        if (!entries.some((entry) => entry.isIntersecting)) return;
-        tree.classList.replace('is-waiting', 'is-drawing');
-        observer.disconnect();
-      },
-      { threshold: 0.3 },
-    ).observe(tree);
+  let current = 0;
+
+  const fromHash = (): number => Math.max(0, tabs.findIndex((tab) => tab.hash === location.hash));
+
+  /** Draw the skills tree the first time it is actually seen. */
+  const drawTree = (): void => {
+    if (tree?.classList.contains('is-waiting') && tree.checkVisibility({ visibilityProperty: true })) tree.classList.replace('is-waiting', 'is-drawing');
+  };
+
+  function show(index: number, animate: boolean): void {
+    const from = current;
+    current = index;
+    tabs.forEach((tab, i) => {
+      tab.setAttribute('aria-selected', String(i === index));
+      tab.tabIndex = i === index ? 0 : -1;
+    });
+    for (const panel of panels) {
+      for (const animation of panel.getAnimations()) animation.cancel();
+      panel.classList.remove('is-leaving');
+    }
+    panels.forEach((panel, i) => panel.classList.toggle('is-active', i === index));
+    const next = panels[index];
+    const prev = panels[from];
+    if (animate && next && prev && from !== index && !REDUCED.matches) {
+      const shift = index > from ? 16 : -16;
+      const timing = { duration: 250, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' };
+      next.animate([{ opacity: 0, transform: `translateX(${shift}px)` }, { opacity: 1, transform: 'none' }], timing);
+      prev.classList.add('is-leaving');
+      prev.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${-shift}px)` }], timing).finished.then(
+        () => prev.classList.remove('is-leaving'),
+        () => undefined,
+      );
+    }
+    drawTree();
+    // the text on show has changed: the orbit lines keep clear of what is there now
+    document.dispatchEvent(new Event('keepout:update'));
   }
+
+  function setMode(): void {
+    const on = WIDE.matches;
+    document.documentElement.classList.toggle('tabbed', on);
+    if (on) {
+      list?.setAttribute('role', 'tablist');
+      tabs.forEach((tab, i) => {
+        tab.setAttribute('role', 'tab');
+        tab.setAttribute('aria-controls', panels[i]?.id ?? '');
+      });
+      panels.forEach((panel, i) => {
+        panel.setAttribute('role', 'tabpanel');
+        panel.setAttribute('aria-labelledby', tabs[i]?.id ?? '');
+      });
+      show(fromHash(), false);
+    } else {
+      list?.removeAttribute('role');
+      for (const tab of tabs) {
+        for (const name of ['role', 'aria-controls', 'aria-selected', 'tabindex']) tab.removeAttribute(name);
+      }
+      for (const panel of panels) {
+        for (const name of ['role', 'aria-labelledby']) panel.removeAttribute(name);
+        panel.classList.remove('is-active', 'is-leaving');
+      }
+    }
+  }
+
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', (event) => {
+      if (!WIDE.matches || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      // a real history entry, so Back returns to the tab before; no jump down the page
+      if (location.hash !== tab.hash) history.pushState(null, '', tab.hash);
+      show(i, true);
+    });
+    tab.addEventListener('keydown', (event) => {
+      if (!WIDE.matches) return;
+      const to = { ArrowRight: (i + 1) % tabs.length, ArrowLeft: (i - 1 + tabs.length) % tabs.length, Home: 0, End: tabs.length - 1 }[event.key];
+      const target = to === undefined ? undefined : tabs[to];
+      if (to === undefined || !target) return;
+      event.preventDefault();
+      target.focus();
+      history.replaceState(null, '', target.hash); // arrowing through tabs does not pile up history
+      show(to, true);
+    });
+  });
+  // Back and Forward, or an address typed with a different #tab
+  window.addEventListener('popstate', () => {
+    if (WIDE.matches && fromHash() !== current) show(fromHash(), true);
+  });
+  WIDE.addEventListener('change', setMode);
+
+  if (tree && !REDUCED.matches) {
+    tree.classList.add('is-waiting');
+    new IntersectionObserver((entries) => entries.some((entry) => entry.isIntersecting) && drawTree(), { threshold: 0.3 }).observe(tree);
+  }
+  setMode();
 </script>
 
 <style is:global>
@@ -294,13 +337,15 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
     scroll-behavior: smooth;
   }
 
+  /* ===== phones and tablets: one stacked page, the tabs are links that jump down it ===== */
+
   .profile-body {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 20px;
     box-sizing: border-box;
     width: 100%;
-    max-width: 1440px;
+    max-width: 720px;
     margin: 0 auto;
     padding: 20px 20px 48px;
   }
@@ -364,34 +409,15 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
     color: var(--gold);
   }
 
-  .profile-back {
-    margin-top: 36px;
-  }
-
-  /* the back link is at the end of the page on narrow screens, under the photo on wide ones */
-  .back-wide {
-    display: none;
-  }
-
   .profile-main {
     min-width: 0;
   }
 
-  /* pinned while the page scrolls */
   .tabs {
-    position: sticky;
-    top: 0;
-    z-index: 5;
     display: flex;
-    gap: 22px;
-    margin: 0 -20px;
-    padding: 0 20px;
-    overflow-x: auto;
+    justify-content: space-between;
+    gap: 8px;
     border-bottom: 1px solid rgb(var(--gold-rgb) / 0.25);
-    scrollbar-width: none;
-    /* No panel behind the bar: whatever scrolls under it is blurred out of the way instead. */
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
   }
 
   .tabs a {
@@ -401,7 +427,7 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
     min-height: 48px;
     margin-bottom: -1px;
     border-bottom: 2px solid transparent;
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 500;
     color: var(--text-muted);
   }
@@ -410,7 +436,7 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
     color: var(--text);
   }
 
-  .tabs a[aria-current] {
+  .tabs a[aria-selected='true'] {
     color: var(--text);
     border-bottom-color: var(--gold);
   }
@@ -419,22 +445,18 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
     outline-offset: -3px;
   }
 
-  .profile section[id],
-  .skills-row {
-    scroll-margin-top: 72px;
-  }
-
-  .profile main > * {
+  .panel {
     padding-top: 32px;
+    scroll-margin-top: 8px;
   }
 
-  .profile main h2 {
-    margin: 0 0 18px;
-    font-size: 32px;
+  .panel h2 {
+    margin: 0 0 16px;
+    font-size: 30px;
     font-weight: 500;
   }
 
-  .profile main .gold-rule {
+  .panel .gold-rule {
     margin-bottom: 22px;
   }
 
@@ -475,16 +497,49 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
     font-size: 16px;
   }
 
+  /* the summary's call to action: what I am looking for, Email me, Resume */
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 16px;
+    margin-top: 26px;
+  }
+
+  .cta div {
+    flex: 1 1 100%;
+  }
+
+  .cta h3 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.25;
+  }
+
+  .cta p {
+    margin: 4px 0 0;
+    font-size: 15px;
+    color: var(--text-muted);
+  }
+
+  .cta .pill {
+    min-height: 48px;
+    padding: 0 24px;
+    border-radius: 24px;
+    font-size: 16px;
+  }
+
   .job {
     padding: 22px 0;
     border-bottom: 1px solid rgb(var(--gold-rgb) / 0.18);
   }
 
-  .job:first-of-type {
+  .job:first-child {
     padding-top: 0;
   }
 
-  .job:last-of-type {
+  .job:last-child {
     border-bottom: 0;
   }
 
@@ -502,7 +557,7 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
     font-weight: 500;
   }
 
-  .job h3.job-lead {
+  .job-lead h3 {
     font-size: 23px;
   }
 
@@ -574,20 +629,10 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
     color: var(--gold);
   }
 
-  .skills-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 32px;
-  }
-
-  .skills-row .gold-rule {
-    margin-bottom: 18px;
-  }
-
   .skills-tree {
     display: block;
     width: 100%;
-    max-width: 440px;
+    max-width: 520px;
     height: auto;
     margin: 0 auto;
     overflow: visible;
@@ -634,7 +679,7 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
   }
 
   .school {
-    margin-bottom: 12px;
+    margin-bottom: 14px;
     padding-bottom: 14px;
     border-bottom: 1px solid rgb(var(--gold-rgb) / 0.2);
   }
@@ -652,7 +697,7 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
   }
 
   #education h4 {
-    margin: 0 0 6px;
+    margin: 0 0 8px;
     font-size: 12px;
     font-weight: 400;
     letter-spacing: 0.16em;
@@ -663,7 +708,7 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
   .courses {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 6px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -672,51 +717,17 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
   .courses li {
     display: flex;
     gap: 12px;
-    font-size: 14px;
+    font-size: 15px;
     color: var(--body);
   }
 
   .courses li > .gold {
     flex: none;
-    width: 70px;
+    width: 78px;
   }
 
   .muted {
     color: var(--text-muted);
-  }
-
-  .cta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px 24px;
-    margin-top: 40px;
-    padding-top: 30px;
-    border-top: 1px solid rgb(var(--gold-rgb) / 0.3);
-  }
-
-  .cta div {
-    flex: 1 1 100%;
-  }
-
-  .cta h2 {
-    margin: 0;
-    font-size: 26px;
-    font-weight: 500;
-    line-height: 1.25;
-  }
-
-  .cta p {
-    margin: 4px 0 0;
-    font-size: 15px;
-    color: var(--text-muted);
-  }
-
-  .cta .pill {
-    min-height: 48px;
-    padding: 0 24px;
-    border-radius: 24px;
-    font-size: 16px;
   }
 
   @media (min-width: 640px) {
@@ -725,10 +736,8 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
     }
 
     .tabs {
+      justify-content: flex-start;
       gap: 40px;
-      margin: 0;
-      padding: 0;
-      overflow-x: visible;
     }
 
     .tabs a {
@@ -748,58 +757,103 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
     }
   }
 
-  /* ===== wide screens: photo column pinned on the left (design/ProfileOne.html) ===== */
+  /* ===== wide screens: the 1440 x 900 stage. Photo on the left, tabs at the top of the right
+     column, one panel showing. Every panel fits the stage, so nothing scrolls. ===== */
 
-  @media (min-width: 1000px) {
+  @media (min-width: 1200px) {
     .profile-body {
       display: grid;
-      grid-template-columns: minmax(280px, 420px) minmax(0, 796px);
+      grid-template-columns: 400px 796px;
       align-items: start;
       justify-content: space-between;
-      gap: 0 clamp(32px, 4.4vw, 64px);
-      padding: 32px 64px 60px clamp(40px, 6.6vw, 96px);
+      gap: 0;
+      max-width: none;
+      padding: 22px 64px 0 104px;
     }
 
     .profile-side {
-      position: sticky;
-      top: 20px;
       padding-top: 64px;
     }
 
-    /* shrink the photo on short windows so the pinned column always fits */
     .profile-ring {
-      --d: clamp(200px, min(100%, 100vh - 410px), 420px);
+      --d: 380px;
     }
 
     .identity {
-      margin-top: 30px;
+      margin-top: 28px;
     }
 
-    .back-wide {
-      display: inline-flex;
-      align-self: flex-start;
-      margin: 32px 0 0 -32px;
+    /* all four panels share one cell; only one is showing */
+    .panels {
+      display: grid;
     }
 
-    .back-narrow {
-      display: none;
+    .panel {
+      grid-area: 1 / 1;
+      padding-top: 30px;
+      visibility: hidden;
     }
 
-    .profile main > *:first-child {
-      padding-top: 32px;
+    /* the script marks the panel to show; before it runs, and without JavaScript, the
+       address decides (#experience), and with no #tab the Profile panel shows */
+    .panel.is-active,
+    .panel.is-leaving,
+    html:not(.tabbed) .panel:target,
+    html:not(.tabbed) .panels:not(:has(.panel:target)) #profile {
+      visibility: visible;
     }
 
-    .profile main > * {
-      padding-top: 48px;
+    .panel.is-leaving {
+      pointer-events: none;
     }
 
-    .skills-row {
-      grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
-      gap: 30px;
+    .bio {
+      font-size: 20px;
+    }
+
+    .cta {
+      margin-top: 34px;
+    }
+
+    /* Experience: the current job across the full width, the two shorter ones side by side */
+    .jobs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 44px;
+    }
+
+    .job-lead {
+      grid-column: 1 / -1;
+      padding-bottom: 18px;
+    }
+
+    .job:not(.job-lead) {
+      padding: 18px 0 0;
+      border-bottom: 0;
+    }
+
+    .job:not(.job-lead) .job-head {
+      flex-direction: column;
+      gap: 2px;
     }
 
     .skills-tree {
-      margin: 0;
+      max-width: none;
+      width: 720px;
+      margin: -6px auto 0;
+    }
+
+    /* two columns, read down the first and then the second */
+    .courses {
+      display: grid;
+      grid-template-rows: repeat(5, auto);
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+      gap: 10px 44px;
+    }
+
+    .courses li {
+      font-size: 16px;
     }
   }
 

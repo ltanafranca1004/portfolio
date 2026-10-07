@@ -560,12 +560,12 @@ img {
     -webkit-mask-image: var(--fade);
     mask-image: var(--fade);
   }
-}
 
-@media (min-width: 1000px) {
+  /* the profile's column of text starts further left: 560px of the stage */
   .profile .orbits-backdrop {
-    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 33%, transparent 39%, transparent 96%, #000 100%);
-    mask-image: linear-gradient(90deg, #000 0, #000 33%, transparent 39%, transparent 96%, #000 100%);
+    --fade: linear-gradient(90deg, #000 0, #000 calc(50% - 250px * var(--s)), transparent calc(50% - 164px * var(--s)), transparent calc(50% + 662px * var(--s)), #000 calc(50% + 720px * var(--s)));
+    -webkit-mask-image: var(--fade);
+    mask-image: var(--fade);
   }
 }
 

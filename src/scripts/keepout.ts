@@ -28,14 +28,6 @@ interface Box {
   bottom: number;
 }
 
-/** The nearest pinned (position: sticky) ancestor, if any. */
-function pinned(el: Element): Element | null {
-  for (let node: Element | null = el; node && node !== document.body; node = node.parentElement) {
-    if (getComputedStyle(node).position === 'sticky') return node;
-  }
-  return null;
-}
-
 /** One box per line of visible text, in viewport coordinates. */
 function textBoxes(): Box[] {
   const boxes: Box[] = [];
@@ -47,9 +39,6 @@ function textBoxes(): Box[] {
     if (!el || !node.data.trim()) continue;
     if (el.closest('svg[data-keepout], script, style, noscript, dialog, .sr-only')) continue;
     if (el.checkVisibility && !el.checkVisibility({ visibilityProperty: true })) continue; // hidden: needs no hole
-    const sticky = pinned(el);
-    // pinned text travels down the page as it scrolls: clear its whole path
-    const floor = sticky?.parentElement ? sticky.parentElement.getBoundingClientRect().bottom : null;
     // Text inside an SVG: take the element's own box. A Range there can answer with the
     // scale the drawing had when it was first laid out (seen in Chromium, on the pipeline
     // hero, after its scale was set), which put the hole in the wrong place.
@@ -61,7 +50,7 @@ function textBoxes(): Box[] {
     }
     for (const r of rects) {
       if (r.width < 1 || r.height < 1) continue;
-      boxes.push({ left: r.left, top: r.top, right: r.right, bottom: floor === null ? r.bottom : Math.max(r.bottom, floor) });
+      boxes.push({ left: r.left, top: r.top, right: r.right, bottom: r.bottom });
     }
   }
   return boxes;
