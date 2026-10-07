@@ -50,7 +50,7 @@ const jsonLd = {
       /* no storage: the route simply draws in each time */
     }
   </script>
-  <div class="page map">
+  <div class="page map staged">
     <Sky priority />
     <div class="stage-wrap">
       <div class="stage">
@@ -392,25 +392,8 @@ const jsonLd = {
   /* ===== desktop: the 1440 x 900 map, scaled as one piece (design/Main.html) ===== */
 
   @media (min-width: 1200px) {
-    .map {
-      display: grid;
-      place-items: center;
-      overflow: clip;
-    }
-
-    /* Fit the width, but never let the three main worlds (790px of the design) fall below the
-       fold. --vw and --vh are the window size as plain numbers, set in layouts/Base.astro. */
-    .stage-wrap {
-      --s: clamp(0.83, min(var(--vw, 1440) / 1440, var(--vh, 790) / 790), 1.25);
-      width: calc(1440px * var(--s));
-      height: calc(900px * var(--s));
-    }
-
+    /* the stage itself (size, scale, centring) is in global.css */
     .map .stage {
-      width: 1440px;
-      height: 900px;
-      transform: scale(var(--s));
-      transform-origin: 0 0;
       --float-rise: -8px;
     }
 

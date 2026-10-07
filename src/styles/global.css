@@ -87,6 +87,40 @@ img {
   }
 }
 
+/* ---------- one screen on wide windows ----------
+   From 1200px wide, a page (.staged) is one fixed 1440 x 900 composition, the stage, scaled
+   as a whole to fit the window in both directions, between 0.75x and 1.25x, and centred. The
+   sky and the orbit lines belong to the page, not the stage, so they fill whatever is left
+   over. Nothing scrolls unless the window is shorter than 0.75 x 900 = 675px; then the stage
+   stays at 0.75x and the page scrolls down.
+   --vw and --vh are the window size as plain numbers, set in layouts/Base.astro. Below
+   1200px .stage-wrap and .stage are ordinary blocks and pages stack and scroll. */
+
+@media (min-width: 1200px) {
+  :root {
+    --s: clamp(0.75, min(var(--vw, 1440) / 1440, var(--vh, 900) / 900), 1.25);
+  }
+
+  .staged {
+    display: grid;
+    place-items: center;
+    overflow: clip;
+  }
+
+  .stage-wrap {
+    width: calc(1440px * var(--s));
+    height: calc(900px * var(--s));
+  }
+
+  .stage {
+    position: relative;
+    width: 1440px;
+    height: 900px;
+    transform: scale(var(--s));
+    transform-origin: 0 0;
+  }
+}
+
 /* ---------- header and main nav ---------- */
 
 .site-header {
@@ -518,10 +552,13 @@ img {
   mask-image: linear-gradient(180deg, #000 0, #000 380px, transparent 520px);
 }
 
+/* On the stage the column of text is at a fixed place, measured from the middle of the page:
+   the lines fade out from 648px to 734px of the 1440px stage and return at its right edge. */
 @media (min-width: 1200px) {
   .project .orbits-backdrop {
-    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 45%, transparent 51%, transparent 96%, #000 100%);
-    mask-image: linear-gradient(90deg, #000 0, #000 45%, transparent 51%, transparent 96%, #000 100%);
+    --fade: linear-gradient(90deg, #000 0, #000 calc(50% - 72px * var(--s)), transparent calc(50% + 14px * var(--s)), transparent calc(50% + 662px * var(--s)), #000 calc(50% + 720px * var(--s)));
+    -webkit-mask-image: var(--fade);
+    mask-image: var(--fade);
   }
 }
 
@@ -544,13 +581,7 @@ img {
    Native cross-document view transitions (no client-side router). src/scripts/transitions.ts
    picks the kind (zoom-in, zoom-out, slide-next, slide-prev) and names the element that
    travels between pages ("hero"). Off entirely for reduced motion; browsers without the
-   feature just navigate. */
-
-@media (prefers-reduced-motion: no-preference) {
-  @view-transition {
-    navigation: auto;
-  }
-}
+   feature just navigate. The opt-in itself (@view-transition) is inline in layouts/Base.astro. */
 
 ::view-transition-old(root),
 ::view-transition-new(root) {

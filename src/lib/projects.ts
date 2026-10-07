@@ -26,7 +26,6 @@ export interface Project {
   problem: string;
   shots: { src: string; caption: string; alt: string; pixelated?: boolean }[];
   stack: string[];
-  footnote: string;
   links: [string, string][];
   primary: [string, string];
 }
@@ -53,7 +52,6 @@ export const projects: Project[] = [
       problem: d.problem,
       shots: d.shots,
       stack: d.stack,
-      footnote: d.footnote,
       links: d.links.map(pair),
       primary: pair(d.primary),
     }),
@@ -76,7 +74,6 @@ export const projects: Project[] = [
       problem: o.problem,
       shots: o.shots,
       stack: o.stack,
-      footnote: o.footnote,
       links: [],
       primary: pair(o.primary),
     }),

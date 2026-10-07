@@ -29,6 +29,24 @@ const imageAlt = `${person.name}, ${person.title}: a gold route map over a navy 
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--
+      Inline, before anything else can run or load:
+      - the page colour, so no frame is ever painted white or black while a stylesheet loads
+        or one page hands over to the next;
+      - the opt-in to page transitions. In the stylesheet it sometimes arrived after the
+        browser had already decided this page had not opted in, and the transition was dropped.
+    -->
+    <style is:inline>
+      html,
+      body {
+        background: #050815;
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        @view-transition {
+          navigation: auto;
+        }
+      }
+    </style>
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
@@ -51,7 +69,7 @@ const imageAlt = `${person.name}, ${person.title}: a gold route map over a navy 
         const root = document.documentElement;
         let last = '';
         const size = () => {
-          const w = root.clientWidth || innerWidth;
+          const w = innerWidth;
           const next = w >= 1200 ? `${w}x${innerHeight}` : '';
           if (next === last) return;
           last = next;
