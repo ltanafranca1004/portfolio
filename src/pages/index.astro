@@ -41,14 +41,14 @@ const description = `${person.name}, ${person.title.toLowerCase()} in ${person.l
         <main class="worlds">
           <World id="about" href={PROFILE_URL} title="About me" blurb={person.mapBlurb} blurbPhone={person.mapBlurbPhone} order={1}>
             <img slot="frame" class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
-            <Picture class="photo" src={asset(person.photo)} formats={['avif', 'webp']} width={420} height={420} alt={person.name} loading="eager" />
+            <Picture class="photo" src={asset(person.photo)} formats={['avif', 'webp']} fallbackFormat="webp" width={420} height={420} alt={person.name} loading="eager" />
           </World>
 
           <div class="connector only-mobile" aria-hidden="true"><span></span><i></i><span></span></div>
 
           <World id="unify" href={projectUrl(unify.slug)} title={unify.name} blurb={unify.mapBlurb} blurbPhone={unify.mapBlurbPhone} chips={unify.chips} order={2} float="float2">
             <img slot="frame" class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
-            <Picture class="unify-hero" src={asset('assets/d-unify-hero.webp')} formats={['avif', 'webp']} width={420} alt={unify.heroAlt} loading="eager" />
+            <Picture class="unify-hero" src={asset('assets/d-unify-hero.webp')} formats={['avif', 'webp']} fallbackFormat="webp" width={420} alt={unify.heroAlt} loading="eager" />
           </World>
 
           <div class="connector only-mobile" aria-hidden="true"><span></span><i></i><span></span></div>

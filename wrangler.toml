@@ -1,6 +1,10 @@
-# Cloudflare Pages project on Luis's PERSONAL account only.
-# scripts/deploy.sh refuses to deploy if wrangler is signed in to any other account.
+# Cloudflare config for Luis's PERSONAL account only.
+#
+# account_id pins every wrangler command run in this folder to that account.
+# Cloudflare Pages does not accept account_id in a Pages config file, so this file
+# deliberately has no pages_build_output_dir: scripts/deploy.sh passes the folder and
+# project name itself, exports CLOUDFLARE_ACCOUNT_ID with the same ID, and refuses to
+# deploy if wrangler is signed in to any other account.
 name = "luistanafranca"
 account_id = "3a459a47f63c6f049c3217b090c824dd"
-pages_build_output_dir = "dist"
 compatibility_date = "2026-10-01"

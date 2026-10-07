@@ -36,7 +36,9 @@ npm run lint
 npm run build
 
 if ! npx wrangler pages project list 2>&1 | grep -qw "$PROJECT"; then
-  npx wrangler pages project create "$PROJECT" --production-branch main
+  # wrangler 4.148 tries to create new Pages projects as Workers and fails; --force keeps it
+  # a classic Pages project, which is what gives the .pages.dev preview URLs.
+  npx wrangler pages project create "$PROJECT" --production-branch main --force
 fi
 
 npx wrangler pages deploy dist --project-name "$PROJECT" --branch "$BRANCH" --commit-dirty=true

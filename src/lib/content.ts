@@ -9,7 +9,8 @@ export type Destination = (typeof raw.destinations)[number];
 export type OtherProject = (typeof raw.otherProjects)[number];
 
 const images = import.meta.glob<{ default: ImageMetadata }>(
-  ['../../redesign/assets/*.{webp,jpg,png}', '!**/cubic-spin48.webp'],
+  // left out: the animated mockup cube, and files the site never shows
+  ['../../redesign/assets/*.{webp,jpg,png}', '!**/cubic-spin48.webp', '!**/sky2.webp', '!**/sky-source-2880.jpg', '!**/lens-sheet.webp'],
   { eager: true },
 );
 
