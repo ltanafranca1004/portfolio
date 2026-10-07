@@ -1,0 +1,262 @@
+---
+import { getImage } from 'astro:assets';
+import { asset, content, person, RESUME_URL } from '../lib/content';
+
+// The message-style contact panel (design/MainContact.html). A native modal dialog: the
+// browser traps focus inside it, Esc closes it, and focus returns to the button that opened it.
+const { contactPanel } = content;
+const avatar = await getImage({ src: asset(person.photo), width: 132, height: 132, format: 'webp' });
+---
+
+<dialog class="contact" id="contact-panel" aria-labelledby="contact-name">
+  <div class="contact-inner">
+    <header class="contact-head">
+      <img src={avatar.src} alt="" width="44" height="44" loading="lazy" decoding="async" />
+      <div>
+        <h2 id="contact-name">{person.name}</h2>
+        <p><span aria-hidden="true">●</span> {contactPanel.status}</p>
+      </div>
+      <button type="button" class="contact-close" aria-label="Close" data-contact-close><span aria-hidden="true">×</span></button>
+    </header>
+    <div class="contact-thread">
+      <p class="contact-label">Today</p>
+      {contactPanel.messages.map((message) => <p class="bubble">{message}</p>)}
+    </div>
+    <div class="contact-replies">
+      <p class="contact-label">Reply</p>
+      {
+        contactPanel.replies.map(([label, href]) => {
+          const isResume = href?.endsWith('resume.pdf');
+          const kind = href?.startsWith('mailto:') ? 'email' : isResume ? 'resume' : 'linkedin';
+          return (
+            <a href={isResume ? RESUME_URL : href} rel={kind === 'linkedin' ? 'noopener' : undefined} data-track={`contact-${kind}`}>
+              <span aria-hidden="true">◆</span>
+              {label}
+            </a>
+          );
+        })
+      }
+    </div>
+  </div>
+</dialog>
+
+<script>
+  const panel = document.querySelector<HTMLDialogElement>('#contact-panel');
+  if (panel) {
+    for (const opener of document.querySelectorAll<HTMLElement>('[data-contact-open]')) {
+      // Without JavaScript the button is a plain mailto link.
+      opener.setAttribute('aria-haspopup', 'dialog');
+      opener.addEventListener('click', (event) => {
+        event.preventDefault();
+        panel.showModal();
+      });
+    }
+    panel.querySelector('[data-contact-close]')?.addEventListener('click', () => panel.close());
+    // a click on the dimmed page around the panel closes it
+    panel.addEventListener('click', (event) => {
+      if (event.target === panel) panel.close();
+    });
+  }
+</script>
+
+<style>
+  .contact {
+    position: fixed;
+    inset: max(12px, min(110px, 100dvh - 572px)) 64px auto auto;
+    box-sizing: border-box;
+    width: min(400px, 100vw - 24px);
+    height: min(560px, 100dvh - 24px);
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 12px;
+    border: 1px solid rgb(var(--gold-rgb) / 0.45);
+    border-radius: 34px;
+    background: #0a0f22;
+    color: #1c2033;
+    box-shadow: 0 30px 80px rgb(0 0 0 / 0.6);
+    font-family: var(--font);
+  }
+
+  .contact::backdrop {
+    background: rgb(3 5 13 / 0.6);
+  }
+
+  .contact[open] {
+    animation: contact-in 0.2s ease-out;
+  }
+
+  .contact[open]::backdrop {
+    animation: backdrop-in 0.2s ease-out;
+  }
+
+  @keyframes contact-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.98);
+    }
+  }
+
+  @keyframes backdrop-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .contact-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 24px;
+    background: linear-gradient(180deg, #f4f1ea, #e9e4d8);
+  }
+
+  .contact-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 18px;
+    background: #1b2140;
+    color: var(--text);
+  }
+
+  .contact-head img {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 0 0 2px var(--gold);
+  }
+
+  .contact-head div {
+    flex: 1;
+  }
+
+  .contact-head h2 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 500;
+  }
+
+  .contact-head p {
+    margin: 0;
+    font-size: 12px;
+    color: #9fd3a8;
+  }
+
+  .contact-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--text);
+    font: inherit;
+    font-size: 22px;
+    cursor: pointer;
+  }
+
+  .contact-close:hover {
+    color: var(--gold);
+  }
+
+  .contact-thread {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 20px 18px;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  /* darker than the mockup's #8a8d9c, which is too faint on cream for small text */
+  .contact-label {
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: #5d6072;
+    text-transform: uppercase;
+  }
+
+  .contact-thread .contact-label {
+    text-align: center;
+  }
+
+  .bubble {
+    align-self: flex-start;
+    max-width: 80%;
+    margin: 0;
+    padding: 10px 14px;
+    border-radius: 4px 16px 16px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+  }
+
+  .contact-replies {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 16px 18px;
+    background: rgb(27 33 64 / 0.06);
+    border-top: 1px solid rgb(27 33 64 / 0.12);
+  }
+
+  .contact-replies .contact-label {
+    margin-bottom: 2px;
+    letter-spacing: 0.14em;
+  }
+
+  .contact-replies a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 48px;
+    padding: 0 16px;
+    border-radius: 24px;
+    background: #1b2140;
+    color: var(--text);
+    font-size: 15px;
+  }
+
+  .contact-replies a:hover {
+    color: var(--gold);
+  }
+
+  .contact-replies a span {
+    color: var(--gold);
+  }
+
+  .contact :focus-visible {
+    outline-color: var(--gold-deep);
+  }
+
+  @media (max-width: 639px) {
+    .contact {
+      inset: auto 12px 12px;
+      width: auto;
+      height: min(560px, 100dvh - 24px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .contact[open],
+    .contact[open]::backdrop {
+      animation: none;
+    }
+  }
+</style>
+
+<style is:global>
+  /* the page behind the open panel does not scroll */
+  html:has(#contact-panel[open]) {
+    overflow: hidden;
+  }
+</style>

@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import ContactPanel from '../components/ContactPanel.astro';
 import jostUrl from '@fontsource-variable/jost/files/jost-latin-wght-normal.woff2?url';
 
 interface Props {
@@ -27,5 +28,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   </head>
   <body>
     <slot />
+    <ContactPanel />
   </body>
 </html>
