@@ -1,0 +1,24 @@
+# build output
+dist/
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+
+# environment variables
+.env
+.env.*
+
+# local tooling
+.wrangler/
+.claude/
+
+# macOS-specific files
+.DS_Store
+
+# 2.6 MB animated mockup fallback, replaced by the live cube
+redesign/assets/cubic-spin48.webp

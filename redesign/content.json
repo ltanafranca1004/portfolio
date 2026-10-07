@@ -1,0 +1,225 @@
+{
+  "person": {
+    "name": "Luis Tanafranca",
+    "title": "Software Engineer",
+    "email": "lat13@sfu.ca",
+    "location": "Vancouver, BC",
+    "github": "https://github.com/ltanafranca1004",
+    "linkedin": "https://linkedin.com/in/luistanafranca",
+    "resume": "assets/resume.pdf",
+    "photo": "assets/profile-hd.webp",
+    "status": "Open to a software engineering co-op for 2027",
+    "mapBlurb": "Fifth-year Computing Science at SFU. Software engineer at Unify Social, classroom facilitator at STEMA. Open to SWE co-op for 2027.",
+    "bio": "I build software that people actually use. I'm the web lead at Unify Social, a settlement app for newcomers to Canada, and I'm building Lens, an interview coach that shows its work.",
+    "facts": [
+      { "label": "Year", "value": "5th year, SFU" },
+      { "label": "Expected", "value": "December 2027" },
+      { "label": "Looking for", "value": "SWE co-op, 2027" },
+      { "label": "Based in", "value": "Vancouver, BC" }
+    ]
+  },
+  "destinations": [
+    {
+      "slug": "unify",
+      "order": 1,
+      "name": "Unify Social",
+      "chips": ["500+ USERS", "2 NATIONAL AWARDS"],
+      "mapBlurb": "A settlement app for newcomers to Canada. I'm the web lead: I built the web platform, its database, and the landing page.",
+      "description": "A settlement app that helps newcomers to Canada learn the basics, find services, and meet people going through the same move. I am the web lead: I built the web app, its database, and the landing page.",
+      "awardsLine": "RBC Foundation Best Project Award · Desjardins Community Empowerment Challenge, Enactus Canada Nationals",
+      "facts": [["My role", "Software Engineer (Web Lead)"], ["Shipped in", "7 languages"], ["Since", "Feb 2026"]],
+      "problemLabel": "Hardest problem",
+      "problem": "Making the AI Companion give answers newcomers can trust. It searches a pgvector knowledge base of vetted guides and ranks each match by meaning and by how recent it is, so outdated rules lose out. When one model is rate limited, it falls back to the next.",
+      "shots": [
+        { "src": "assets/d-unify-landing.webp", "caption": "LANDING PAGE", "alt": "Unify landing page: The all-in-one newcomer settlement platform" },
+        { "src": "assets/d-unify-companion.webp", "caption": "AI COMPANION", "alt": "Unify Companion: Ask me anything, Luis, with fact-checked answers about life in Canada" }
+      ],
+      "stack": ["Next.js", "TypeScript", "Supabase", "PostgreSQL", "pgvector", "Astro", "Sanity", "Cloudflare"],
+      "footnote": "Feb 2026 to now",
+      "links": [["Landing page", "https://unifysocial.ca"], ["GitHub", "https://github.com/UnifyCN/web-app"]],
+      "primary": ["Open Unify", "https://app.unifysocial.ca/welcome"],
+      "world": "assets/d-unify-hero.webp"
+    },
+    {
+      "slug": "cubic",
+      "order": 2,
+      "name": "Cubic",
+      "chips": ["STORMHACKS 2026 BEST DESIGN AWARD"],
+      "mapBlurb": "One player walks the outside of a cube, the other is trapped inside. Neither can see the other's screen.",
+      "description": "A two-player co-op puzzle game in the browser. One player walks the outside of a cube, the other is trapped inside, and neither can see the other's screen. You solve all six faces by talking through the walls.",
+      "facts": [["My role", "Full stack, visual design"], ["Team", "4 people"], ["Built in", "24 hours"]],
+      "problemLabel": "Hardest problem",
+      "problem": "Keeping both players oriented as they walk across cube edges. Every face has its own \"up,\" and the inside view is a mirror of the outside, so one shared cube-math library runs on both the client and the server to keep them in agreement.",
+      "shots": [
+        { "src": "assets/shot-outside.webp", "caption": "OUTSIDE PLAYER", "alt": "Cubic outside view: a bright pixel-art biome on the cube's surface", "pixelated": true },
+        { "src": "assets/shot-inside.webp", "caption": "INSIDE PLAYER", "alt": "Cubic inside view: a dark lantern-lit room inside the cube", "pixelated": true }
+      ],
+      "stack": ["TypeScript", "Phaser 4", "Node.js", "Socket.io", "WebRTC", "Gemini API", "Vercel", "Render"],
+      "footnote": "Team of 4 · Oct 2026",
+      "links": [["Devpost", "https://devpost.com/software/cubic-wu2s5i"], ["GitHub", "https://github.com/ltanafranca1004/Cubic"]],
+      "primary": ["Play Cubic", "https://www.playcubic.tech/"],
+      "world": "LIVE: port the spinning cube from ~/Cubic/client/src/cube (TURN_MS 48000, 15 fps). Fallback image: assets/cubic-spin48.webp"
+    },
+    {
+      "slug": "lens",
+      "order": 3,
+      "name": "Lens",
+      "chips": ["VALIDATED SCORING"],
+      "chipNote": "Only keep VALIDATED once the full labelled set (407 answers) has been run. Otherwise use EVIDENCE-CHECKED SCORES.",
+      "mapBlurb": "Interview prep that scores every answer on four dimensions and highlights the exact phrases behind each score.",
+      "description": "Paste a job posting and Lens writes five interview questions for that role. Answer by typing or by voice, and it scores you on four dimensions, highlighting the exact phrase behind every score.",
+      "facts": [["My role", "Solo, full stack"], ["Scored on", "4 dimensions"], ["Since", "Apr 2026"]],
+      "problemLabel": "Hardest problem",
+      "problem": "Making the score something you can check, not just an AI saying \"good answer.\" Every score has to quote your answer, and the server rejects any quote that is not really in your text. Voice mode broke that at first, because speech-to-text splits on every pause, so I wrote a transcript builder that only ends a sentence on a real pause.",
+      "shots": [
+        { "src": "assets/d-lens-answer.webp", "caption": "HIGHLIGHTED ANSWER", "alt": "A Lens answer with the phrases behind each score highlighted" },
+        { "src": "assets/d-lens-scores.webp", "caption": "FOUR SCORES", "alt": "Lens score breakdown: completeness, substance density, reasoning, correctness" }
+      ],
+      "stack": ["React", "TypeScript", "FastAPI", "PostgreSQL", "Groq", "Vercel", "Render"],
+      "footnote": "Solo project · Apr 2026 to now",
+      "links": [["GitHub", "https://github.com/ltanafranca1004/lens"]],
+      "primary": ["Try Lens", "https://lens-tau-nine.vercel.app/"],
+      "world": "assets/lens-real.webp with the gliding gold loupe (see design/Main.html, .loupe2 keyframes)"
+    }
+  ],
+  "otherProjects": [
+    {
+      "slug": "turtle-trips",
+      "name": "Turtle Trips AI",
+      "tag": "StormHacks 2025",
+      "description": "Tell it where you want to go and when, and it plans a multi-day trip with a photo for every stop and a route on the map for each day.",
+      "facts": [["My role", "Itinerary and maps"], ["Team", "3 people"], ["When", "Oct 2025"]],
+      "problemLabel": "Hardest problem",
+      "problem": "Gemini answers in loose text, but a trip planner needs days, times, and real places. I had it return JSON, turned that into page templates, pulled photos from Google Places, and sent each day's stops to the Directions API to draw the route.",
+      "shots": [
+        { "src": "assets/d-turtle-day.webp", "caption": "DAY PLAN", "alt": "A day plan card: Stanley Park Seawall with a photo and description" },
+        { "src": "assets/d-turtle-map.webp", "caption": "DAILY ROUTE", "alt": "Map of Vancouver with a numbered walking route" }
+      ],
+      "stack": ["Python", "Flask", "Gemini API", "Google Maps Platform"],
+      "footnote": "StormHacks 2025 · Team of 3",
+      "primary": ["View on GitHub", "https://github.com/ltanafranca1004/AI-Travel-Planner"],
+      "hero": "assets/d-turtle-hero.webp",
+      "world": "assets/mini-turtle-mascot.webp in front of assets/mini-turtle-card.webp (see design/Main.html)"
+    },
+    {
+      "slug": "amenity-recommender",
+      "name": "Amenity Recommender",
+      "fullName": "Vancouver Amenity Recommender",
+      "tag": "CMPT 353",
+      "description": "Type what you like, such as coffee or sushi, and it maps the closest Vancouver places that match. It can also read the GPS data in your photos and show what you walked past.",
+      "facts": [["My role", "Matching and maps"], ["Team", "3 people"], ["When", "Spring 2025"]],
+      "problemLabel": "Hardest problem",
+      "problem": "Matching what people type to OpenStreetMap tags. Plain text matching missed obvious hits, like \"sushi\" against a place tagged as a Japanese restaurant, so we compared sentence embeddings instead, then kept only places within the distance you set.",
+      "shots": [
+        { "src": "assets/d-amenity-tour.webp", "caption": "PREFERENCE MAP", "alt": "Map of places that match the typed preferences" },
+        { "src": "assets/d-amenity-photo.webp", "caption": "PHOTO WALK", "alt": "Map of a photo walk with nearby amenities" }
+      ],
+      "stack": ["Python", "Sentence Transformers", "PyTorch", "pandas", "Folium"],
+      "footnote": "CMPT 353 · Team of 3",
+      "primary": ["View on GitHub", "https://github.com/ltanafranca1004/Vancouver-Amenity-Recommender"],
+      "hero": "assets/d-amenity-hero.webp",
+      "world": "folded paper map built in CSS from assets/d-amenity-tour.webp with three pins (see design/Main.html)"
+    },
+    {
+      "slug": "pipeline-simulator",
+      "name": "Pipeline Simulator",
+      "tag": "CMPT 305",
+      "description": "A cycle-by-cycle simulator of a 2-wide, 5-stage processor pipeline, written in C++. It replays real instruction traces of hundreds of megabytes and measures how pipeline depth changes run time.",
+      "facts": [["My role", "Simulator core, results"], ["Team", "3 people"], ["When", "Spring 2026"]],
+      "problemLabel": "Hardest problem",
+      "problem": "Getting the hazards right at speed. The simulator tracks data, control and structural hazards every cycle, and the traces were too big to scan from the start each run. I added a sparse index that remembers a file offset every 100,000 lines, so each of the 72 runs jumps straight to its starting instruction.",
+      "shots": [
+        { "src": "assets/mini-pipe-chart.webp", "caption": "RESULTS, 72 RUNS", "alt": "Bar chart: average run time drops as pipeline depth goes from 1 to 4 on all three traces" },
+        { "src": "assets/mini-pipe-code.webp", "caption": "SIMULATOR CORE", "alt": "C++ code for the pipeline stages, hazard flags and sparse trace index" }
+      ],
+      "stack": ["C++", "Make", "Instruction traces"],
+      "footnote": "CMPT 305 · Team of 3",
+      "primary": ["View on GitHub", "https://github.com/emataa/305-Final"],
+      "world": "animated SVG pipeline, 5 stages x 2 lanes with stepping tokens (see design/Main.html and design/DetailPipeline.html)"
+    },
+    {
+      "slug": "nutrifit",
+      "name": "NutriFit",
+      "tag": "CMPT 276",
+      "description": "A meal planning web app for people with fitness goals. Find recipes that fit your diet and allergies, save meals, find grocery stores nearby, and ask the community.",
+      "facts": [["My role", "Recipe finder, tests"], ["Team", "5 people"], ["When", "Spring 2024"]],
+      "problemLabel": "What I built",
+      "problem": "The Recipe Finder, on the Edamam API, with diet and allergy filters and search by several ingredients at once. I also added a store finder that maps grocery stores near your postal code, and wrote the tests for sign up, login, recipes, and the community board.",
+      "shots": [
+        { "src": "assets/d-nutrifit-find.webp", "caption": "RECIPE FINDER", "alt": "NutriFit Find a Recipe form with calorie, ingredient, diet and allergy filters" },
+        { "src": "assets/d-nutrifit-community.webp", "caption": "COMMUNITY BOARD", "alt": "NutriFit community board posts" }
+      ],
+      "stack": ["Java", "Spring Boot", "PostgreSQL", "Edamam API", "Docker"],
+      "footnote": "CMPT 276 · Team of 5",
+      "primary": ["View on GitHub", "https://github.com/JasonSoo123/NutriFit"],
+      "hero": "assets/d-nutrifit-hero.webp",
+      "world": "tilted recipe card using assets/mini-nf-recipe-banner.webp (see design/Main.html)"
+    }
+  ],
+  "experience": [
+    {
+      "role": "Software Engineer (Web Lead)",
+      "org": "Unify Social",
+      "when": "Feb 2026 to now",
+      "summary": "Built nearly all of the web app for a settlement platform with 500+ users, on a production database shared with the mobile app.",
+      "bullets": [
+        "Shipped an AI assistant with retrieval over a vector knowledge base, plus AI resume and cover letter tools, with per-user quotas and provider fallback",
+        "Built a scheduled pipeline pulling events from 12 sources; traced 30 of 69 mislabelled events to a field the sources never set, and fixed it",
+        "Fixed a race where out-of-order saves wiped user edits, by serializing writes through one promise chain",
+        "Shipped the app in 7 languages, including right-to-left Arabic, across 120+ reviewed pull requests"
+      ],
+      "awards": ["RBC Foundation Best Project Award", "Desjardins Community Empowerment Challenge"],
+      "project": "unify"
+    },
+    {
+      "role": "Technical Specification (Student Placement)",
+      "org": "Spotwork",
+      "when": "Jul to Sep 2026",
+      "summary": "Riipen Level UP placement with a job board startup.",
+      "bullets": ["Found why a 40+ listing job board showed up as only 1 or 2 Google results, traced it to URL structure and metadata, and wrote the fix specification"]
+    },
+    {
+      "role": "Classroom Facilitator",
+      "org": "STEMA Learning",
+      "when": "Jan 2025 to now",
+      "summary": "Teach coding, robotics and STEM to 20+ students per session, adapting to mixed skill levels.",
+      "bullets": []
+    }
+  ],
+  "skills": {
+    "Languages": ["TypeScript", "Python", "Java", "SQL"],
+    "Frameworks": ["React", "Next.js", "FastAPI", "Astro"],
+    "Data": ["PostgreSQL", "Supabase", "pgvector", "Sanity"],
+    "Tools": ["Docker", "Cloudflare", "Vercel", "Git"]
+  },
+  "education": {
+    "school": "Simon Fraser University",
+    "degree": "BSc, Computing Science",
+    "expected": "December 2027",
+    "courses": [
+      ["CMPT 403", "System Security and Privacy", "current"],
+      ["CMPT 307", "Data Structures and Algorithms"],
+      ["CMPT 354", "Database Systems I"],
+      ["CMPT 454", "Database Systems II"],
+      ["CMPT 201", "Systems Programming"],
+      ["CMPT 371", "Computer Networks"],
+      ["CMPT 276", "Software Engineering"],
+      ["CMPT 310", "Intro to Artificial Intelligence"],
+      ["CMPT 353", "Computational Data Science"]
+    ]
+  },
+  "contactPanel": {
+    "status": "Open to SWE co-op, 2027",
+    "messages": ["Hey, thanks for stopping by.", "I'm looking for a software engineering co-op for 2027. Happy to talk about anything on the map."],
+    "replies": [["Email lat13@sfu.ca", "mailto:lat13@sfu.ca"], ["Connect on LinkedIn", "https://linkedin.com/in/luistanafranca"], ["Download my resume", "assets/resume.pdf"]]
+  },
+  "palette": {
+    "sky": "#050815",
+    "text": "#F3EEE2",
+    "textMuted": "#AEB2C8",
+    "body": "#D9DCEB",
+    "gold": "#E8C27A",
+    "goldDeep": "#C9A24E",
+    "routeLine": "#F3D99A"
+  }
+}

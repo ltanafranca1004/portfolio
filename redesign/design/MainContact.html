@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Map with contact open</title>
+
+</head>
+<body>
+
+
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#F3EEE2;text-decoration:none}
+a:hover{color:#E8C27A}
+.sky{background-color:#050815;background-image:url(../assets/sky2.webp);background-size:cover;background-position:center}
+.orb{position:absolute;inset:0;background-image:url(../assets/orbits2.svg);background-size:1440px 900px;pointer-events:none}
+.dest{transition:transform .35s ease}
+.dest:hover{transform:translateY(-6px)}
+.dest p,.dest h2{text-shadow:0 0 10px #050815,0 0 22px #050815}
+.float{animation:fl 7s ease-in-out infinite}
+.float2{animation:fl 8s ease-in-out -3s infinite}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.spin{animation:sp 120s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.px{image-rendering:pixelated}
+.route-glow,.route{stroke-dasharray:1900;stroke-dashoffset:1900;animation:draw 1.6s cubic-bezier(.65,0,.35,1) .1s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.comet{position:absolute;left:0;top:0;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#fff6dd;box-shadow:0 0 12px 4px rgba(255,236,190,.9),0 0 40px 12px rgba(232,194,122,.55);offset-path:path('M -20 340 C 100 300, 160 280, 230 275 S 470 150, 560 202 S 760 480, 870 465 S 1090 250, 1200 245 S 1380 190, 1470 160');offset-rotate:0deg;opacity:0;animation:ride 1.6s cubic-bezier(.65,0,.35,1) .1s forwards}
+@keyframes ride{0%{offset-distance:0%;opacity:1}90%{opacity:1}100%{offset-distance:100%;opacity:0}}
+.in1,.in2,.in3,.in4,.in5{opacity:0;animation:arrive .6s ease-out forwards}
+.in1{animation-delay:.35s}.in2{animation-delay:.6s}.in3{animation-delay:.85s}.in4{animation-delay:1.1s}.in5{animation-delay:1.3s}
+@keyframes arrive{from{opacity:0;filter:blur(6px)}to{opacity:1;filter:blur(0)}}
+@media (prefers-reduced-motion:reduce){.float,.float2,.spin,.comet{animation:none}.dest{transition:none}.route,.route-glow{animation:none;stroke-dashoffset:0}.in1,.in2,.in3,.in4,.in5{animation:none;opacity:1}}
+.loupe{position:absolute;left:0;top:0;width:80px;height:80px;border-radius:50%;background:#f8f9fc url(../assets/lens-sheet.webp) no-repeat;background-size:238px 238px;border:3px solid #C9A24E;box-shadow:0 10px 18px rgba(10,15,30,.45),inset 0 0 18px rgba(90,120,170,.45);animation:glide 16s ease-in-out infinite}
+.loupe::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.75),rgba(255,255,255,0) 22%),radial-gradient(circle at 50% 50%,rgba(255,255,255,0) 60%,rgba(140,170,220,.35))}
+@keyframes glide{0%,100%{transform:translate(15px,15px);background-position:-53.5px -53.5px}25%{transform:translate(50px,35px);background-position:-113px -87.5px}50%{transform:translate(30px,50px);background-position:-79px -113px}75%{transform:translate(5px,30px);background-position:-36.5px -79px}}
+@media (prefers-reduced-motion:reduce){.loupe{animation:none;transform:translate(30px,35px);background-position:-79px -87.5px}}
+.loupe2{position:absolute;left:0;top:0;width:70px;height:70px;border-radius:50%;background:#f8f9fc url(../assets/lens-real.webp) no-repeat;background-size:342px 153px;border:3px solid #C9A24E;box-shadow:0 10px 18px rgba(10,15,30,.45),inset 0 0 14px rgba(90,120,170,.4);animation:glide2 14s ease-in-out infinite}
+.loupe2::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.75),rgba(255,255,255,0) 22%),radial-gradient(circle at 50% 50%,rgba(255,255,255,0) 60%,rgba(140,170,220,.35))}
+@keyframes glide2{0%,100%{transform:translate(10px,40px);background-position:-46px -100px}33%{transform:translate(110px,46px);background-position:-226px -110px}66%{transform:translate(60px,12px);background-position:-136px -49px}}
+@media (prefers-reduced-motion:reduce){.loupe2{animation:none;transform:translate(60px,30px);background-position:-136px -80px}}
+.tok{animation:tok 5s steps(5,jump-none) infinite}
+@keyframes tok{from{transform:translateX(0)}to{transform:translateX(76px)}}
+@media (prefers-reduced-motion:reduce){.tok{animation:none}}
+</style>
+
+<div class="sky" style="position: relative; width: 1440px; height: 900px; overflow: hidden; font-family: 'Jost', sans-serif; color: #F3EEE2;">
+<div class="orb"></div>
+<div class="routewrap" aria-hidden="true" style="position: absolute; inset: 0; pointer-events: none; -webkit-mask-image: radial-gradient(circle 90px at 230px 275px, transparent 88px, #000 90px), radial-gradient(ellipse 106px 84px at 560px 222px, transparent 104px, #000 106px), radial-gradient(circle 84px at 870px 456px, transparent 82px, #000 84px), radial-gradient(ellipse 104px 56px at 1200px 244px, transparent 102px, #000 104px); mask-image: radial-gradient(circle 90px at 230px 275px, transparent 88px, #000 90px), radial-gradient(ellipse 106px 84px at 560px 222px, transparent 104px, #000 106px), radial-gradient(circle 84px at 870px 456px, transparent 82px, #000 84px), radial-gradient(ellipse 104px 56px at 1200px 244px, transparent 102px, #000 104px); -webkit-mask-composite: source-in; mask-composite: intersect;">
+<svg aria-hidden="true" width="1440" height="900" viewBox="0 0 1440 900" fill="none" style="position: absolute; inset: 0; pointer-events: none;">
+<path class="route-glow" d="M -20 340 C 100 300, 160 280, 230 275 S 470 150, 560 202 S 760 480, 870 465 S 1090 250, 1200 245 S 1380 190, 1470 160" stroke="#E8C27A" stroke-width="7" stroke-opacity="0.18" stroke-linecap="round"></path>
+<path class="route" d="M -20 340 C 100 300, 160 280, 230 275 S 470 150, 560 202 S 760 480, 870 465 S 1090 250, 1200 245 S 1380 190, 1470 160" stroke="#F3D99A" stroke-width="1.6" stroke-linecap="round"></path>
+</svg>
+<div class="comet"></div>
+</div>
+
+<header style="position: absolute; left: 64px; top: 34px; display: flex; align-items: center; gap: 14px;">
+<svg width="30" height="38" viewBox="0 0 30 38" fill="none" stroke="#E8C27A" stroke-width="1.6" aria-hidden="true"><path d="M15 36c-6-9-12-15-12-22a12 12 0 0 1 24 0c0 7-6 13-12 22z"></path><circle cx="15" cy="14" r="5"></circle></svg>
+<div>
+<div style="font-size: 15px; color: #E8C27A; letter-spacing: 0.04em;">Navigation</div>
+<h1 style="margin: 0; font-size: 26px; font-weight: 500; letter-spacing: 0.03em;">Luis Tanafranca</h1>
+</div>
+</header>
+
+<nav aria-label="Main" style="position: absolute; right: 64px; top: 40px; display: flex; align-items: center; gap: 12px; font-size: 15px;">
+<a href="https://github.com/ltanafranca1004" aria-label="GitHub" style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(232,194,122,0.4); background: rgba(5,8,21,0.45);"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.77.11 3.06.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.4-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"></path></svg></a>
+<a href="https://linkedin.com/in/luistanafranca" aria-label="LinkedIn" style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(232,194,122,0.4); background: rgba(5,8,21,0.45);"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.75h4V21H3zM9.5 9.75h3.83v1.54h.05c.53-1.01 1.84-2.07 3.79-2.07 4.05 0 4.8 2.67 4.8 6.13V21h-4v-4.99c0-1.19-.02-2.72-1.66-2.72-1.66 0-1.91 1.3-1.91 2.63V21h-4z"></path></svg></a>
+<a href="#" style="display: flex; align-items: center; min-height: 44px; padding: 0 22px; border: 1px solid rgba(232,194,122,0.55); border-radius: 22px; background: rgba(5,8,21,0.45);">Resume</a>
+<a href="MainContact.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 22px; border-radius: 22px; background: #F3EEE2; color: #10131F;">Contact</a>
+</nav>
+
+<!-- Origin -->
+<a class="dest in1" href="ProfileOne.html" style="position: absolute; left: 80px; top: 170px; width: 300px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;">
+<div class="float" style="position: relative; width: 210px; height: 210px;">
+<img class="spin" src="../assets/frame.svg" alt="" style="position: absolute; inset: 0; width: 210px; height: 210px;">
+<span style="position: absolute; left: 22px; top: 22px; width: 166px; height: 166px; border-radius: 50%; box-shadow: 0 0 0 2px rgba(232,194,122,0.85), 0 0 36px rgba(232,194,122,0.35);"></span><img src="../assets/profile-hd.webp" alt="Luis Tanafranca" style="position: absolute; left: 22px; top: 22px; width: 166px; height: 166px; border-radius: 50%; object-fit: cover;">
+</div>
+<div style="display: flex; align-items: center; gap: 8px; width: 300px;"><span style="flex: 1; height: 1px; background: rgba(232,194,122,0.5);"></span><span style="width: 6px; height: 6px; border: 1px solid #E8C27A; border-radius: 50%;"></span><span style="flex: 1; height: 1px; background: rgba(232,194,122,0.5);"></span></div>
+<h2 style="margin: 0; font-size: 27px; font-weight: 500; letter-spacing: 0.03em;">About me</h2>
+<div style="width: 300px; height: 1px; background: rgba(232,194,122,0.5);"></div>
+<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #D9DCEB;">Fifth-year Computing Science at SFU. Software engineer at Unify Social, classroom facilitator at STEMA. Open to SWE co-op for 2027.</p>
+</a>
+
+<!-- Cubic -->
+<a class="dest in3" href="DetailCubic.html" style="position: absolute; left: 720px; top: 350px; width: 300px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;">
+<div class="float2" style="position: relative; width: 220px; height: 220px;">
+<img class="spin" src="../assets/frame.svg" alt="" style="position: absolute; inset: 0; width: 220px; height: 220px;">
+<img class="px" src="../assets/cubic-spin48.webp" alt="" style="position: absolute; left: 26px; top: 22px; width: 168px; height: 168px;">
+</div>
+<div style="display: flex; align-items: center; gap: 8px; width: 300px;"><span style="flex: 1; height: 1px; background: rgba(232,194,122,0.5);"></span><span style="width: 6px; height: 6px; border: 1px solid #E8C27A; border-radius: 50%;"></span><span style="flex: 1; height: 1px; background: rgba(232,194,122,0.5);"></span></div>
+<h2 style="margin: 0; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 10px; font-size: 27px; font-weight: 500; letter-spacing: 0.03em;">Cubic
+<span style="padding: 3px 9px; border: 1px solid #E8C27A; border-radius: 12px; font-size: 11px; font-weight: 500; letter-spacing: 0.12em; color: #E8C27A;">STORMHACKS 2026 BEST DESIGN AWARD</span></h2>
+<div style="width: 300px; height: 1px; background: rgba(232,194,122,0.5);"></div>
+<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #D9DCEB;">One player walks the outside of a cube, the other is trapped inside. Neither can see the other's screen.</p>
+</a>
+
+<!-- Lens -->
+<a class="dest in4" href="DetailLens.html" style="position: absolute; left: 1050px; top: 140px; width: 300px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;">
+<div class="float" style="position: relative; width: 210px; height: 210px;">
+<img class="spin" src="../assets/frame.svg" alt="" style="position: absolute; inset: 0; width: 210px; height: 210px;">
+<div aria-hidden="true" style="position: absolute; left: 10px; top: 62px; width: 190px; height: 85px; perspective: 700px;"><div style="position: absolute; inset: 0; transform: rotateX(10deg) rotateY(-14deg) rotateZ(2deg);"><img src="../assets/lens-real.webp" alt="" style="position: absolute; inset: 0; width: 190px; height: 85px; border-radius: 6px; box-shadow: 0 12px 30px rgba(0,0,0,0.5);"><div class="loupe2"></div></div></div>
+</div>
+<div style="display: flex; align-items: center; gap: 8px; width: 300px;"><span style="flex: 1; height: 1px; background: rgba(232,194,122,0.5);"></span><span style="width: 6px; height: 6px; border: 1px solid #E8C27A; border-radius: 50%;"></span><span style="flex: 1; height: 1px; background: rgba(232,194,122,0.5);"></span></div>
+<h2 style="margin: 0; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 10px; font-size: 27px; font-weight: 500; letter-spacing: 0.03em;">Lens
+<span style="padding: 3px 9px; border: 1px solid #E8C27A; border-radius: 12px; font-size: 11px; font-weight: 500; letter-spacing: 0.12em; color: #E8C27A;">VALIDATED SCORING</span></h2>
+<div style="width: 300px; height: 1px; background: rgba(232,194,122,0.5);"></div>
+<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #D9DCEB;">Interview prep that scores every answer on four dimensions and highlights the exact phrases behind each score.</p>
+</a>
+
+<!-- Unify -->
+<a class="dest in2" href="DetailUnify.html" style="position: absolute; left: 410px; top: 92px; width: 300px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;">
+<div class="float2" style="position: relative; width: 210px; height: 210px;">
+<img class="spin" src="../assets/frame.svg" alt="" style="position: absolute; inset: 0; width: 210px; height: 210px;">
+<img src="../assets/d-unify-hero.webp" alt="Unify's web app on desktop and phone, with its logo" style="position: absolute; left: 3px; top: 52px; width: 204px; height: auto;">
+</div>
+<div style="display: flex; align-items: center; gap: 8px; width: 300px;"><span style="flex: 1; height: 1px; background: rgba(232,194,122,0.5);"></span><span style="width: 6px; height: 6px; border: 1px solid #E8C27A; border-radius: 50%;"></span><span style="flex: 1; height: 1px; background: rgba(232,194,122,0.5);"></span></div>
+<h2 style="margin: 0; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 10px; font-size: 27px; font-weight: 500; letter-spacing: 0.03em;">Unify Social
+<span style="padding: 3px 9px; border: 1px solid #E8C27A; border-radius: 12px; font-size: 11px; font-weight: 500; letter-spacing: 0.12em; color: #E8C27A;">500+ USERS</span>
+<span style="padding: 3px 9px; border: 1px solid #E8C27A; border-radius: 12px; font-size: 11px; font-weight: 500; letter-spacing: 0.12em; color: #E8C27A;">2 NATIONAL AWARDS</span></h2>
+<div style="width: 300px; height: 1px; background: rgba(232,194,122,0.5);"></div>
+<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #D9DCEB;">A settlement app for newcomers to Canada. I built the web platform, its database, and the landing page.</p>
+</a>
+
+<!-- Other projects -->
+<div class="in5" style="position: absolute; left: 64px; top: 618px;">
+<div style="font-size: 12px; font-weight: 500; letter-spacing: 0.3em; color: #E8C27A; margin-bottom: 8px;">OTHER PROJECTS</div>
+<div style="display: flex; gap: 8px;">
+<a class="dest" href="DetailTurtle.html" style="width: 142px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;"><div class="float" style="position: relative; width: 120px; height: 120px;"><img class="spin" src="../assets/frame.svg" alt="" style="position: absolute; inset: 0; width: 120px; height: 120px;"><div style="position: absolute; left: 26px; top: 30px; width: 84px; perspective: 400px;"><img src="../assets/mini-turtle-card.webp" alt="" style="width: 84px; border-radius: 5px; box-shadow: 0 6px 14px rgba(0,0,0,0.5); transform: rotateY(-14deg) rotateZ(5deg);"></div><img src="../assets/mini-turtle-mascot.webp" alt="" style="position: absolute; left: 4px; top: 50px; height: 62px;"></div><span style="font-size: 15px; line-height: 1.2;">Turtle Trips AI</span><span style="font-size: 12px; color: #AEB2C8;">StormHacks 2025</span></a>
+<a class="dest" href="DetailAmenity.html" style="width: 142px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;"><div class="float" style="position: relative; width: 120px; height: 120px;"><img class="spin" src="../assets/frame.svg" alt="" style="position: absolute; inset: 0; width: 120px; height: 120px;"><div style="position: absolute; left: 12px; top: 34px; perspective: 300px;"><div style="display: flex; transform: rotateX(28deg); box-shadow: 0 10px 16px rgba(0,0,0,0.45);"><div style="width: 32px; height: 58px; background: url(../assets/d-amenity-tour.webp) -0px 0 / 96px 58px; transform: rotateY(22deg); transform-origin: right; box-shadow: inset 0 0 0 100px rgba(255,255,255,0.10);"></div><div style="width: 32px; height: 58px; background: url(../assets/d-amenity-tour.webp) -32px 0 / 96px 58px; transform: rotateY(-22deg); transform-origin: center; box-shadow: inset 0 0 0 100px rgba(0,0,0,0.22);"></div><div style="width: 32px; height: 58px; background: url(../assets/d-amenity-tour.webp) -64px 0 / 96px 58px; transform: rotateY(22deg); transform-origin: left; box-shadow: inset 0 0 0 100px rgba(255,255,255,0.10);"></div></div></div><svg width="12" height="16" viewBox="0 0 12 16" aria-hidden="true" style="position: absolute; left: 36px; top: 26px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));"><path d="M6 16S0 9 0 6a6 6 0 0 1 12 0c0 3-6 10-6 10z" fill="#3b82f6" stroke="#fff" stroke-width="1"></path><circle cx="6" cy="6" r="2" fill="#fff"></circle></svg><svg width="12" height="16" viewBox="0 0 12 16" aria-hidden="true" style="position: absolute; left: 62px; top: 36px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));"><path d="M6 16S0 9 0 6a6 6 0 0 1 12 0c0 3-6 10-6 10z" fill="#3b82f6" stroke="#fff" stroke-width="1"></path><circle cx="6" cy="6" r="2" fill="#fff"></circle></svg><svg width="12" height="16" viewBox="0 0 12 16" aria-hidden="true" style="position: absolute; left: 80px; top: 22px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));"><path d="M6 16S0 9 0 6a6 6 0 0 1 12 0c0 3-6 10-6 10z" fill="#3b82f6" stroke="#fff" stroke-width="1"></path><circle cx="6" cy="6" r="2" fill="#fff"></circle></svg></div><span style="font-size: 15px; line-height: 1.2;">Amenity Recommender</span><span style="font-size: 12px; color: #AEB2C8;">CMPT 353</span></a>
+<a class="dest" href="DetailPipeline.html" style="width: 142px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;"><div class="float" style="position: relative; width: 120px; height: 120px;"><img class="spin" src="../assets/frame.svg" alt="" style="position: absolute; inset: 0; width: 120px; height: 120px;"><div style="position: absolute; left: 10px; top: 28px;"><svg width="100" height="64" viewBox="0 0 100 64" aria-hidden="true"><text x="11" y="10" text-anchor="middle" font-family="Jost, sans-serif" font-size="6" letter-spacing="0.5" fill="#E8C27A">IF</text><rect x="4" y="15" width="14" height="14" rx="2" fill="rgba(5,8,21,0.7)" stroke="#E8C27A" stroke-width="0.8"></rect><rect x="4" y="35" width="14" height="14" rx="2" fill="rgba(5,8,21,0.7)" stroke="#E8C27A" stroke-width="0.8"></rect><path d="M19 22 H22 M19 42 H22" stroke="#E8C27A" stroke-opacity="0.6" stroke-width="0.8"></path><text x="30" y="10" text-anchor="middle" font-family="Jost, sans-serif" font-size="6" letter-spacing="0.5" fill="#E8C27A">ID</text><rect x="23" y="15" width="14" height="14" rx="2" fill="rgba(5,8,21,0.7)" stroke="#E8C27A" stroke-width="0.8"></rect><rect x="23" y="35" width="14" height="14" rx="2" fill="rgba(5,8,21,0.7)" stroke="#E8C27A" stroke-width="0.8"></rect><path d="M38 22 H41 M38 42 H41" stroke="#E8C27A" stroke-opacity="0.6" stroke-width="0.8"></path><text x="49" y="10" text-anchor="middle" font-family="Jost, sans-serif" font-size="6" letter-spacing="0.5" fill="#E8C27A">EX</text><rect x="42" y="15" width="14" height="14" rx="2" fill="rgba(5,8,21,0.7)" stroke="#E8C27A" stroke-width="0.8"></rect><rect x="42" y="35" width="14" height="14" rx="2" fill="rgba(5,8,21,0.7)" stroke="#E8C27A" stroke-width="0.8"></rect><path d="M57 22 H60 M57 42 H60" stroke="#E8C27A" stroke-opacity="0.6" stroke-width="0.8"></path><text x="68" y="10" text-anchor="middle" font-family="Jost, sans-serif" font-size="6" letter-spacing="0.5" fill="#E8C27A">MEM</text><rect x="61" y="15" width="14" height="14" rx="2" fill="rgba(5,8,21,0.7)" stroke="#E8C27A" stroke-width="0.8"></rect><rect x="61" y="35" width="14" height="14" rx="2" fill="rgba(5,8,21,0.7)" stroke="#E8C27A" stroke-width="0.8"></rect><path d="M76 22 H79 M76 42 H79" stroke="#E8C27A" stroke-opacity="0.6" stroke-width="0.8"></path><text x="87" y="10" text-anchor="middle" font-family="Jost, sans-serif" font-size="6" letter-spacing="0.5" fill="#E8C27A">WB</text><rect x="80" y="15" width="14" height="14" rx="2" fill="rgba(5,8,21,0.7)" stroke="#E8C27A" stroke-width="0.8"></rect><rect x="80" y="35" width="14" height="14" rx="2" fill="rgba(5,8,21,0.7)" stroke="#E8C27A" stroke-width="0.8"></rect><rect class="tok" x="6" y="18" width="10" height="8" rx="1.5" fill="#7aa7d9" style="animation-delay: 0s;"></rect><rect class="tok" x="6" y="38" width="10" height="8" rx="1.5" fill="#c28aa8" style="animation-delay: -1s;"></rect><rect class="tok" x="6" y="18" width="10" height="8" rx="1.5" fill="#c9a64e" style="animation-delay: -2s;"></rect><rect class="tok" x="6" y="38" width="10" height="8" rx="1.5" fill="#7bb58a" style="animation-delay: -3s;"></rect><rect class="tok" x="6" y="18" width="10" height="8" rx="1.5" fill="#b9a6ff" style="animation-delay: -4s;"></rect><text x="50" y="62" text-anchor="middle" font-family="Jost, sans-serif" font-size="5" fill="#AEB2C8" letter-spacing="0.4">2-WIDE · 5 STAGES</text></svg></div></div><span style="font-size: 15px; line-height: 1.2;">Pipeline Simulator</span><span style="font-size: 12px; color: #AEB2C8;">CMPT 305</span></a>
+<a class="dest" href="DetailNutrifit.html" style="width: 142px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;"><div class="float" style="position: relative; width: 120px; height: 120px;"><img class="spin" src="../assets/frame.svg" alt="" style="position: absolute; inset: 0; width: 120px; height: 120px;"><div style="position: absolute; left: 16px; top: 30px; width: 88px; perspective: 400px;"><div style="background: #fff; border-radius: 5px; overflow: hidden; box-shadow: 0 6px 14px rgba(0,0,0,0.5); transform: rotateY(-14deg) rotateZ(-4deg);"><img src="../assets/mini-nf-recipe-banner.webp" alt="" style="display: block; width: 88px; padding: 6px 6px 2px; box-sizing: border-box;"><div style="padding: 3px 7px 7px; display: flex; flex-direction: column; gap: 3px;"><span style="height: 5px; border-radius: 2px; background: #dfe7e2;"></span><span style="height: 5px; width: 70%; border-radius: 2px; background: #dfe7e2;"></span><span style="align-self: flex-start; height: 7px; width: 26px; border-radius: 3px; background: #7fae95;"></span></div></div></div></div><span style="font-size: 15px; line-height: 1.2;">NutriFit</span><span style="font-size: 12px; color: #AEB2C8;">CMPT 276</span></a>
+</div>
+</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 30px; text-align: center; font-size: 14px; letter-spacing: 0.14em; color: #AEB2C8;">SELECT A DESTINATION</div>
+<div style="position: absolute; left: 104px; bottom: 30px; font-size: 12px; letter-spacing: 0.06em; color: rgba(217,220,235,0.7);">ID: lat13@sfu.ca</div>
+
+<div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(3,5,13,0.6);"></div>
+<section role="dialog" aria-label="Contact Luis" style="position: absolute; right: 64px; top: 110px; width: 400px; height: 560px; box-sizing: border-box; border-radius: 34px; padding: 12px; background: #0a0f22; border: 1px solid rgba(232,194,122,0.45); box-shadow: 0 30px 80px rgba(0,0,0,0.6);">
+<div style="height: 100%; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column; background: linear-gradient(180deg, #f4f1ea, #e9e4d8); color: #1c2033;">
+<div style="display: flex; align-items: center; gap: 12px; padding: 16px 18px; background: #1b2140; color: #F3EEE2;">
+<img src="../assets/profile-hd.webp" alt="" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 2px #E8C27A;">
+<div style="flex: 1;"><div style="font-size: 17px; font-weight: 500;">Luis Tanafranca</div><div style="font-size: 12px; color: #9fd3a8;">● Open to SWE co-op, 2027</div></div>
+<a href="Main.html" aria-label="Close" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #F3EEE2;">×</a>
+</div>
+<div style="flex: 1; padding: 20px 18px; display: flex; flex-direction: column; gap: 12px; font-size: 15px; line-height: 1.5;">
+<div style="font-size: 11px; text-align: center; letter-spacing: 0.12em; color: #8a8d9c;">TODAY</div>
+<div style="align-self: flex-start; max-width: 80%; padding: 10px 14px; border-radius: 4px 16px 16px 16px; background: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,0.08);">Hey, thanks for stopping by.</div>
+<div style="align-self: flex-start; max-width: 80%; padding: 10px 14px; border-radius: 4px 16px 16px 16px; background: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,0.08);">I'm looking for a software engineering co-op for 2027. Happy to talk about anything on the map.</div>
+</div>
+<div style="padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 8px; background: rgba(27,33,64,0.06); border-top: 1px solid rgba(27,33,64,0.12);">
+<div style="font-size: 11px; letter-spacing: 0.14em; color: #8a8d9c; margin-bottom: 2px;">REPLY</div><a href="mailto:lat13@sfu.ca" style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 16px; border-radius: 24px; background: #1b2140; color: #F3EEE2; font-size: 15px;"><span style="color: #E8C27A;">◆</span>Email lat13@sfu.ca</a><a href="https://linkedin.com/in/luistanafranca" style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 16px; border-radius: 24px; background: #1b2140; color: #F3EEE2; font-size: 15px;"><span style="color: #E8C27A;">◆</span>Connect on LinkedIn</a><a href="#" style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 16px; border-radius: 24px; background: #1b2140; color: #F3EEE2; font-size: 15px;"><span style="color: #E8C27A;">◆</span>Download my resume</a></div></div></section>
+</div>
+
+
+</body>
+</html>

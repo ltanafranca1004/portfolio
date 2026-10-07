@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Phone map</title>
+
+</head>
+<body>
+
+
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#F3EEE2;text-decoration:none}
+a:hover{color:#E8C27A}
+.sky{background-color:#050815;background-image:url(../assets/sky2.webp);background-size:auto 100%;background-repeat:no-repeat;background-position:40% 0}
+.float{animation:fl 7s ease-in-out infinite}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.spin{animation:sp 120s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.float,.spin{animation:none}}
+.loupe{position:absolute;left:0;top:0;width:80px;height:80px;border-radius:50%;background:#f8f9fc url(../assets/lens-sheet.webp) no-repeat;background-size:238px 238px;border:3px solid #C9A24E;box-shadow:0 10px 18px rgba(10,15,30,.45),inset 0 0 18px rgba(90,120,170,.45);animation:glide 16s ease-in-out infinite}
+.loupe::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.75),rgba(255,255,255,0) 22%),radial-gradient(circle at 50% 50%,rgba(255,255,255,0) 60%,rgba(140,170,220,.35))}
+@keyframes glide{0%,100%{transform:translate(15px,15px);background-position:-53.5px -53.5px}25%{transform:translate(50px,35px);background-position:-113px -87.5px}50%{transform:translate(30px,50px);background-position:-79px -113px}75%{transform:translate(5px,30px);background-position:-36.5px -79px}}
+@media (prefers-reduced-motion:reduce){.loupe{animation:none;transform:translate(30px,35px);background-position:-79px -87.5px}}
+.loupe2{position:absolute;left:0;top:0;width:70px;height:70px;border-radius:50%;background:#f8f9fc url(../assets/lens-real.webp) no-repeat;background-size:342px 153px;border:3px solid #C9A24E;box-shadow:0 10px 18px rgba(10,15,30,.45),inset 0 0 14px rgba(90,120,170,.4);animation:glide2 14s ease-in-out infinite}
+.loupe2::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.75),rgba(255,255,255,0) 22%),radial-gradient(circle at 50% 50%,rgba(255,255,255,0) 60%,rgba(140,170,220,.35))}
+@keyframes glide2{0%,100%{transform:translate(10px,40px);background-position:-46px -100px}33%{transform:translate(110px,46px);background-position:-226px -110px}66%{transform:translate(60px,12px);background-position:-136px -49px}}
+@media (prefers-reduced-motion:reduce){.loupe2{animation:none;transform:translate(60px,30px);background-position:-136px -80px}}
+</style>
+
+<div class="sky" style="position: relative; width: 390px; min-height: 1980px; font-family: 'Jost', sans-serif; color: #F3EEE2; overflow: hidden;">
+
+<div style="position: absolute; left: -160px; top: 520px; width: 420px; height: 420px; border-radius: 50%; border: 1px solid rgba(232,194,122,0.3);"></div>
+<div style="position: absolute; right: -200px; top: 1220px; width: 420px; height: 420px; border-radius: 50%; border: 2px dotted rgba(232,194,122,0.4);"></div>
+
+<header style="position: relative; padding: 22px 20px; display: flex; align-items: center; justify-content: space-between;">
+<div style="display: flex; align-items: center; gap: 10px;">
+<svg width="22" height="28" viewBox="0 0 30 38" fill="none" stroke="#E8C27A" stroke-width="1.8" aria-hidden="true"><path d="M15 36c-6-9-12-15-12-22a12 12 0 0 1 24 0c0 7-6 13-12 22z"></path><circle cx="15" cy="14" r="5"></circle></svg>
+<div><div style="font-size: 12px; color: #E8C27A;">Navigation</div><div style="font-size: 19px; font-weight: 500;">Luis Tanafranca</div></div>
+</div>
+<a href="MainContact.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: 22px; background: #F3EEE2; color: #10131F; font-size: 14px;">Contact</a>
+</header>
+<div style="position: relative; display: flex; justify-content: center; gap: 12px; padding: 0 20px;">
+<a href="#" style="display: flex; align-items: center; min-height: 44px; padding: 0 20px; border: 1px solid rgba(232,194,122,0.55); border-radius: 22px; background: rgba(5,8,21,0.45); font-size: 14px;">Resume</a>
+<a href="https://github.com/ltanafranca1004" aria-label="GitHub" style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(232,194,122,0.4); background: rgba(5,8,21,0.45);"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.77.11 3.06.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.4-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"></path></svg></a>
+<a href="https://linkedin.com/in/luistanafranca" aria-label="LinkedIn" style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(232,194,122,0.4); background: rgba(5,8,21,0.45);"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.75h4V21H3zM9.5 9.75h3.83v1.54h.05c.53-1.01 1.84-2.07 3.79-2.07 4.05 0 4.8 2.67 4.8 6.13V21h-4v-4.99c0-1.19-.02-2.72-1.66-2.72-1.66 0-1.91 1.3-1.91 2.63V21h-4z"></path></svg></a>
+</div>
+
+<div style="position: relative; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 28px 24px 40px;">
+
+<a href="ProfileOne.html" style="display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; width: 100%;">
+<div class="float" style="position: relative; width: 170px; height: 170px;"><img class="spin" src="../assets/frame.svg" alt="" style="position: absolute; inset: 0; width: 170px; height: 170px;"><img src="../assets/profile-hd.webp" alt="Luis Tanafranca" style="position: absolute; left: 18px; top: 18px; width: 134px; height: 134px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 2px rgba(232,194,122,0.85), 0 0 30px rgba(232,194,122,0.35);"></div>
+<div style="display: flex; align-items: center; gap: 8px; width: 260px; background: #050815;"><span style="flex: 1; height: 1px; background: rgba(232,194,122,0.5);"></span><span style="width: 6px; height: 6px; border: 1px solid #E8C27A; border-radius: 50%;"></span><span style="flex: 1; height: 1px; background: rgba(232,194,122,0.5);"></span></div>
+<h2 style="margin: 0; font-size: 24px; font-weight: 500;">About me</h2>
+<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #D9DCEB; text-shadow: 0 0 12px #050815;">Fifth-year Computing Science at SFU. Software engineer at Unify Social. Open to SWE co-op for 2027.</p>
+</a>
+
+<div aria-hidden="true" style="display: flex; flex-direction: column; align-items: center; gap: 0;"><span style="width: 1px; height: 44px; background: rgba(232,194,122,0.55);"></span><span style="width: 9px; height: 9px; border: 1.5px solid #E8C27A; border-radius: 50%;"></span><span style="width: 1px; height: 44px; background: rgba(232,194,122,0.55);"></span></div>
+<a href="DetailUnify.html" style="display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; width: 100%;">
+<div class="float" style="position: relative; width: 170px; height: 170px;"><img class="spin" src="../assets/frame.svg" alt="" style="position: absolute; inset: 0; width: 170px; height: 170px;"><img src="../assets/d-unify-hero.webp" alt="Unify's web app on desktop and phone, with its logo" style="position: absolute; left: 2px; top: 42px; width: 166px; height: auto;"></div>
+<div style="display: flex; align-items: center; gap: 8px; width: 260px; background: #050815;"><span style="flex: 1; height: 1px; background: rgba(232,194,122,0.5);"></span><span style="width: 6px; height: 6px; border: 1px solid #E8C27A; border-radius: 50%;"></span><span style="flex: 1; height: 1px; background: rgba(232,194,122,0.5);"></span></div>
+<h2 style="margin: 0; font-size: 24px; font-weight: 500;">Unify Social</h2>
+<span style="padding: 3px 10px; border: 1px solid #E8C27A; border-radius: 12px; font-size: 11px; letter-spacing: 0.12em; color: #E8C27A; background: #050815;">500+ USERS</span>
+<span style="padding: 3px 10px; border: 1px solid #E8C27A; border-radius: 12px; font-size: 11px; letter-spacing: 0.12em; color: #E8C27A; background: #050815;">2 NATIONAL AWARDS</span>
+<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #D9DCEB; text-shadow: 0 0 12px #050815;">Settlement app for newcomers to Canada. Web platform, database, landing page.</p>
+</a>
+
+<div aria-hidden="true" style="display: flex; flex-direction: column; align-items: center; gap: 0;"><span style="width: 1px; height: 44px; background: rgba(232,194,122,0.55);"></span><span style="width: 9px; height: 9px; border: 1.5px solid #E8C27A; border-radius: 50%;"></span><span style="width: 1px; height: 44px; background: rgba(232,194,122,0.55);"></span></div>
+<a href="DetailCubic.html" style="display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; width: 100%;">
+<div class="float" style="position: relative; width: 190px; height: 190px;"><img class="spin" src="../assets/frame.svg" alt="" style="position: absolute; inset: 0; width: 190px; height: 190px;"><img src="../assets/cubic-spin48.webp" alt="" style="position: absolute; left: 22px; top: 20px; width: 146px; height: 146px; image-rendering: pixelated;"></div>
+<div style="display: flex; align-items: center; gap: 8px; width: 260px; background: #050815;"><span style="flex: 1; height: 1px; background: rgba(232,194,122,0.5);"></span><span style="width: 6px; height: 6px; border: 1px solid #E8C27A; border-radius: 50%;"></span><span style="flex: 1; height: 1px; background: rgba(232,194,122,0.5);"></span></div>
+<h2 style="margin: 0; font-size: 24px; font-weight: 500;">Cubic</h2>
+<span style="padding: 3px 10px; border: 1px solid #E8C27A; border-radius: 12px; font-size: 11px; letter-spacing: 0.12em; color: #E8C27A; background: #050815;">STORMHACKS 2026 BEST DESIGN AWARD</span>
+<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #D9DCEB; text-shadow: 0 0 12px #050815;">One player outside a cube, one trapped inside.</p>
+</a>
+
+<div aria-hidden="true" style="display: flex; flex-direction: column; align-items: center; gap: 0;"><span style="width: 1px; height: 44px; background: rgba(232,194,122,0.55);"></span><span style="width: 9px; height: 9px; border: 1.5px solid #E8C27A; border-radius: 50%;"></span><span style="width: 1px; height: 44px; background: rgba(232,194,122,0.55);"></span></div>
+<a href="DetailLens.html" style="display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; width: 100%;">
+<div class="float" style="position: relative; width: 170px; height: 170px;"><img class="spin" src="../assets/frame.svg" alt="" style="position: absolute; inset: 0; width: 170px; height: 170px;"><div aria-hidden="true" style="position: absolute; left: -10px; top: 42px; width: 190px; height: 85px; perspective: 700px;"><div style="position: absolute; inset: 0; transform: rotateX(10deg) rotateY(-14deg) rotateZ(2deg);"><img src="../assets/lens-real.webp" alt="" style="position: absolute; inset: 0; width: 190px; height: 85px; border-radius: 6px; box-shadow: 0 12px 30px rgba(0,0,0,0.5);"><div class="loupe2"></div></div></div></div>
+<div style="display: flex; align-items: center; gap: 8px; width: 260px; background: #050815;"><span style="flex: 1; height: 1px; background: rgba(232,194,122,0.5);"></span><span style="width: 6px; height: 6px; border: 1px solid #E8C27A; border-radius: 50%;"></span><span style="flex: 1; height: 1px; background: rgba(232,194,122,0.5);"></span></div>
+<h2 style="margin: 0; font-size: 24px; font-weight: 500;">Lens</h2>
+<span style="padding: 3px 10px; border: 1px solid #E8C27A; border-radius: 12px; font-size: 11px; letter-spacing: 0.12em; color: #E8C27A; background: #050815;">VALIDATED SCORING</span>
+<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #D9DCEB; text-shadow: 0 0 12px #050815;">Interview prep that scores answers and shows the phrases behind each score.</p>
+</a>
+
+<div aria-hidden="true" style="display: flex; flex-direction: column; align-items: center; gap: 0;"><span style="width: 1px; height: 44px; background: rgba(232,194,122,0.55);"></span><span style="width: 9px; height: 9px; border: 1.5px solid #E8C27A; border-radius: 50%;"></span><span style="width: 1px; height: 44px; background: rgba(232,194,122,0.55);"></span></div>
+<div style="width: 100%; display: flex; flex-direction: column; gap: 4px; padding: 20px; background: rgba(5,8,21,0.7); border: 1px solid rgba(232,194,122,0.3);">
+<div style="font-size: 12px; font-weight: 500; letter-spacing: 0.3em; color: #E8C27A; margin-bottom: 6px;">OTHER PROJECTS</div>
+<a href="DetailTurtle.html" style="display: flex; align-items: center; gap: 12px; min-height: 44px;"><span style="width: 14px; height: 14px; border: 1.5px solid #E8C27A; border-radius: 50%;"></span>Turtle Trips AI</a>
+<a href="DetailAmenity.html" style="display: flex; align-items: center; gap: 12px; min-height: 44px;"><span style="width: 14px; height: 14px; border: 1.5px solid #E8C27A; border-radius: 50%;"></span>Vancouver Amenity Recommender</a>
+<a href="DetailPipeline.html" style="display: flex; align-items: center; gap: 12px; min-height: 44px;"><span style="width: 14px; height: 14px; border: 1.5px solid #E8C27A; border-radius: 50%;"></span>Pipeline Simulator</a><a href="DetailNutrifit.html" style="display: flex; align-items: center; gap: 12px; min-height: 44px;"><span style="width: 14px; height: 14px; border: 1.5px solid #E8C27A; border-radius: 50%;"></span>NutriFit</a>
+</div>
+
+</div>
+</div>
+
+
+</body>
+</html>
