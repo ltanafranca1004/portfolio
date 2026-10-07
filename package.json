@@ -16,6 +16,8 @@
     "test:viewports": "node scripts/check-viewports.mjs",
     "test:a11y": "node scripts/check-a11y.mjs",
     "test:analytics": "node scripts/check-analytics.mjs",
+    "test:keepout": "node scripts/check-keepout.mjs",
+    "test:transitions": "node scripts/check-transitions.mjs",
     "screenshots": "node scripts/screenshots.mjs",
     "lighthouse": "node scripts/lighthouse.mjs",
     "og": "node scripts/make-og.mjs"

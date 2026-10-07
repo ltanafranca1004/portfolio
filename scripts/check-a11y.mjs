@@ -48,7 +48,7 @@ for (const engine of ['chromium', 'webkit', 'firefox']) {
   await page.goto(`${BASE}/`);
   await settle(page, 2200);
   const map = await tabStops(page, 12);
-  const want = ['GitHub', 'LinkedIn', 'Resume', 'Contact', 'About me', 'Unify Social', 'Cubic', 'Lens', 'Turtle Trips AI', 'Amenity Recommender', 'Pipeline Simulator', 'NutriFit'];
+  const want = ['GitHub (opens in new tab)', 'LinkedIn (opens in new tab)', 'Resume (opens in new tab)', 'Contact', 'About me', 'Unify Social', 'Cubic', 'Lens', 'Turtle Trips AI', 'Amenity Recommender', 'Pipeline Simulator', 'NutriFit'];
   report(JSON.stringify(map.map((s) => s.label)) === JSON.stringify(want), `map tab order: ${map.map((s) => s.label).join(' > ')}`);
   report(map.every((s) => s.ring), `map: every stop draws a focus ring${map.every((s) => s.ring) ? '' : ` (missing: ${map.filter((s) => !s.ring).map((s) => s.label)})`}`);
   report(map.every((s) => s.gold), `map: every ring is gold${map.every((s) => s.gold) ? '' : ` (${[...new Set(map.filter((s) => !s.gold).map((s) => `${s.label}: ${s.colour}`))]})`}`);
@@ -75,7 +75,7 @@ for (const engine of ['chromium', 'webkit', 'firefox']) {
   // project page and profile: everything reachable, rings drawn
   await page.goto(`${BASE}/projects/unify/`);
   await settle(page, 600);
-  const project = await tabStops(page, 9);
+  const project = await tabStops(page, 11);
   report(project.every((s) => s.ring && s.gold), `project page: ${project.map((s) => s.label).join(' > ')}`);
   await page.goto(`${BASE}/profile/`);
   await settle(page, 600);
@@ -127,6 +127,44 @@ for (const engine of ['chromium', 'webkit', 'firefox']) {
     });
     report(r.running.length === 0 && !r.cubeMoved && r.hidden === 0, `${engine} ${url}: ${r.running.length} running animations${r.running.length ? ` (${[...new Set(r.running)]})` : ''}, cube ${r.cubeMoved ? 'MOVING' : 'still'}, ${r.hidden} hidden elements`);
   }
+  await b.close();
+}
+
+// ---- links that leave the site, and Copy email (Chromium) ----
+console.log('\n== new-tab links and Copy email ==');
+{
+  const b = await playwright.chromium.launch();
+  const ctx = await b.newContext({ viewport: { width: 1440, height: 790 }, permissions: ['clipboard-read', 'clipboard-write'] });
+  const p = await ctx.newPage();
+  for (const url of ['/', '/profile/', '/projects/unify/', '/projects/cubic/', '/projects/nutrifit/']) {
+    await p.goto(BASE + url);
+    await settle(p, 300);
+    const links = await p.evaluate(() =>
+      [...document.querySelectorAll('a[href]')].map((a) => ({
+        text: a.innerText.replace(/\s+/g, ' ').trim().slice(0, 30) || a.getAttribute('href'),
+        leaves: a.origin !== location.origin || a.pathname.endsWith('.pdf'),
+        mail: a.protocol === 'mailto:',
+        blank: a.target === '_blank',
+        rel: a.rel,
+        said: a.textContent.includes('(opens in new tab)'),
+      })),
+    );
+    const outside = links.filter((l) => l.leaves && !l.mail);
+    const wrong = outside.filter((l) => !l.blank || !l.rel.includes('noopener') || !l.rel.includes('noreferrer') || !l.said);
+    const mailBlank = links.filter((l) => l.mail && l.blank);
+    const insideBlank = links.filter((l) => !l.leaves && !l.mail && l.blank);
+    report(wrong.length === 0 && mailBlank.length === 0 && insideBlank.length === 0, `${url}: ${outside.length} links leave the site, all open in a new tab with rel and a spoken note; ${links.filter((l) => l.mail).length} email links stay in this tab${wrong.length ? ` (wrong: ${wrong.map((l) => l.text)})` : ''}`);
+  }
+  await p.goto(`${BASE}/`);
+  await settle(p, 800);
+  await p.click('[data-contact-open]');
+  await p.click('.copy-email');
+  await p.waitForTimeout(150);
+  const copied = await p.evaluate(async () => ({ button: document.querySelector('.copy-email').textContent, said: document.querySelector('[data-copy-status]').textContent, live: document.querySelector('[data-copy-status]').getAttribute('aria-live'), clipboard: await navigator.clipboard.readText() }));
+  await p.waitForTimeout(2100);
+  const after = await p.evaluate(() => document.querySelector('.copy-email').textContent);
+  report(copied.button === 'Copied' && copied.clipboard === 'lat13@sfu.ca' && copied.live === 'polite' && copied.said.includes('lat13@sfu.ca'), `Copy email: button says "${copied.button}", clipboard has "${copied.clipboard}", announced "${copied.said}"`);
+  report(after === 'Copy email', `after 2 seconds the button says "${after}" again`);
   await b.close();
 }
 

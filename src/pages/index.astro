@@ -1,9 +1,10 @@
 ---
-import { getImage, Picture } from 'astro:assets';
+import { getImage } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import CubeCanvas from '../components/CubeCanvas.astro';
 import LensCard from '../components/LensCard.astro';
 import Orbits from '../components/Orbits.astro';
+import Pic from '../components/Pic.astro';
 import PipelineArt from '../components/PipelineArt.astro';
 import Route from '../components/Route.astro';
 import SiteHeader from '../components/SiteHeader.astro';
@@ -16,12 +17,13 @@ import { absoluteUrl, metaDescription, OG_IMAGE } from '../lib/site';
 const [unify, cubic, lens] = destinations;
 if (!unify || !cubic || !lens) throw new Error('content.json needs three destinations');
 
-const webp = (path: string, width: number) => getImage({ src: asset(path), width, format: 'webp' });
+// the small worlds are drawn at up to 1.25x on a 2x screen: three times their CSS size covers that
+const webp = (path: string, width: number) => getImage({ src: asset(path), width, format: 'webp', quality: 86 });
 const [turtleCard, turtleMascot, amenityMap, nutrifitBanner] = await Promise.all([
-  webp('assets/mini-turtle-card.webp', 168),
-  webp('assets/mini-turtle-mascot.webp', 80),
-  webp('assets/d-amenity-tour.webp', 192),
-  webp('assets/mini-nf-recipe-banner.webp', 176),
+  webp('assets/mini-turtle-card.webp', 252),
+  webp('assets/mini-turtle-mascot.webp', 120),
+  webp('assets/d-amenity-tour.webp', 288),
+  webp('assets/mini-nf-recipe-banner.webp', 228),
 ]);
 
 const description = metaDescription(`${person.title} in ${person.location}. ${person.status}. ${person.bio}`);
@@ -39,21 +41,34 @@ const jsonLd = {
 ---
 
 <Base title={`${person.name} | ${person.title}`} description={description} jsonLd={jsonLd}>
+  <script slot="head" is:inline>
+    // The route draws in once per browser tab. Later visits to the map show it settled.
+    try {
+      if (sessionStorage.getItem('map-seen')) document.documentElement.classList.add('map-settled');
+      else sessionStorage.setItem('map-seen', '1');
+    } catch {
+      /* no storage: the route simply draws in each time */
+    }
+  </script>
   <div class="page map">
     <Sky priority />
     <div class="stage-wrap">
       <div class="stage">
         <Orbits class="only-desktop" />
         <Route />
-        <div class="phone-orbit phone-orbit-1 only-mobile" aria-hidden="true"></div>
-        <div class="phone-orbit phone-orbit-2 only-mobile" aria-hidden="true"></div>
+        <svg class="phone-orbit phone-orbit-1 only-mobile" width="422" height="422" viewBox="-1 -1 422 422" fill="none" aria-hidden="true" data-keepout>
+          <g class="orbit-lines"><circle cx="210" cy="210" r="210" stroke="rgb(232 194 122 / 0.3)" stroke-width="1"></circle></g>
+        </svg>
+        <svg class="phone-orbit phone-orbit-2 only-mobile" width="422" height="422" viewBox="-1 -1 422 422" fill="none" aria-hidden="true" data-keepout>
+          <g class="orbit-lines"><circle cx="210" cy="210" r="209" stroke="rgb(232 194 122 / 0.4)" stroke-width="2" stroke-dasharray="0.1 6" stroke-linecap="round"></circle></g>
+        </svg>
 
         <SiteHeader home />
 
         <main class="worlds">
           <World id="about" href={PROFILE_URL} title="About me" blurb={person.mapBlurb} blurbPhone={person.mapBlurbPhone} order={1}>
             <img slot="frame" class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
-            <Picture class="photo" src={asset(person.photo)} formats={['avif', 'webp']} fallbackFormat="webp" width={420} height={420} alt={person.name} loading="eager" />
+            <Pic class="photo" src={asset(person.photo)} width={208} alt={person.name} loading="eager" />
           </World>
 
           <h2 class="sr-only" id="projects-heading">Projects</h2>
@@ -62,7 +77,7 @@ const jsonLd = {
               <div class="connector only-mobile" aria-hidden="true"><span></span><i></i><span></span></div>
               <World id="unify" href={projectUrl(unify.slug)} title={unify.name} blurb={unify.mapBlurb} blurbPhone={unify.mapBlurbPhone} chips={unify.chips} order={2} float="float2" level={3}>
                 <img slot="frame" class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
-                <Picture class="unify-hero" src={asset('assets/d-unify-hero.webp')} formats={['avif', 'webp']} fallbackFormat="webp" width={420} alt={unify.heroAlt} loading="lazy" />
+                <Pic class="unify-hero" src={asset('assets/d-unify-hero.webp')} width={255} alt={unify.heroAlt} />
               </World>
             </li>
             <li role="listitem">
@@ -154,22 +169,18 @@ const jsonLd = {
 
   .phone-orbit {
     position: absolute;
-    width: 420px;
-    height: 420px;
-    border-radius: 50%;
+    overflow: visible;
     pointer-events: none;
   }
 
   .phone-orbit-1 {
-    left: -160px;
-    top: 520px;
-    border: 1px solid rgb(var(--gold-rgb) / 0.3);
+    left: -161px;
+    top: 519px;
   }
 
   .phone-orbit-2 {
-    right: -200px;
-    top: 1220px;
-    border: 2px dotted rgb(var(--gold-rgb) / 0.4);
+    right: -201px;
+    top: 1219px;
   }
 
   .worlds {
@@ -207,18 +218,6 @@ const jsonLd = {
     align-items: center;
     gap: 10px;
     width: 100%;
-  }
-
-  /* A soft dark glow behind each text block, so orbit and route lines never cut through letters. */
-  .world-text::before,
-  .others::before {
-    content: '';
-    position: absolute;
-    inset: 12px 18px;
-    z-index: -1;
-    border-radius: 36px;
-    background: rgb(var(--sky-rgb) / 0.8);
-    box-shadow: 0 0 30px 26px rgb(var(--sky-rgb) / 0.8);
   }
 
   .divider {
@@ -262,7 +261,6 @@ const jsonLd = {
 
   .world-title .chip {
     padding: 3px 10px;
-    background: var(--sky);
   }
 
   /* The whole world is the link target; the heading holds the link itself. */
@@ -291,7 +289,6 @@ const jsonLd = {
     font-size: 15px;
     line-height: 1.5;
     color: var(--body);
-    text-shadow: 0 0 12px var(--sky);
   }
 
   .photo {
@@ -347,12 +344,7 @@ const jsonLd = {
     width: 100%;
     max-width: 420px;
     padding: 20px;
-    background: rgb(var(--sky-rgb) / 0.7);
     border: 1px solid rgb(var(--gold-rgb) / 0.3);
-  }
-
-  .others::before {
-    display: none;
   }
 
   .others-label {
@@ -512,15 +504,8 @@ const jsonLd = {
 
     .world-title .chip {
       padding: 3px 9px;
-      background: none;
     }
 
-    .world-name,
-    .world p {
-      text-shadow:
-        0 0 10px var(--sky),
-        0 0 22px var(--sky);
-    }
 
     /* worlds arrive one by one as the comet passes */
     .in1,
@@ -559,13 +544,7 @@ const jsonLd = {
       width: auto;
       max-width: none;
       padding: 0;
-      background: none;
       border: 0;
-    }
-
-    .others::before {
-      display: block;
-      inset: 6px 4px;
     }
 
     .others-label {
@@ -760,6 +739,16 @@ const jsonLd = {
       opacity: 1;
       translate: 0 0;
     }
+  }
+
+  /* After the first visit in this tab the map is shown settled: no draw-in, no arrival. */
+  .map-settled .in1,
+  .map-settled .in2,
+  .map-settled .in3,
+  .map-settled .in4,
+  .map-settled .in5 {
+    animation: none;
+    opacity: 1;
   }
 
   @media (prefers-reduced-motion: reduce) {

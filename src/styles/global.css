@@ -446,29 +446,141 @@ img {
 }
 
 
-/* ---------- review option: ?lines=fade ----------
-   Instead of a dark glow behind text, the orbit lines fade out where they pass behind it. */
+/* ---------- orbit lines stay clear of text ----------
+   src/scripts/keepout.ts cuts a hole in the lines around every line of text. Until it has
+   run the lines are hidden, so they never flash across a paragraph (without JavaScript they
+   are simply shown). On pages with a column
+   of text, the lines also fade out over that whole column. */
 
-.lines-fade .world-text::before,
-.lines-fade .others::before {
-  display: none;
+.js svg[data-keepout] .orbit-lines {
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
 }
 
-.lines-fade .project .orbits-backdrop,
-.lines-fade .profile .orbits-backdrop {
+.js svg[data-keepout].is-ready .orbit-lines {
+  opacity: 1;
+}
+
+.project .orbits-backdrop,
+.profile .orbits-backdrop {
   -webkit-mask-image: linear-gradient(180deg, #000 0, #000 380px, transparent 520px);
   mask-image: linear-gradient(180deg, #000 0, #000 380px, transparent 520px);
 }
 
 @media (min-width: 1000px) {
-  .lines-fade .project .orbits-backdrop {
+  .project .orbits-backdrop {
     -webkit-mask-image: linear-gradient(90deg, #000 0, #000 45%, transparent 51%, transparent 96%, #000 100%);
     mask-image: linear-gradient(90deg, #000 0, #000 45%, transparent 51%, transparent 96%, #000 100%);
   }
 
-  .lines-fade .profile .orbits-backdrop {
+  .profile .orbits-backdrop {
     -webkit-mask-image: linear-gradient(90deg, #000 0, #000 33%, transparent 39%, transparent 96%, #000 100%);
     mask-image: linear-gradient(90deg, #000 0, #000 33%, transparent 39%, transparent 96%, #000 100%);
+  }
+}
+
+/* ---------- links that open in a new tab ---------- */
+
+.newtab {
+  flex: none;
+  margin-left: 7px;
+  opacity: 0.85;
+}
+
+/* ---------- page transitions ----------
+   Native cross-document view transitions (no client-side router). src/scripts/transitions.ts
+   picks the kind (zoom-in, zoom-out, slide-next, slide-prev) and names the element that
+   travels between pages ("hero"). Off entirely for reduced motion; browsers without the
+   feature just navigate. */
+
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.25s;
+  transform-origin: var(--vt-origin, 50% 50%);
+}
+
+/* the world that travels: above the page, moving on one eased curve */
+::view-transition-group(hero) {
+  z-index: 2;
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::view-transition-old(hero),
+::view-transition-new(hero) {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* map to project: the sky comes towards you and fades, the project page settles in */
+html:active-view-transition-type(zoom-in)::view-transition-old(root) {
+  animation: 0.5s cubic-bezier(0.4, 0, 0.2, 1) both vt-pass;
+}
+
+html:active-view-transition-type(zoom-in)::view-transition-new(root) {
+  animation: 0.5s cubic-bezier(0.4, 0, 0.2, 1) both vt-arrive;
+}
+
+/* project to map: the same, backwards */
+html:active-view-transition-type(zoom-out)::view-transition-old(root) {
+  animation: 0.5s cubic-bezier(0.4, 0, 0.2, 1) both reverse vt-arrive;
+}
+
+html:active-view-transition-type(zoom-out)::view-transition-new(root) {
+  animation: 0.5s cubic-bezier(0.4, 0, 0.2, 1) both reverse vt-pass;
+}
+
+/* project to project: a short slide in route order */
+html:active-view-transition-type(slide-next)::view-transition-old(root) {
+  animation: 0.3s cubic-bezier(0.4, 0, 0.2, 1) both vt-out-left;
+}
+
+html:active-view-transition-type(slide-next)::view-transition-new(root) {
+  animation: 0.3s cubic-bezier(0.4, 0, 0.2, 1) both reverse vt-out-right;
+}
+
+html:active-view-transition-type(slide-prev)::view-transition-old(root) {
+  animation: 0.3s cubic-bezier(0.4, 0, 0.2, 1) both vt-out-right;
+}
+
+html:active-view-transition-type(slide-prev)::view-transition-new(root) {
+  animation: 0.3s cubic-bezier(0.4, 0, 0.2, 1) both reverse vt-out-left;
+}
+
+@keyframes vt-pass {
+  to {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes vt-arrive {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+
+@keyframes vt-out-left {
+  to {
+    opacity: 0;
+    transform: translateX(-56px);
+  }
+}
+
+@keyframes vt-out-right {
+  to {
+    opacity: 0;
+    transform: translateX(56px);
   }
 }
 

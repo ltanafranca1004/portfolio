@@ -1,8 +1,10 @@
 ---
 import '../styles/global.css';
 import ContactPanel from '../components/ContactPanel.astro';
+import transitions from '../scripts/transitions.js?raw';
 import jostUrl from '@fontsource-variable/jost/files/jost-latin-wght-normal.woff2?url';
 import { person } from '../lib/content';
+import { projects } from '../lib/projects';
 import { absoluteUrl, IS_PRODUCTION, OG_IMAGE } from '../lib/site';
 
 interface Props {
@@ -23,7 +25,7 @@ const imageAlt = `${person.name}, ${person.title}: a gold route map over a navy 
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-projects={projects.map((p) => p.slug).join(',')}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -33,14 +35,27 @@ const imageAlt = `${person.name}, ${person.title}: a gold route map over a navy 
     {(noindex || !IS_PRODUCTION) && <meta name="robots" content="noindex, nofollow" />}
     <meta name="theme-color" content="#050815" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="sitemap" href="/sitemap.xml" />
     <link rel="preload" as="font" type="font/woff2" href={jostUrl} crossorigin />
     <slot name="head" />
     <script is:inline>
-      // review option: ?lines=fade swaps the dark glow behind text for orbit lines that fade out
-      if (new URLSearchParams(location.search).get('lines') === 'fade') document.documentElement.classList.add('lines-fade');
+      // lets CSS hide the orbit lines until the script that keeps them off text has run
+      document.documentElement.classList.add('js');
     </script>
+    <!--
+      Page transitions use the browser's own cross-document view transitions (switched on in
+      global.css), not a client-side router: every navigation is a normal page load.
+        map to project      the clicked world grows into the hero ring; the sky zooms in
+        project to map      the reverse
+        project to project  a short sideways slide, in route order
+      The script is inline and the page waits for #page-end before its first paint, because
+      the browser asks which transition to run at that first paint: the listener and the
+      elements it names must both exist by then. Browsers without the feature just navigate.
+    -->
+    <link rel="expect" href="#page-end" blocking="render" />
+    <script is:inline set:html={transitions} />
 
     <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={person.name} />
@@ -61,8 +76,10 @@ const imageAlt = `${person.name}, ${person.title}: a gold route map over a navy 
   </head>
   <body>
     <slot />
+    <span id="page-end" hidden></span>
     <ContactPanel />
     <script>
+      import '../scripts/keepout';
       import '../scripts/analytics';
     </script>
   </body>

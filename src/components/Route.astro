@@ -125,6 +125,21 @@ const LEAD_OUT = 'M 1470 160 C 1560 130, 1800 90, 2040 60';
     }
   }
 
+  /* after the first visit in this tab (see index.astro) the route is simply there */
+  :global(.map-settled) .route-draw {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+
+  :global(.map-settled) .lead-out {
+    animation: none;
+    opacity: 1;
+  }
+
+  :global(.map-settled) .comet {
+    animation: none;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .route-draw {
       animation: none;
