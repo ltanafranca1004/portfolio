@@ -43,6 +43,17 @@ const imageAlt = `${person.name}, ${person.title}: a gold route map over a navy 
     <script is:inline>
       // lets CSS hide the orbit lines until the script that keeps them off text has run
       document.documentElement.classList.add('js');
+      // The window size as plain numbers (--vw, --vh), so CSS can work out the stage scale with
+      // ordinary division. The CSS-only way, tan(atan2(100vw, 1440px)), is wrong in Safari 18.
+      (() => {
+        const root = document.documentElement;
+        const size = () => {
+          root.style.setProperty('--vw', String(root.clientWidth || innerWidth));
+          root.style.setProperty('--vh', String(innerHeight));
+        };
+        size();
+        for (const type of ['resize', 'pageshow', 'DOMContentLoaded']) addEventListener(type, size);
+      })();
     </script>
     <!--
       Page transitions use the browser's own cross-document view transitions (switched on in

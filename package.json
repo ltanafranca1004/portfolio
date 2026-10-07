@@ -18,6 +18,7 @@
     "test:analytics": "node scripts/check-analytics.mjs",
     "test:keepout": "node scripts/check-keepout.mjs",
     "test:transitions": "node scripts/check-transitions.mjs",
+    "test:phone": "node scripts/check-phone.mjs",
     "screenshots": "node scripts/screenshots.mjs",
     "lighthouse": "node scripts/lighthouse.mjs",
     "og": "node scripts/make-og.mjs"

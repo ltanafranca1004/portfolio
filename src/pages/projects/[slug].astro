@@ -78,6 +78,18 @@ const track = (url: string) => (isGitHub(url) ? { 'data-event': 'github_click', 
             )
           }
         </div>
+        <script is:inline>
+          // The hero is drawn at 520px and scaled to its box. The scale is measured here and not
+          // worked out in CSS: tan(atan2(100cqw, 520px)) comes out wrong in Safari 18 (0.14 on a
+          // 430px-wide iPhone, where it should be 0.69), which left the hero tiny in a corner.
+          (() => {
+            const hero = document.currentScript.parentElement;
+            const fit = () => hero.style.setProperty('--hero-s', (hero.clientWidth / 520).toFixed(4));
+            fit();
+            if ('ResizeObserver' in window) new ResizeObserver(fit).observe(hero);
+            else addEventListener('resize', fit);
+          })();
+        </script>
       </div>
 
       <main class="project-main">
@@ -252,13 +264,14 @@ const track = (url: string) => (isGitHub(url) ? { 'data-event': 'github_click', 
     padding: 24px 20px 0;
   }
 
-  /* The hero is drawn at the mockup's 520px and scaled to whatever room it has. */
+  /* The hero is drawn at the mockup's 520px and scaled to whatever room it has. The script
+     inside .hero measures the scale; the numbers here are what it comes to without JavaScript. */
   .hero {
     position: relative;
     flex: none;
     width: min(100%, 360px);
     aspect-ratio: 1;
-    container-type: inline-size;
+    --hero-s: 0.6731;
     --float-rise: -10px;
   }
 
@@ -269,7 +282,7 @@ const track = (url: string) => (isGitHub(url) ? { 'data-event': 'github_click', 
     width: 520px;
     height: 520px;
     transform-origin: 0 0;
-    transform: scale(tan(atan2(100cqw, 520px)));
+    transform: scale(var(--hero-s));
   }
 
   .hero-flat {
@@ -544,6 +557,7 @@ const track = (url: string) => (isGitHub(url) ? { 'data-event': 'github_click', 
 
     .hero {
       width: min(100%, 420px);
+      --hero-s: 0.8077;
     }
 
     .facts {
@@ -598,6 +612,7 @@ const track = (url: string) => (isGitHub(url) ? { 'data-event': 'github_click', 
       justify-self: end;
       width: min(100%, 520px);
       margin: 50px 0 0;
+      --hero-s: 1;
     }
 
     .project-foot {

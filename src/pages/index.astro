@@ -396,17 +396,12 @@ const jsonLd = {
       overflow: clip;
     }
 
+    /* Fit the width, but never let the three main worlds (790px of the design) fall below the
+       fold. --vw and --vh are the window size as plain numbers, set in layouts/Base.astro. */
     .stage-wrap {
-      --s: 1;
+      --s: clamp(0.83, min(var(--vw, 1440) / 1440, var(--vh, 790) / 790), 1.25);
       width: calc(1440px * var(--s));
       height: calc(900px * var(--s));
-    }
-
-    /* Fit the width, but never let the three main worlds (790px of the design) fall below the fold. */
-    @supports (width: calc(1px * tan(atan2(1px, 1px)))) {
-      .stage-wrap {
-        --s: clamp(0.83, min(tan(atan2(100vw, 1440px)), tan(atan2(100vh, 790px))), 1.25);
-      }
     }
 
     .map .stage {
