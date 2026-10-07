@@ -9,9 +9,10 @@ export interface Project {
   name: string;
   /** Page heading: the full name where there is one. */
   title: string;
-  /** "Destination 2 of 3", or "Other project". */
-  label: string;
-  badge: string;
+  /** Position on the route, 1 to 7: the three destinations first, then the other projects. */
+  position: number;
+  /** "Destination" or "Other project": what the badge calls it. */
+  kind: string;
   chips: string[];
   description: string;
   highlights: string[];
@@ -38,8 +39,8 @@ export const projects: Project[] = [
       slug: d.slug,
       name: d.name,
       title: d.name,
-      label: `Destination ${d.order} of ${destinations.length}`,
-      badge: String(d.order),
+      position: 0,
+      kind: 'Destination',
       chips: d.chips,
       description: d.description,
       highlights: d.highlights,
@@ -62,8 +63,8 @@ export const projects: Project[] = [
       slug: o.slug,
       name: o.name,
       title: 'fullName' in o && o.fullName ? o.fullName : o.name,
-      label: 'Other project',
-      badge: '+',
+      position: 0,
+      kind: 'Other project',
       chips: [o.tag],
       description: o.description,
       highlights: o.highlights,
@@ -81,6 +82,15 @@ export const projects: Project[] = [
     }),
   ),
 ];
+
+projects.forEach((project, i) => (project.position = i + 1));
+
+/** The projects before and after one, in route order, wrapping round at both ends. */
+export function neighbours(project: Project): { prev: Project; next: Project } {
+  const i = projects.indexOf(project);
+  const at = (n: number): Project => projects[(n + projects.length) % projects.length]!;
+  return { prev: at(i - 1), next: at(i + 1) };
+}
 
 /** Split text around the phrases to highlight, in the order they appear. */
 export function highlight(text: string, phrases: string[]): { text: string; mark: boolean }[] {

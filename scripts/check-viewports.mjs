@@ -29,10 +29,11 @@ for (const [width, height] of SIZES) {
         const el = document.querySelector(sel);
         return el ? Math.round(el.getBoundingClientRect().bottom) : 0;
       };
-      return { title: bottom('.title-row'), role: bottom('.facts'), awards: bottom('.awards'), primary: bottom('.primary'), scroll: document.documentElement.scrollHeight, overflowX: document.documentElement.scrollWidth - innerWidth };
+      return { title: bottom('.title-row'), role: bottom('.facts'), awards: bottom('.awards'), primary: bottom('.primary'), pager: bottom('.pager'), scroll: document.documentElement.scrollHeight, overflowX: document.documentElement.scrollWidth - innerWidth };
     });
-    const lowest = Math.max(p.title, p.role, p.awards);
-    rows.push({ size: `${width}x${height}`, page: slug, 'worlds bottom': '', fits: lowest <= height, 'title/role/awards bottom': lowest, 'primary button bottom': p.primary, 'page height': p.scroll, 'x overflow': p.overflowX });
+    // title, role, awards or tag line, the primary button and the previous/next arrows
+    const lowest = Math.max(p.title, p.role, p.awards, p.primary, p.pager);
+    rows.push({ size: `${width}x${height}`, page: slug, 'worlds bottom': '', fits: lowest <= height, 'title/role/awards bottom': Math.max(p.title, p.role, p.awards), 'primary button bottom': p.primary, 'pager bottom': p.pager, 'page height': p.scroll, 'x overflow': p.overflowX });
   }
   await page.close();
 }
