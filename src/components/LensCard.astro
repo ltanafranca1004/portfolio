@@ -23,10 +23,10 @@ const set = async (widths: number[], unit: (w: number, i: number) => string) => 
 // browser picks by width: 446 and 804 CSS px on wide screens, about 310 and 560 on a phone.
 const fallback = await file(hero ? 892 : 238);
 const cardSet = hero ? await set([640, 892, 1340], (w) => `${w}w`) : await set([238, 476, 714], (_, i) => `${i + 1}x`);
-const cardSizes = hero ? '(min-width: 1000px) 446px, 310px' : undefined;
+const cardSizes = hero ? '(min-width: 1200px) 446px, (min-width: 640px) 360px, 310px' : undefined;
 const loupe = await file(hero ? 1340 : 1026);
 const loupeSet = hero ? await set([1026, 1340], (w) => `${w}w`) : undefined;
-const loupeSizes = hero ? '(min-width: 1000px) 804px, 560px' : undefined;
+const loupeSizes = hero ? '(min-width: 1200px) 804px, (min-width: 640px) 650px, 560px' : undefined;
 ---
 
 <div class="lens-card" aria-hidden="true">

@@ -14,12 +14,13 @@ import { BASE, playwright } from './browsers.mjs';
 
 const PHONES = [
   [390, 844],
+  [390, 664], // the same phone with Safari's toolbars showing
   [430, 932],
 ];
 const PROJECTS = ['unify', 'cubic', 'lens', 'turtle-trips', 'amenity-recommender', 'pipeline-simulator', 'nutrifit'];
 const SELFTEST = process.argv.includes('--selftest');
 if (SELFTEST) {
-  PHONES.splice(0, 1);
+  PHONES.splice(0, 2);
   PROJECTS.splice(2);
 }
 

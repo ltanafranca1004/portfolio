@@ -116,6 +116,25 @@ img {
   stroke-width: 1.6;
 }
 
+/* On project pages and the profile the block is the back control: an arrow in a circle. */
+.brand-arrow {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgb(var(--gold-rgb) / 0.55);
+  background: rgb(var(--sky-rgb) / 0.45);
+  color: var(--gold);
+}
+
+.brand-back:hover .brand-arrow {
+  background: var(--gold);
+  color: var(--ink);
+}
+
 .brand-kicker {
   display: block;
   font-size: 15px;
@@ -226,6 +245,17 @@ img {
     right: 20px;
     top: 22px;
     padding: 0 18px;
+  }
+
+  .site-header-slim .site-nav {
+    margin-top: 0;
+  }
+}
+
+/* project pages on phones and tablets: only the back control and Contact */
+@media (max-width: 1199px) {
+  .site-header-slim .header-extra {
+    display: none;
   }
 }
 
@@ -467,12 +497,14 @@ img {
   mask-image: linear-gradient(180deg, #000 0, #000 380px, transparent 520px);
 }
 
-@media (min-width: 1000px) {
+@media (min-width: 1200px) {
   .project .orbits-backdrop {
     -webkit-mask-image: linear-gradient(90deg, #000 0, #000 45%, transparent 51%, transparent 96%, #000 100%);
     mask-image: linear-gradient(90deg, #000 0, #000 45%, transparent 51%, transparent 96%, #000 100%);
   }
+}
 
+@media (min-width: 1000px) {
   .profile .orbits-backdrop {
     -webkit-mask-image: linear-gradient(90deg, #000 0, #000 33%, transparent 39%, transparent 96%, #000 100%);
     mask-image: linear-gradient(90deg, #000 0, #000 33%, transparent 39%, transparent 96%, #000 100%);
