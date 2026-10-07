@@ -142,7 +142,7 @@ const track = (url: string) => (isGitHub(url) ? { 'data-event': 'github_click', 
               {
                 project.shots.map((shot) => (
                   <figure>
-                    <Pic class={shot.pixelated ? 'px' : undefined} src={asset(shot.src)} width={294} widths={[320, 640, 900]} sizes="(min-width: 640px) 294px, 46vw" alt={shot.alt} crisp={shot.pixelated} />
+                    <Pic class={shot.pixelated ? 'px' : undefined} src={asset(shot.src)} width={294} widths={[320, 640, 900]} sizes="(min-width: 640px) 294px, 46vw" alt={shot.alt} crisp={shot.pixelated} eagerWide />
                     <figcaption>{shot.caption}</figcaption>
                   </figure>
                 ))
@@ -191,10 +191,6 @@ const track = (url: string) => (isGitHub(url) ? { 'data-event': 'github_click', 
 </script>
 
 <style is:global>
-  .project {
-    --sky-position: 30% center;
-  }
-
   /* ---- "3 of 7", and previous and next ----
      Wide screens: all three in the header. Below 1200px: the badge sits small above the
      title and previous and next are two buttons at the end of the page. */

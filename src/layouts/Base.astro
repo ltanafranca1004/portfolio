@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import ContactPanel from '../components/ContactPanel.astro';
+import keepout from '../scripts/keepout.js?raw';
 import transitions from '../scripts/transitions.js?raw';
 import jostUrl from '@fontsource-variable/jost/files/jost-latin-wght-normal.woff2?url';
 import { person } from '../lib/content';
@@ -59,8 +60,12 @@ const imageAlt = `${person.name}, ${person.title}: a gold route map over a navy 
     <link rel="preload" as="font" type="font/woff2" href={jostUrl} crossorigin />
     <slot name="head" />
     <script is:inline>
-      // lets CSS hide the orbit lines until the script that keeps them off text has run
-      document.documentElement.classList.add('js');
+      // The stage and the orbit lines stay hidden until the page is settled: the text is in its
+      // real font and the lines are masked around it (scripts/keepout.js, at the end of the
+      // content, lifts this before the first paint whenever the font is already here). After
+      // three seconds the page shows whatever state it is in.
+      document.documentElement.classList.add('settling');
+      setTimeout(() => document.documentElement.classList.remove('settling'), 3000);
       // The window size as plain numbers (--vw, --vh), so CSS can work out the stage scale with
       // ordinary division. The CSS-only way, tan(atan2(100vw, 1440px)), is wrong in Safari 18.
       // Only the wide layout uses them. Below it nothing is set, so a phone's toolbar hiding
@@ -83,18 +88,23 @@ const imageAlt = `${person.name}, ${person.title}: a gold route map over a navy 
         };
         size();
         for (const type of ['resize', 'pageshow', 'DOMContentLoaded']) addEventListener(type, size);
+        document.addEventListener('prerenderingchange', size);
       })();
     </script>
     <!--
+      Chrome and Edge: when a link to another page of this site is hovered for a moment or
+      pressed, that page is loaded and rendered in the background, so the click shows it at
+      once. Other browsers get the page and its main picture fetched instead (scripts/prefetch.ts).
+    -->
+    <script type="speculationrules" is:inline set:html={JSON.stringify({ prerender: [{ where: { or: [{ href_matches: '/' }, { href_matches: '/profile/' }, { href_matches: '/projects/*' }] }, eagerness: 'moderate' }] })} />
+    <!--
       Page transitions use the browser's own cross-document view transitions, not a
-      client-side router: every navigation is a normal page load.
-        map to project or profile   the clicked world grows into the hero ring (or the photo)
-        back to the map             the reverse
-        project to project          the hero and text cross-fade with a short sideways shift
-      The sky never moves in any of them (see global.css).
-      The script is inline and the page waits for #page-end before its first paint, because
-      the browser asks which transition to run at that first paint: the listener and the
-      elements it names must both exist by then. Browsers without the feature just navigate.
+      client-side router: every navigation is a normal page load, and the old page cross-fades
+      into the new one over 200ms (see global.css). Browsers without the feature just navigate.
+
+      The page waits for #page-end, its last element, before its first paint. Measured in
+      Session 7: that costs 0 to 16ms of first paint, and without it a slow connection paints
+      the page in pieces (twice as many things appear or change after the first paint).
     -->
     <link rel="expect" href="#page-end" blocking="render" />
     <script is:inline set:html={transitions} />
@@ -118,11 +128,24 @@ const imageAlt = `${person.name}, ${person.title}: a gold route map over a navy 
   </head>
   <body>
     <slot />
+    <script is:inline>
+      // Pictures that are on the first screen only in the wide layout (the map's later worlds,
+      // a project's screenshots): fetched at once there, with priority, and drawn in the same
+      // frame they arrive in. On a phone they are far down the page and stay lazy.
+      if (innerWidth >= 1200) {
+        for (const img of document.querySelectorAll('img[data-eager-wide]')) {
+          img.loading = 'eager';
+          img.decoding = 'sync';
+          img.fetchPriority = 'high';
+        }
+      }
+    </script>
+    <script is:inline set:html={keepout} />
     <span id="page-end" hidden></span>
     <ContactPanel />
     <script>
-      import '../scripts/keepout';
       import '../scripts/offscreen';
+      import '../scripts/prefetch';
       import '../scripts/analytics';
     </script>
   </body>

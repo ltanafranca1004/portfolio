@@ -1,8 +1,8 @@
 // Checks the page transitions and records them.
 //   node scripts/check-transitions.mjs
-// - Chromium and WebKit: map to project zooms in, back zooms out, previous/next slide; About me
-//   zooms into the profile and back; Esc returns to the map, except with the contact panel
-//   open, when it only closes the panel.
+// - Chromium and WebKit: every navigation between pages is a view transition (a 200ms
+//   cross-fade) with nothing named, so nothing travels; Esc returns to the map, except with
+//   the contact panel open, when it only closes the panel.
 // - Firefox (no cross-document view transitions yet): plain navigation, no errors.
 // - Reduced motion: plain navigation everywhere.
 // Output in redesign/screenshots/: transition-chromium.webm, transition-webkit.webm, and
@@ -97,6 +97,12 @@ async function run(engine, { reducedMotion = 'no-preference', video = false, fra
   await page.keyboard.press('Escape');
   await landed(page, '/');
   seen.aboutBack = await kind(page);
+  // nothing is named, so nothing is drawn into a picture of its own and moved
+  seen.length = await page.evaluate(() => {
+    for (const sheet of document.styleSheets) for (const rule of sheet.cssRules) if (rule.selectorText?.includes('::view-transition-old(root)')) return rule.style.animationDuration;
+    return 'not set';
+  });
+  seen.mapNamed = await page.evaluate(() => [...document.querySelectorAll('body *')].filter((el) => getComputedStyle(el).viewTransitionName !== 'none').map((el) => el.className).join());
 
   await context.close();
   await browser.close();
@@ -112,15 +118,16 @@ const KINDS = ['in', 'out', 'next', 'prev', 'wrap', 'esc', 'about', 'aboutBack']
 const frames = [];
 for (const engine of ['chromium', 'webkit']) {
   const { seen, errors } = await run(engine, { video: true, frames: engine === 'chromium' ? frames : null });
-  report(seen.in === 'zoom-in', `${engine}: map to project is "${seen.in}"`);
-  report(seen.out === 'zoom-out', `${engine}: project to map is "${seen.out}"`);
+  report(seen.in === 'fade', `${engine}: map to project is "${seen.in}"`);
+  report(seen.out === 'fade', `${engine}: project to map is "${seen.out}"`);
   report(seen.settled, `${engine}: the map is shown settled on return (no second draw-in)`);
-  report(seen.next === 'slide-next' && seen.prev === 'slide-prev', `${engine}: Right arrow is "${seen.next}", Left arrow is "${seen.prev}"`);
-  report(seen.wrap === 'slide-prev', `${engine}: previous from the first project wraps to the last ("${seen.wrap}")`);
+  report(seen.next === 'fade' && seen.prev === 'fade', `${engine}: Right arrow is "${seen.next}", Left arrow is "${seen.prev}"`);
+  report(seen.wrap === 'fade', `${engine}: previous from the first project wraps to the last ("${seen.wrap}")`);
   report(seen.escPanel === '/projects/nutrifit/ panel closed', `${engine}: Esc with the contact panel open only closes the panel (${seen.escPanel})`);
-  report(seen.esc === 'zoom-out', `${engine}: Esc on a project page goes back to the map ("${seen.esc}")`);
-  report(seen.about === 'zoom-in' && seen.aboutBack === 'zoom-out', `${engine}: About me to the profile is "${seen.about}", Esc back is "${seen.aboutBack}"`);
-  report(seen.aboutNamed === 'none', `${engine}: nothing stays named after a transition (${seen.aboutNamed})`);
+  report(seen.esc === 'fade', `${engine}: Esc on a project page goes back to the map ("${seen.esc}")`);
+  report(seen.about === 'fade' && seen.aboutBack === 'fade', `${engine}: About me to the profile is "${seen.about}", Esc back is "${seen.aboutBack}"`);
+  report(seen.length === '0.2s', `${engine}: the cross-fade is ${seen.length} long`);
+  report(seen.aboutNamed === 'none' && seen.mapNamed === '', `${engine}: nothing on a page has a view-transition-name (profile ring "${seen.aboutNamed}", map "${seen.mapNamed}")`);
   report(errors.length === 0, `${engine}: ${errors.length} errors ${errors.slice(0, 2).join(' | ')}`);
 }
 {

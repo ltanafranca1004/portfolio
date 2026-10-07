@@ -81,9 +81,11 @@ img {
   object-position: center top;
 }
 
+/* On wide screens the sky is the same picture in the same place on every page, so it does
+   not move when one page hands over to the next. */
 @media (min-width: 1200px) {
   .sky img {
-    object-position: var(--sky-position, center);
+    object-position: center;
   }
 }
 
@@ -490,32 +492,39 @@ img {
 }
 
 
-/* ---------- orbit lines stay clear of text ----------
-   src/scripts/keepout.ts cuts a hole in the lines around every line of text. Until it has
-   run the lines are hidden, so they never flash across a paragraph (without JavaScript they
-   are simply shown). On pages with a column
-   of text, the lines also fade out over that whole column. */
+/* ---------- nothing is shown before it is settled ----------
+   src/scripts/keepout.js cuts a hole in the orbit lines around every line of text, measured
+   with the text in its real font. Until that is done (.settling, set in the head of the page)
+   the stage and the lines are not shown, so no text is ever painted in one font and then
+   another, and no line is painted across a paragraph and then masked. When the font is
+   already here, which is every page after the first, it is done before the first paint and
+   the page is simply there. Otherwise both fade in once (.settle-fade).
+   Without JavaScript nothing is hidden and the lines are not masked.
+   On pages with a column of text, the lines also fade out over that whole column. */
 
-.js svg[data-keepout] .orbit-lines {
+.settling .stage,
+.settling svg[data-keepout] {
   opacity: 0;
-  transition: opacity 0.3s ease-out;
 }
 
-.js svg[data-keepout].is-ready .orbit-lines {
-  opacity: 1;
+.settle-fade .stage,
+.settle-fade svg[data-keepout] {
+  animation: settle 0.2s ease-out;
 }
 
-/* the lines are masked, and a masked element is slow to animate on a phone: no fade there */
-@media (max-width: 1199px), (pointer: coarse) {
-  .js svg[data-keepout] .orbit-lines {
-    transition: none;
+@keyframes settle {
+  from {
+    opacity: 0;
   }
 }
 
-.project .orbits-backdrop,
-.profile .orbits-backdrop {
-  -webkit-mask-image: linear-gradient(180deg, #000 0, #000 380px, transparent 520px);
-  mask-image: linear-gradient(180deg, #000 0, #000 380px, transparent 520px);
+/* Phones and tablets have no orbit lines behind project pages and the profile. They were a
+   faint strip at the top of the page, and the masked drawing made the page's text blink out
+   for a frame or two during page transitions in Safari's engine (Session 7 recordings). */
+@media (max-width: 1199px) {
+  .orbits-backdrop {
+    display: none;
+  }
 }
 
 /* On the stage the column of text is at a fixed place, measured from the middle of the page:
@@ -544,125 +553,19 @@ img {
 }
 
 /* ---------- page transitions ----------
-   Native cross-document view transitions (no client-side router). src/scripts/transitions.js
-   picks the kind (zoom-in, zoom-out, slide-next, slide-prev, fade) and names the parts that
-   move. Off entirely for reduced motion; browsers without the feature just navigate. The
-   opt-in itself (@view-transition) is inline in layouts/Base.astro.
+   Native cross-document view transitions (no client-side router), and one kind only: the old
+   page and the new one cross-fade in place over 200ms. Nothing has a view-transition-name, so
+   nothing moves. The sky is the same picture in the same place on both pages, so it stands
+   still while the rest changes over it. Off entirely for reduced motion; browsers without the
+   feature just navigate. The opt-in itself (@view-transition) is inline in layouts/Base.astro.
 
-   The page (root) holds the sky. It only ever cross-fades in place, old over new at full
-   strength, so no frame can show the empty backdrop: nothing slides or scales away from it.
-   The named parts animate above it with mix-blend-mode: normal, as plain fades. */
+   (Sessions 5 and 6 grew the clicked world into the page's hero. Session 7 measured it: with
+   only the small ring named it ran at 60 frames a second in Chrome, but in Safari's engine the
+   map blinked out and the screen went black for about 200ms on the way back, so it is gone.) */
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 0.28s;
-}
-
-/* the world that travels: above everything, moving on one eased curve */
-::view-transition-group(hero) {
-  z-index: 2;
-  animation-duration: 0.5s;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-::view-transition-old(hero),
-::view-transition-new(hero) {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  animation-duration: 0.5s;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* the stage, or a project's hero and text: the box stays put, only its picture animates */
-::view-transition-group(map),
-::view-transition-group(content) {
-  animation: none;
-}
-
-::view-transition-old(map),
-::view-transition-new(map),
-::view-transition-old(content),
-::view-transition-new(content) {
-  mix-blend-mode: normal;
-  transform-origin: var(--vt-origin, 50% 50%);
-}
-
-/* map to a project or the profile: the map comes towards you and fades, the page settles in */
-html:active-view-transition-type(zoom-in)::view-transition-old(map) {
-  animation: 0.5s cubic-bezier(0.4, 0, 0.2, 1) both vt-pass;
-}
-
-html:active-view-transition-type(zoom-in)::view-transition-new(content) {
-  animation: 0.5s cubic-bezier(0.4, 0, 0.2, 1) both vt-arrive;
-}
-
-/* back to the map: the same, backwards */
-html:active-view-transition-type(zoom-out)::view-transition-old(content) {
-  animation: 0.5s cubic-bezier(0.4, 0, 0.2, 1) both reverse vt-arrive;
-}
-
-html:active-view-transition-type(zoom-out)::view-transition-new(map) {
-  animation: 0.5s cubic-bezier(0.4, 0, 0.2, 1) both reverse vt-pass;
-}
-
-/* project to project: the hero and text cross-fade with a 20px shift in the direction of travel */
-html:active-view-transition-type(slide-next)::view-transition-old(content) {
-  animation: 0.28s cubic-bezier(0.4, 0, 0.2, 1) both vt-out-left;
-}
-
-html:active-view-transition-type(slide-next)::view-transition-new(content) {
-  animation: 0.28s cubic-bezier(0.4, 0, 0.2, 1) both reverse vt-out-right;
-}
-
-html:active-view-transition-type(slide-prev)::view-transition-old(content) {
-  animation: 0.28s cubic-bezier(0.4, 0, 0.2, 1) both vt-out-right;
-}
-
-html:active-view-transition-type(slide-prev)::view-transition-new(content) {
-  animation: 0.28s cubic-bezier(0.4, 0, 0.2, 1) both reverse vt-out-left;
-}
-
-/* The two fades overlap (the old page holds for a moment, the new one is solid before the
-   end), so the picture never thins out to bare sky half way through. */
-@keyframes vt-pass {
-  25% {
-    opacity: 1;
-  }
-  85% {
-    opacity: 0;
-  }
-  to {
-    opacity: 0;
-    transform: scale(1.12);
-  }
-}
-
-@keyframes vt-arrive {
-  from {
-    opacity: 0;
-    transform: scale(0.94);
-  }
-  15% {
-    opacity: 0;
-  }
-  75% {
-    opacity: 1;
-  }
-}
-
-@keyframes vt-out-left {
-  to {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-}
-
-@keyframes vt-out-right {
-  to {
-    opacity: 0;
-    transform: translateX(20px);
-  }
+  animation-duration: 0.2s;
 }
 
 /* ---------- utilities ---------- */
@@ -701,6 +604,11 @@ html:active-view-transition-type(slide-prev)::view-transition-new(content) {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .settle-fade .stage,
+  .settle-fade svg[data-keepout] {
+    animation: none;
+  }
+
   .float,
   .float2,
   .spin,
