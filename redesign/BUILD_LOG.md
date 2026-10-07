@@ -98,3 +98,53 @@ Preview: https://redesign.luistanafranca.pages.dev/projects/unify/ (and `/cubic/
 7. **Screenshot thumbnails keep the mockup's 294:150 framing at every size** (they are not
    cropped tighter on phones).
 8. **Primary button hover** turns gold. The mockups define no hover state for it.
+
+## Session 3: profile, contact panel, phone layouts (2026-10-06)
+
+Preview: https://redesign.luistanafranca.pages.dev/profile/ (the contact panel opens from the
+Contact button on any page)
+
+### Built
+- Profile page (`src/pages/profile.astro`) from `ProfileOne.html`: one page, tab bar pinned
+  while scrolling and following the section in view, photo column pinned on wide screens,
+  experience, skills tree, education, and the closing call to action (Email me, Resume).
+- Contact panel (`src/components/ContactPanel.astro`) from `MainContact.html`, on every page.
+  It is a native modal dialog: focus stays inside it, Esc and the close button dismiss it, a
+  click outside closes it, and focus returns to the Contact button.
+- Phone and tablet layouts for the map, all seven project pages, the profile and the panel.
+  Checked at 375, 768 and 1440 wide: no sideways scrolling anywhere.
+
+### Judgment calls and things I was unsure about
+1. **Pinned photo column holds the back link.** In the mockup "Back to the map" sits at the
+   bottom left of a 2020px page. With the column pinned it is under the photo and always in
+   view; on phones it is at the end of the page.
+2. **Pinned tab bar has a dark backing** so text does not show through it as the page scrolls.
+   The mockup's bar is transparent because it never moves.
+3. **Tabs.** Skills and Education are one stop on wide screens. The bar highlights Skills there
+   unless Education was the tab you clicked. On phones they are separate stops.
+4. **Skills tree text is larger than the mockup** (about 13px instead of 9 to 13px), and the
+   group names sit above and below each cluster so they do not collide with the skills. On
+   phones the labels are set larger again so they stay readable.
+5. **The page heading is the name under the photo** (`h1`). The mockup had no `h1`.
+6. **"Resume" has no accent anywhere**, including "View full resume (PDF)".
+7. **Email in the photo column is a link.** It is plain text in the mockup.
+8. **Orbit lines on the profile** keep their size and sit at the top of the page, as in the
+   mockup, instead of stretching over the whole page.
+9. **Contact panel labels** ("TODAY", "REPLY") are darker than the mockup's grey, which was too
+   faint on cream for small text.
+10. **Contact panel on phones** is anchored to the bottom of the screen, full width.
+11. **"Download my resume"** opens `/resume.pdf` in the browser; it does not force a download.
+12. **Without JavaScript** the Contact button is a plain `mailto:` link, the cube shows its
+    still frame, and the tab bar keeps "Profile" highlighted.
+
+### Not done yet (Session 4)
+Lighthouse pass, Open Graph images and JSON-LD, PostHog. `data-track` attributes are already on
+Resume, Contact and every world so analytics can hook in.
+
+### Things to look at when you review
+- Reduced motion was checked with a headless Chrome capture (everything drawn, nothing moving,
+  cube on its still frame). Keyboard order was checked on the map and inside the contact panel.
+- Not tested on a real phone or in Safari or Firefox. The stage scaling uses CSS `tan(atan2())`,
+  which needs Safari 15.4, Chrome 111 or Firefox 108 and newer; older browsers get the map at
+  a fixed 1440px.
+- A fresh `.pages.dev` address took a few minutes before its certificate worked.
