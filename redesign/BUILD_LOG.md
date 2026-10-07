@@ -268,3 +268,98 @@ check passed for `3a459a47f63c6f049c3217b090c824dd`).
 11. **The favicon is still the old site's orange "LT".** Not in scope, so unchanged.
 12. **New heading on the map:** a visually hidden "Projects" heading labels the list.
 13. **404 page copy** ("This page is not on the map") is mine.
+
+## Session 5: polish and transitions (2026-10-06)
+
+Preview: https://redesign.luistanafranca.pages.dev (deployed through `scripts/deploy.sh`; account
+check passed for `3a459a47f63c6f049c3217b090c824dd`). No production deploy, domain, DNS or
+GitHub Pages change.
+
+### What changed
+1. **Glow removed everywhere.** No dark glow, no dark fills behind text, and the `?lines=`
+   switch is gone. Also removed: the text shadow the mockup had on map headings and blurbs,
+   the dark fill on phone chips, and the dark fill of the phone "Other projects" box (its gold
+   border stays). The profile tab bar has no box: what scrolls under it is blurred instead.
+2. **Lines and nodes keep 14px from text.** `src/scripts/keepout.ts` measures every line of
+   text on the page and cuts a feathered hole in the orbit drawing around it, so this holds on
+   every page at any size, for lines and node markers alike. Pinned text (the profile photo
+   column and tab bar) clears its whole scroll path. Project and profile pages also fade the
+   lines over the whole text column, as in version B. `npm run test:keepout` checks it from
+   pixels on 9 pages at 6 sizes (1280x720, 1366x768, 1440x790, 1920x960, 768x1024, 390x844) at
+   every scroll position: all 54 pass, and its self-test fails as it should with the mask off.
+3. **Profile.** The gold eyebrow labels are gone; the back link's small label says "Map".
+4. **Route animation** plays on the first map load in a browser tab (a `sessionStorage` flag).
+   After that the map appears settled.
+5. **Sharper images.** Map art and project images now ship 1x, 2x and 3x files (AVIF and WebP).
+   The Lens card and loupe come from the full-size capture (1340px wide, recovered from this
+   repo's history) instead of the 760px copy: the loupe on the map gets a file three times its
+   CSS size. Quality is up too (AVIF 62, WebP 84; pixel art 72 and 90).
+6. **Previous and next** on every project page, in the header beside the badge, with the
+   neighbour's name, looping. Left and Right arrow keys work (not while typing, not while the
+   contact panel is open). The badge counts all seven: "Destination 3 of 7", "Other project 4
+   of 7". They are on the first screen at every tested size.
+7. **Page transitions** with native cross-document view transitions, no ClientRouter. Map to
+   project: the clicked world grows into the hero ring while the sky scales to 1.12 and fades
+   (500ms). Back: the reverse. Previous and next: a 56px sideways slide (300ms). Off for reduced
+   motion. `npm run test:transitions` passes in Chromium and WebKit; Firefox navigates plainly
+   with no errors.
+8. **Links.** GitHub, LinkedIn, Resume and every project link open in a new tab with
+   `rel="noopener noreferrer"`, a spoken "(opens in new tab)" and a small arrow (not on the two
+   icon buttons). Email links stay in the same tab. The contact panel has "Copy email".
+9. **PostHog** persistence is `sessionStorage`. Nothing else changed.
+10. **Project buttons moved up**, under the role and facts. With title, role and awards or tag
+    line they end between 428 and 509px, so all are on the first screen at 1280x720 and up.
+11. **Favicon:** a gold map pin on navy (`favicon.svg`, `favicon-32.png`, 180px touch icon).
+
+### Lighthouse (deployed preview)
+| Page | Form | Perf / A11y / BP / SEO | LCP | First load |
+|---|---|---|---|---|
+| `/` | mobile | 100 / 100 / 100 / 69 | 1.26s | 198 KB, 13 requests (was 141 KB) |
+| `/` | desktop | 99 / 100 / 100 / 69 | 0.62s | 249 KB, 18 requests (was 209 KB) |
+| `/projects/unify/` | mobile | 100 / 100 / 100 / 69 | 1.25s | 100 KB, 11 requests (was 92 KB) |
+| `/projects/unify/` | desktop | 100 / 100 / 100 / 69 | 0.54s | 93 KB, 11 requests (was 85 KB) |
+| `/projects/lens/` | mobile | 99 / 100 / 100 / 69 | 2.03s | 204 KB, 12 requests |
+| `/projects/lens/` | desktop | 100 / 100 / 100 / 69 | 0.45s | 185 KB, 12 requests |
+
+SEO stays at 69 on the preview because of the intended noindex. CLS is 0 and blocking time 0ms
+everywhere. The extra weight is the sharper images. Lens on mobile ranged from 1.6s to 2.3s LCP
+across three runs: under 2.5s, but the closest to it.
+
+### Did Session 4 compression make images worse?
+No. Session 4 did not touch image compression. The softness came from earlier choices: files
+sized for 1x that the page then enlarged (the Lens card was a 380px file drawn 2.35x larger on
+the Lens page, and its loupe a 684px file drawn at up to 1600 device pixels), and default
+AVIF quality on screenshots full of small text.
+
+### Judgment calls and limits
+1. **Lens page loupe is 1.7x, not 2x or 3x.** There the loupe layer is 804 CSS px wide and the
+   best source is 1340px. A 2x screen wants 1608. Sharper needs a new, larger capture of that
+   Lens screen. On the map the loupe is past 3x.
+2. **Turtle Trips screenshots are still soft on 2x.** Their sources are 430 and 455px wide for a
+   294px slot.
+3. **Tab bar.** With no backing, text scrolling under the pinned tabs would collide with them,
+   so the bar blurs what is behind it. It is not a dark panel, but it is not nothing either.
+4. **Text shadow removed.** The mockup's dark text shadow on the map is a glow of its own, so
+   I took "no dark glow or shadow behind text" to cover it.
+5. **Where the buttons went.** The mockup has them bottom right. They are now in the text
+   column under the facts, on phones too. The footer keeps only "Back to the map".
+6. **Prev and next are in the header**, not at the page edges, so they are always on the first
+   screen. On phones they sit on their own row under the badge.
+7. **Badge wording for the last four** is "Other project 4 of 7".
+8. **A fix found by testing:** the transition script first loaded with the other scripts, and
+   WebKit often decided on the transition before it ran. It is now inline in the head, and the
+   page waits for its last element before first paint (`rel="expect"`).
+9. **Playwright's cut-down headless Chromium skips transitions at random**, so that test runs
+   in the full Chromium build. WebKit is Playwright's build, not Safari itself.
+10. **Without JavaScript** the orbit lines are not masked and cross text as in the mockup, and
+    the route draws in on every map visit.
+11. **Keep-out leaves the profile's left column nearly bare of lines**, because the pinned
+    name and back link clear a strip all the way down the page.
+12. **`sessionStorage` now also holds** a "map seen" flag and the last transition's zoom centre.
+    Neither is sent anywhere.
+13. **Copy email** says "Copy failed" if the browser refuses clipboard access.
+
+### Files for review (`redesign/screenshots/`, git-ignored)
+`map-before-after.jpg`, `profile-before-after.jpg`, `lens-before-after.jpg`,
+`loupe-before-after.png`, `transition-frames.png`, `transition-chromium.webm`,
+`transition-webkit.webm`, and `browsers/` for the cross-browser sheets.
