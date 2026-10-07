@@ -1,0 +1,6 @@
+# Cloudflare Pages project on Luis's PERSONAL account only.
+# scripts/deploy.sh refuses to deploy if wrangler is signed in to any other account.
+name = "luistanafranca"
+account_id = "3a459a47f63c6f049c3217b090c824dd"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-10-01"
