@@ -66,12 +66,12 @@ const LEAD_OUT = 'M 1470 160 C 1560 130, 1800 90, 2040 60';
   .route-draw {
     stroke-dasharray: 1900;
     stroke-dashoffset: 1900;
-    animation: draw 1.6s cubic-bezier(0.65, 0, 0.35, 1) 0.1s forwards;
+    animation: draw 0.9s cubic-bezier(0.65, 0, 0.35, 1) 0.05s forwards;
   }
 
   .lead-out {
     opacity: 0;
-    animation: lead 0.4s ease-out 1.5s forwards;
+    animation: lead 0.3s ease-out 0.7s forwards;
   }
 
   .comet-origin {
@@ -96,7 +96,7 @@ const LEAD_OUT = 'M 1470 160 C 1560 130, 1800 90, 2040 60';
       0 0 40px 12px rgb(232 194 122 / 0.55);
     offset-rotate: 0deg;
     opacity: 0;
-    animation: ride 1.6s cubic-bezier(0.65, 0, 0.35, 1) 0.1s forwards;
+    animation: ride 0.9s cubic-bezier(0.65, 0, 0.35, 1) 0.05s forwards;
   }
 
   @keyframes draw {

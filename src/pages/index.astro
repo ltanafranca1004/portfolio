@@ -487,34 +487,35 @@ const jsonLd = {
     }
 
 
-    /* worlds arrive one by one as the comet passes */
+    /* Worlds arrive one by one as the comet passes: the first visit in a tab only, and all
+       of it done in one second (the last world starts at 0.5s and takes 0.5s). */
     .in1,
     .in2,
     .in3,
     .in4,
     .in5 {
       opacity: 0;
-      animation: arrive 0.6s ease-out forwards;
+      animation: arrive 0.5s ease-out forwards;
     }
 
     .in1 {
-      animation-delay: 0.35s;
+      animation-delay: 0.1s;
     }
 
     .in2 {
-      animation-delay: 0.6s;
+      animation-delay: 0.2s;
     }
 
     .in3 {
-      animation-delay: 0.85s;
+      animation-delay: 0.3s;
     }
 
     .in4 {
-      animation-delay: 1.1s;
+      animation-delay: 0.4s;
     }
 
     .in5 {
-      animation-delay: 1.3s;
+      animation-delay: 0.5s;
     }
 
     .others {
