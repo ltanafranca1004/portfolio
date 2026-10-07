@@ -36,6 +36,15 @@ const imageAlt = `${person.name}, ${person.title}: a gold route map over a navy 
         or one page hands over to the next;
       - the opt-in to page transitions. In the stylesheet it sometimes arrived after the
         browser had already decided this page had not opted in, and the transition was dropped.
+
+      Safari gets no page transitions: Chrome and Edge cross-fade, Safari on macOS and every
+      browser on iOS (they are all Safari's engine, Chrome for iPhone included) navigate
+      plainly and at once. Safari is told apart by a feature, not by its name: only Apple's
+      WebKit understands the system font keyword in "font: -apple-system-body", so the opt-in
+      sits inside "@supports not (...)" and Safari never sees it. Checked in Playwright's
+      WebKit (true) and in Chromium and Firefox (false); scripts/check-transitions.mjs fails
+      if WebKit ever runs a transition or Chromium stops. The prefetch (scripts/prefetch.ts)
+      is separate and stays on.
     -->
     <style is:inline>
       html,
@@ -43,8 +52,10 @@ const imageAlt = `${person.name}, ${person.title}: a gold route map over a navy 
         background: #050815;
       }
       @media (prefers-reduced-motion: no-preference) {
-        @view-transition {
-          navigation: auto;
+        @supports not (font: -apple-system-body) {
+          @view-transition {
+            navigation: auto;
+          }
         }
       }
     </style>
@@ -99,8 +110,9 @@ const imageAlt = `${person.name}, ${person.title}: a gold route map over a navy 
     <script type="speculationrules" is:inline set:html={JSON.stringify({ prerender: [{ where: { or: [{ href_matches: '/' }, { href_matches: '/profile/' }, { href_matches: '/projects/*' }] }, eagerness: 'moderate' }] })} />
     <!--
       Page transitions use the browser's own cross-document view transitions, not a
-      client-side router: every navigation is a normal page load, and the old page cross-fades
-      into the new one over 200ms (see global.css). Browsers without the feature just navigate.
+      client-side router: every navigation is a normal page load, and in Chrome and Edge the
+      old page cross-fades into the new one over 200ms (see global.css). Safari and browsers
+      without the feature just navigate.
 
       The page waits for #page-end, its last element, before its first paint. Measured in
       Session 7: that costs 0 to 16ms of first paint, and without it a slow connection paints

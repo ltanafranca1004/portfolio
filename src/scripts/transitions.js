@@ -1,7 +1,8 @@
 // Page-to-page transitions (see the notes in layouts/Base.astro, which inlines this file).
 //
 // Every transition is the same: the old page and the new one cross-fade in place over 200ms
-// (global.css). Nothing is named, so nothing travels and nothing is drawn into a picture of
+// (global.css), in Chrome and Edge. Safari has no opt-in, so these events carry no transition
+// there and it navigates plainly. Nothing is named, so nothing travels and nothing is drawn into a picture of
 // its own. This script only records that a transition ran, for the checks, and keeps a
 // skipped transition's rejected promises out of the console.
 (() => {

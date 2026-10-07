@@ -556,8 +556,9 @@ img {
    Native cross-document view transitions (no client-side router), and one kind only: the old
    page and the new one cross-fade in place over 200ms. Nothing has a view-transition-name, so
    nothing moves. The sky is the same picture in the same place on both pages, so it stands
-   still while the rest changes over it. Off entirely for reduced motion; browsers without the
-   feature just navigate. The opt-in itself (@view-transition) is inline in layouts/Base.astro.
+   still while the rest changes over it. Off entirely for reduced motion and in Safari (macOS
+   and iOS); browsers without the feature just navigate. The opt-in itself (@view-transition),
+   and how Safari is left out of it, is inline in layouts/Base.astro.
 
    (Sessions 5 and 6 grew the clicked world into the page's hero. Session 7 measured it: with
    only the small ring named it ran at 60 frames a second in Chrome, but in Safari's engine the

@@ -1,10 +1,14 @@
 // Checks the page transitions and records them.
 //   node scripts/check-transitions.mjs
-// - Chromium and WebKit: every navigation between pages is a view transition (a 200ms
-//   cross-fade) with nothing named, so nothing travels; Esc returns to the map, except with
-//   the contact panel open, when it only closes the panel.
+// - Chromium (Chrome and Edge): every navigation between pages is a view transition (a 200ms
+//   cross-fade) with nothing named, so nothing travels.
+// - WebKit (Safari on macOS and iOS, and every other browser on iOS): no view transitions at
+//   all. The opt-in is inside "@supports not (font: -apple-system-body)" in layouts/Base.astro,
+//   which only Apple's WebKit understands. This check fails if WebKit ever runs a transition.
 // - Firefox (no cross-document view transitions yet): plain navigation, no errors.
 // - Reduced motion: plain navigation everywhere.
+// - Everywhere: Esc returns to the map, except with the contact panel open, when it only
+//   closes the panel, and the map is shown settled on return.
 // Output in redesign/screenshots/: transition-chromium.webm, transition-webkit.webm, and
 // transition-frames.png (frames of map to Unify and back, from Chromium).
 import { mkdirSync, readdirSync, renameSync, rmSync } from 'node:fs';
@@ -102,6 +106,7 @@ async function run(engine, { reducedMotion = 'no-preference', video = false, fra
     for (const sheet of document.styleSheets) for (const rule of sheet.cssRules) if (rule.selectorText?.includes('::view-transition-old(root)')) return rule.style.animationDuration;
     return 'not set';
   });
+  seen.detected = await page.evaluate(() => CSS.supports('font: -apple-system-body'));
   seen.mapNamed = await page.evaluate(() => [...document.querySelectorAll('body *')].filter((el) => getComputedStyle(el).viewTransitionName !== 'none').map((el) => el.className).join());
 
   await context.close();
@@ -116,8 +121,9 @@ async function run(engine, { reducedMotion = 'no-preference', video = false, fra
 mkdirSync(OUT, { recursive: true });
 const KINDS = ['in', 'out', 'next', 'prev', 'wrap', 'esc', 'about', 'aboutBack'];
 const frames = [];
-for (const engine of ['chromium', 'webkit']) {
-  const { seen, errors } = await run(engine, { video: true, frames: engine === 'chromium' ? frames : null });
+{
+  const engine = 'chromium';
+  const { seen, errors } = await run(engine, { video: true, frames });
   report(seen.in === 'fade', `${engine}: map to project is "${seen.in}"`);
   report(seen.out === 'fade', `${engine}: project to map is "${seen.out}"`);
   report(seen.settled, `${engine}: the map is shown settled on return (no second draw-in)`);
@@ -127,7 +133,18 @@ for (const engine of ['chromium', 'webkit']) {
   report(seen.esc === 'fade', `${engine}: Esc on a project page goes back to the map ("${seen.esc}")`);
   report(seen.about === 'fade' && seen.aboutBack === 'fade', `${engine}: About me to the profile is "${seen.about}", Esc back is "${seen.aboutBack}"`);
   report(seen.length === '0.2s', `${engine}: the cross-fade is ${seen.length} long`);
+  report(!seen.detected, `${engine}: not taken for Safari by the feature check`);
   report(seen.aboutNamed === 'none' && seen.mapNamed === '', `${engine}: nothing on a page has a view-transition-name (profile ring "${seen.aboutNamed}", map "${seen.mapNamed}")`);
+  report(errors.length === 0, `${engine}: ${errors.length} errors ${errors.slice(0, 2).join(' | ')}`);
+}
+{
+  // Safari's engine: the same journey, and not one view transition
+  const engine = 'webkit';
+  const { seen, errors } = await run(engine, { video: true });
+  report(KINDS.every((k) => seen[k] === 'none'), `${engine}: plain navigation everywhere, no view transitions (${[...new Set(KINDS.map((k) => seen[k]))]})`);
+  report(seen.detected, `${engine}: told apart by the feature check, @supports (font: -apple-system-body)`);
+  report(seen.settled, `${engine}: the map is shown settled on return (no second draw-in)`);
+  report(seen.escPanel === '/projects/nutrifit/ panel closed', `${engine}: Esc with the contact panel open only closes the panel (${seen.escPanel})`);
   report(errors.length === 0, `${engine}: ${errors.length} errors ${errors.slice(0, 2).join(' | ')}`);
 }
 {
