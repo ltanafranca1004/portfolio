@@ -212,7 +212,6 @@ const jsonLd = {
   }
 
   .world-text {
-    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -263,12 +262,15 @@ const jsonLd = {
     padding: 3px 10px;
   }
 
-  /* The whole world is the link target; the heading holds the link itself. */
+  /* One link per world. The heading holds it, and it is stretched over the whole world: the
+     ring, the picture or cube inside it, and the text. Nothing between the link and .world
+     (or .mini) may be positioned, or the stretch stops there. The ring floats up to 8px
+     above its box, so the link reaches a little higher too. */
   .world-link::after,
   .mini-link::after {
     content: '';
     position: absolute;
-    inset: 0;
+    inset: -10px 0 0;
     z-index: 1;
   }
 
