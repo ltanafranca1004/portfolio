@@ -23,5 +23,7 @@ export function record(file) {
       });
       ffmpeg.stdin.write('q');
       ffmpeg.stdin.end();
+      // a recorder that never got its first frame does not hear "q": do not wait for it forever
+      setTimeout(() => ffmpeg.kill('SIGKILL'), 5000).unref();
     });
 }

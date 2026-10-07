@@ -714,6 +714,17 @@ at the same time.
 | Cold load, map: things changing after first paint | 25 | 25 | 15 |
 | Cold load, map: first paint | 116ms | 116ms | 122ms |
 
+A later run of the current build with Low Power Mode off and the Mac left alone (on battery,
+no added latency), which is the one to trust for "now":
+
+| Real Safari, current build, clean run | |
+|---|---|
+| First frame of each of the 8 transitions | 74 to 97ms |
+| Every frame after it | 13 to 25ms (two of 33 to 34ms, arriving on the map) |
+| Click to the new page's first frame | 22 to 39ms |
+| Transition length | 254 to 281ms |
+| Things changing after first paint, arriving on a page | 0, or 2 where there is a cube |
+
 So Safari was already worse in Session 5 than Chrome ever was, Session 6 did not fix it, and
 it is now one long first frame (about 100 to 120ms, the new page setting up) followed by
 steady frames. **That first frame is over the 33ms target.** I did not chase it: the numbers
