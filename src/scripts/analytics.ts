@@ -78,6 +78,11 @@ if (enabled) {
     if ('requestIdleCallback' in window) requestIdleCallback(() => void load(), { timeout: 4000 });
     else setTimeout(() => void load(), 1500);
   };
-  if (document.readyState === 'complete') start();
-  else window.addEventListener('load', start, { once: true });
+  const whenLoaded = (): void => {
+    if (document.readyState === 'complete') start();
+    else window.addEventListener('load', start, { once: true });
+  };
+  // A page rendered ahead of a click (speculation rules) is not a visit until it is shown.
+  if ((document as Document & { prerendering?: boolean }).prerendering) document.addEventListener('prerenderingchange', whenLoaded, { once: true });
+  else whenLoaded();
 }
