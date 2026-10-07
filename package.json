@@ -23,6 +23,10 @@
     "test:tabs": "node scripts/check-tabs.mjs",
     "test:worlds": "node scripts/check-worlds.mjs",
     "perf:phone": "node scripts/perf-phone.mjs",
+    "measure:chrome": "node scripts/measure/chrome.mjs",
+    "measure:safari": "node scripts/measure/safari.mjs",
+    "measure:iphone": "node scripts/measure/webkit-phone.mjs",
+    "measure:report": "node scripts/measure/report.mjs",
     "screenshots": "node scripts/screenshots.mjs",
     "lighthouse": "node scripts/lighthouse.mjs",
     "og": "node scripts/make-og.mjs"
