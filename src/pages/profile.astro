@@ -49,6 +49,15 @@ const treeLabel = `Skills. ${Object.entries(skills)
   .map(([group, items]) => `${group}: ${items.join(', ')}`)
   .join('. ')}.`;
 
+// The highlights repeat facts that each project already states (its chips and facts). The
+// build stops if one of them is no longer said there, so the two cannot drift apart.
+const highlights = person.highlights.map((item) => {
+  const project = [...content.destinations, ...content.otherProjects].find((p) => p.slug === item.project);
+  if (!project) throw new Error(`content.json: highlight "${item.value}" names an unknown project "${item.project}"`);
+  if (!JSON.stringify(project).toLowerCase().includes(item.value.toLowerCase())) throw new Error(`content.json: highlight "${item.value}" is not stated anywhere in the ${item.project} project`);
+  return item;
+});
+
 const description = metaDescription(`${person.bio} ${person.status}.`);
 ---
 
@@ -105,6 +114,18 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
                     ))
                   }
                 </dl>
+                <ul class="highlights" aria-label="Highlights">
+                  {
+                    highlights.map((item) => (
+                      <li>
+                        <a href={projectUrl(item.project)} data-event="project_open" data-slug={item.project} data-placement="profile_highlights">
+                          <strong>{item.value}</strong>
+                          <span>{item.label}</span>
+                        </a>
+                      </li>
+                    ))
+                  }
+                </ul>
                 <div class="cta">
                   <div>
                     <h3>{person.status}.</h3>
@@ -505,6 +526,44 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
     font-size: 16px;
   }
 
+  /* Highlights: the same row as the facts, larger. A number or a short title with a small
+     label under it, each one a link to its project. Two by two on phones. */
+  .highlights {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 12px;
+    margin: 0;
+    padding: 6px 0;
+    border-bottom: 1px solid rgb(var(--gold-rgb) / 0.2);
+    list-style: none;
+  }
+
+  .highlights a {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 44px;
+    padding: 12px 0;
+  }
+
+  .highlights strong {
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+
+  .highlights span {
+    font-size: 14px;
+    line-height: 1.35;
+    color: var(--text-muted);
+  }
+
+  .highlights a:hover span {
+    color: var(--text);
+  }
+
   /* the summary's call to action: what I am looking for, Email me, Resume */
   .cta {
     display: flex;
@@ -752,7 +811,8 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
       font-size: 18px;
     }
 
-    .quick-facts {
+    .quick-facts,
+    .highlights {
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
@@ -823,12 +883,36 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
       pointer-events: none;
     }
 
+    /* The Profile panel is centred against the photo column: the photo's ring starts 64px
+       below the top of the column and the name block ends at 566px, so their middle is at
+       315px. The tab bar takes the first 50px and stays where it is on every tab; the panel's
+       content is centred in the 470px from 80px to 550px, which has the same middle. */
+    #profile {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-self: start; /* not stretched to the tallest panel, which shares its cell */
+      box-sizing: border-box;
+      min-height: 500px;
+    }
+
+    /* spaced so the content nearly fills those 470px: its heading then sits where the other
+       tabs' headings do, and nothing shifts when the tab changes */
     .bio {
+      margin-bottom: 30px;
       font-size: 20px;
     }
 
+    .highlights {
+      padding: 16px 0;
+    }
+
+    .highlights strong {
+      font-size: 30px;
+    }
+
     .cta {
-      margin-top: 34px;
+      margin-top: 48px;
     }
 
     /* Experience: the current job across the full width, the two shorter ones side by side */

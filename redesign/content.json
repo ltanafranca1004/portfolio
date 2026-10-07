@@ -17,6 +17,12 @@
       { "label": "Expected", "value": "December 2027" },
       { "label": "Looking for", "value": "SWE co-op, 2027" },
       { "label": "Based in", "value": "Vancouver, BC" }
+    ],
+    "highlights": [
+      { "value": "500+", "label": "users on Unify", "project": "unify" },
+      { "value": "2", "label": "national awards", "project": "unify" },
+      { "value": "Best Design", "label": "StormHacks 2026, Cubic", "project": "cubic" },
+      { "value": "7", "label": "languages shipped", "project": "unify" }
     ]
   },
   "destinations": [
