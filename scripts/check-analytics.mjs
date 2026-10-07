@@ -93,7 +93,9 @@ for (const want of ['github_click', 'linkedin_click', 'resume_open', 'project_op
 report(custom.filter((e) => e.event === 'project_open').map((e) => e.properties.slug).join() === 'unify,pipeline-simulator', 'project_open carries the project slug');
 report(r.events.some((e) => e.event === '$pageview'), 'page view captured');
 report(r.logs.some((l) => l.startsWith('[analytics] contact_open')), `events are logged to the console (${r.logs.filter((l) => l.startsWith('[analytics]')).length} lines)`);
-report(r.cookies.length === 0 && !r.storage.cookie && r.storage.local.length === 0 && r.storage.session.length === 0, `nothing stored: ${r.cookies.length} cookies, localStorage [${r.storage.local}], sessionStorage [${r.storage.session}]`);
+// the map's own "seen" flag and the transition origin are not analytics
+const phKeys = r.storage.session.filter((k) => k.startsWith('ph_'));
+report(r.cookies.length === 0 && !r.storage.cookie && r.storage.local.length === 0 && phKeys.length > 0, `stored in sessionStorage only: ${r.cookies.length} cookies, localStorage [${r.storage.local}], sessionStorage [${r.storage.session}]`);
 const props = r.events.find((e) => e.event === '$pageview')?.properties ?? {};
 report(!r.events.some((e) => ['$autocapture', '$snapshot', '$$heatmap', '$rageclick', '$dead_click', '$pageleave'].includes(e.event)), 'no autocapture, recording, heatmap or page-leave events');
 console.log(`     page view: host=${props.$host} path=${props.$pathname} person profile=${props.$process_person_profile}`);

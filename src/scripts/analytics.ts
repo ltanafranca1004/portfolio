@@ -1,6 +1,7 @@
 // Privacy-first analytics (PostHog, Luis's personal project).
 //
-// - Nothing is stored on the visitor's device: no cookies, no local storage.
+// - No cookies and no local storage. A visitor ID is kept in sessionStorage only, so pages
+//   viewed in one tab count as one visit and it is gone when the tab closes.
 // - No session recording, no autocapture, no heatmaps, no surveys, no remote config.
 // - Do Not Track is respected.
 // - Events are only sent from the real site (the host in SITE_URL), never from localhost
@@ -30,7 +31,7 @@ function load(): Promise<Capture> {
     const [{ default: posthog }] = await Promise.all([import('posthog-js/dist/module.no-external'), import('posthog-js/dist/web-vitals')]);
     posthog.init(POSTHOG_KEY, {
       api_host: POSTHOG_HOST,
-      persistence: 'memory',
+      persistence: 'sessionStorage',
       person_profiles: 'identified_only',
       respect_dnt: !debug,
       // ?ph_debug=1: print each event. (PostHog's own debug flag is not used: it writes
