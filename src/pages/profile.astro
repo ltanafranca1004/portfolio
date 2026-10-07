@@ -64,7 +64,7 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
         <div class="profile-body">
           <aside class="profile-side">
             <div class="ring float profile-ring">
-              <img class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
+              <img class="ring-frame spin" src={frame.src} alt="" width="320" height="320" fetchpriority="high" />
               <Pic class="profile-photo" src={asset(person.photo)} width={328} alt={person.name} loading="eager" fetchpriority="high" />
             </div>
             <div class="identity">

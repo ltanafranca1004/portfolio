@@ -56,7 +56,7 @@ const track = (url: string) => (isGitHub(url) ? { 'data-event': 'github_click', 
         <div class="project-body">
           <div class="hero float">
             <div class="hero-stage">
-              <img class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
+              <img class="ring-frame spin" src={frame.src} alt="" width="320" height="320" fetchpriority="high" />
               {project.heroKind === 'image' && hero && <Pic class="hero-flat" src={hero} width={468} widths={[480, 720, 960]} sizes="(min-width: 1200px) 468px, (min-width: 640px) 378px, 80vw" alt={project.heroAlt} loading="eager" fetchpriority="high" />}
               {project.heroKind === 'cube' && <CubeCanvas class="hero-cube" alt={project.heroAlt} eager />}
               {

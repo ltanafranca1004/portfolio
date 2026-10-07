@@ -67,7 +67,7 @@ const jsonLd = {
 
         <main class="worlds">
           <World id="about" href={PROFILE_URL} title="About me" blurb={person.mapBlurb} blurbPhone={person.mapBlurbPhone} order={1}>
-            <img slot="frame" class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
+            <img slot="frame" class="ring-frame spin" src={frame.src} alt="" width="320" height="320" fetchpriority="high" />
             <Pic class="photo" src={asset(person.photo)} width={208} alt={person.name} loading="eager" />
           </World>
 
