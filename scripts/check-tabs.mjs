@@ -1,10 +1,11 @@
 // Checks the profile's tabs.
 //   node scripts/check-tabs.mjs
-// Wide screens, in Chromium, WebKit and Firefox: the ARIA tabs pattern (one Tab stop, arrow
+// In Chromium, WebKit and Firefox: the ARIA tabs pattern (one Tab stop, arrow
 // keys, Home and End), an address per tab that opens it directly and works with Back and
 // Forward, one panel showing with all four in the HTML, the summary on the Profile tab, a
 // cross-fade on switching and none under reduced motion.
-// Phones: the same links are plain jump links and every section is on the page.
+// Phones: the same four tabs, with the bar under the header (not pinned) and the panel
+// scrolling with the page.
 import { BASE, playwright } from './browsers.mjs';
 
 let failed = false;
@@ -122,19 +123,48 @@ for (const engine of ['chromium', 'webkit', 'firefox']) {
   report(moving === 0 && after.showing.join() === 'skills', `${engine}, reduced motion: the tab switches with ${moving} animations running`);
   await calm.close();
 
-  // phones: jump links, every section on the page
+  // phones: the same four tabs. The bar is straight under the header and is not pinned, one
+  // panel shows and scrolls with the page, and the address and the Back button work as on wide screens.
   if (engine !== 'firefox') {
     const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
     await phone.goto(`${BASE}/profile/`);
     await phone.waitForTimeout(400);
     s = await state(phone);
-    const sticky = await phone.evaluate(() => getComputedStyle(document.querySelector('.tabs')).position);
-    report(s.list === null && s.roles === ',,,' && s.showing.length === 4, `${engine}, phone: plain links, and all four sections are on the page (${s.showing.join(', ')})`);
-    report(sticky !== 'sticky' && sticky !== 'fixed', `${engine}, phone: the row of links is not pinned (${sticky})`);
+    const place = await phone.evaluate(() => {
+      const top = (sel) => Math.round(document.querySelector(sel).getBoundingClientRect().top);
+      const header = document.querySelector('.site-header').getBoundingClientRect();
+      return { position: getComputedStyle(document.querySelector('.tabs')).position, tabs: top('.tabs'), header: Math.round(header.bottom), photo: top('.profile-ring'), panel: top('#profile') };
+    });
+    report(s.list === 'tablist' && s.roles === 'tab,tab,tab,tab' && s.controls && s.stops === 1, `${engine}, phone: a tablist of four tabs, one Tab stop`);
+    report(s.showing.join() === 'profile' && s.selected.join() === 'Profile', `${engine}, phone: one panel on the page, Profile by default (${s.showing.join(', ')})`);
+    report(place.position !== 'sticky' && place.position !== 'fixed', `${engine}, phone: the tab bar is not pinned (${place.position})`);
+    report(place.tabs >= place.header && place.tabs - place.header < 40 && place.tabs < place.photo && place.photo < place.panel, `${engine}, phone: header (ends ${place.header}px), tab bar (${place.tabs}px), photo (${place.photo}px), panel (${place.panel}px), in that order`);
+    await phone.tap('.tabs a[href="#experience"]');
+    await phone.waitForTimeout(450);
     await phone.tap('.tabs a[href="#education"]');
-    await phone.waitForTimeout(1200);
-    const jumped = await phone.evaluate(() => ({ hash: location.hash, top: Math.round(document.querySelector('#education').getBoundingClientRect().top), scrollY: Math.round(scrollY) }));
-    report(jumped.hash === '#education' && jumped.scrollY > 500 && jumped.top < 400, `${engine}, phone: tapping Education jumps down to it (scrolled ${jumped.scrollY}px, section now ${jumped.top}px from the top)`);
+    await phone.waitForTimeout(450);
+    const tapped = await state(phone);
+    const still = await phone.evaluate(() => ({ scrollY: Math.round(scrollY), photo: document.querySelector('.profile-ring').getClientRects().length, sideways: document.documentElement.scrollWidth > innerWidth }));
+    report(tapped.hash === '#education' && tapped.showing.join() === 'education' && tapped.selected.join() === 'Education', `${engine}, phone: tapping Education shows it and sets the address (${tapped.hash}, showing ${tapped.showing.join(', ')})`);
+    report(still.scrollY === 0 && !still.sideways, `${engine}, phone: switching tabs does not move the page (scrolled ${still.scrollY}px)`);
+    report(still.photo === 0, `${engine}, phone: the photo belongs to the Profile tab (showing on Education: ${still.photo ? 'yes' : 'no'})`);
+    await phone.goBack();
+    await phone.waitForTimeout(450);
+    const back = await state(phone);
+    await phone.goBack();
+    await phone.waitForTimeout(450);
+    const backAgain = await state(phone);
+    report(back.showing.join() === 'experience' && back.hash === '#experience' && backAgain.showing.join() === 'profile', `${engine}, phone: Back walks the tabs (${back.hash} then ${backAgain.hash || '(none)'})`);
+    // a long panel scrolls with the page, and the bar scrolls away with it
+    await phone.goto(`${BASE}/profile/#experience`);
+    await phone.waitForTimeout(450);
+    const long = await phone.evaluate(async () => {
+      const tall = document.documentElement.scrollHeight - innerHeight;
+      scrollTo(0, tall);
+      await new Promise((done) => setTimeout(done, 100));
+      return { tall, tabsTop: Math.round(document.querySelector('.tabs').getBoundingClientRect().top), showing: [...document.querySelectorAll('[data-panel]')].filter((p) => p.checkVisibility({ visibilityProperty: true })).map((p) => p.id) };
+    });
+    report(long.showing.join() === 'experience' && long.tall > 100 && long.tabsTop < 0, `${engine}, phone: /profile/#experience opens Experience; the page scrolls ${long.tall}px and the tab bar scrolls away with it`);
     await phone.close();
   }
   await browser.close();

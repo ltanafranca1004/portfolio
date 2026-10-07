@@ -76,9 +76,9 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
 
           <div class="profile-main">
             <!--
-              Four sections. On wide screens the script below turns this into tabs (one panel
-              showing at a time); on phones and without JavaScript the links jump down the page.
-              Every panel is always in the HTML.
+              Four tabs at every width, one panel showing at a time. Every panel is always in
+              the HTML. Before the script below has run, and without JavaScript, the address
+              decides which one shows (#experience), so nothing changes when it takes over.
             -->
             <nav class="tabs" aria-label="Profile sections">
               {
@@ -223,15 +223,17 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
 </Base>
 
 <script>
-  // Tabs on wide screens (the one-screen layout), jump links below it.
+  // The four tabs, at every width.
   //
-  // In tab mode this is the ARIA tabs pattern: the row is a tablist with one Tab stop, the
-  // arrow keys (and Home and End) move between tabs and show their panel, and each tab has
-  // its own address (/profile/#experience) that opens it directly and that the Back button
-  // returns to. Panels cross-fade with a 16px shift in the direction of travel, 250ms; with
-  // reduced motion they simply swap.
+  // This is the ARIA tabs pattern: the row is a tablist with one Tab stop, the arrow keys (and
+  // Home and End) move between tabs and show their panel, and each tab has its own address
+  // (/profile/#experience) that opens it directly and that the Back button returns to.
+  // On wide screens the panels cross-fade with a 16px shift in the direction of travel, 250ms.
+  // On phones the panels have different heights and the page scrolls, so the old one simply
+  // goes and the new one fades in. With reduced motion they swap.
   const WIDE = window.matchMedia('(min-width: 1200px)');
   const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const body = document.querySelector<HTMLElement>('.profile-body');
   const list = document.querySelector<HTMLElement>('.tabs');
   const tabs = [...document.querySelectorAll<HTMLAnchorElement>('.tabs a[data-tab]')];
   const panels = [...document.querySelectorAll<HTMLElement>('[data-panel]')];
@@ -257,59 +259,39 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
       panel.classList.remove('is-leaving');
     }
     panels.forEach((panel, i) => panel.classList.toggle('is-active', i === index));
+    // phones show the photo and name on the Profile tab only (see the styles below)
+    if (body) body.dataset.tab = panels[index]?.id ?? '';
     const next = panels[index];
     const prev = panels[from];
     if (animate && next && prev && from !== index && !REDUCED.matches) {
       const shift = index > from ? 16 : -16;
       const timing = { duration: 250, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' };
       next.animate([{ opacity: 0, transform: `translateX(${shift}px)` }, { opacity: 1, transform: 'none' }], timing);
-      prev.classList.add('is-leaving');
-      prev.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${-shift}px)` }], timing).finished.then(
-        () => prev.classList.remove('is-leaving'),
-        () => undefined,
-      );
+      if (WIDE.matches) {
+        prev.classList.add('is-leaving');
+        prev.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${-shift}px)` }], timing).finished.then(
+          () => prev.classList.remove('is-leaving'),
+          () => undefined,
+        );
+      }
     }
     drawTree();
     // the text on show has changed: the orbit lines keep clear of what is there now
     document.dispatchEvent(new Event('keepout:update'));
   }
 
-  function setMode(): void {
-    const on = WIDE.matches;
-    document.documentElement.classList.toggle('tabbed', on);
-    if (on) {
-      list?.setAttribute('role', 'tablist');
-      tabs.forEach((tab, i) => {
-        tab.setAttribute('role', 'tab');
-        tab.setAttribute('aria-controls', panels[i]?.id ?? '');
-      });
-      panels.forEach((panel, i) => {
-        panel.setAttribute('role', 'tabpanel');
-        panel.setAttribute('aria-labelledby', tabs[i]?.id ?? '');
-      });
-      show(fromHash(), false);
-    } else {
-      list?.removeAttribute('role');
-      for (const tab of tabs) {
-        for (const name of ['role', 'aria-controls', 'aria-selected', 'tabindex']) tab.removeAttribute(name);
-      }
-      for (const panel of panels) {
-        for (const name of ['role', 'aria-labelledby']) panel.removeAttribute(name);
-        panel.classList.remove('is-active', 'is-leaving');
-      }
-    }
-  }
-
+  list?.setAttribute('role', 'tablist');
   tabs.forEach((tab, i) => {
+    tab.setAttribute('role', 'tab');
+    tab.setAttribute('aria-controls', panels[i]?.id ?? '');
     tab.addEventListener('click', (event) => {
-      if (!WIDE.matches || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
       // a real history entry, so Back returns to the tab before; no jump down the page
       if (location.hash !== tab.hash) history.pushState(null, '', tab.hash);
       show(i, true);
     });
     tab.addEventListener('keydown', (event) => {
-      if (!WIDE.matches) return;
       const to = { ArrowRight: (i + 1) % tabs.length, ArrowLeft: (i - 1 + tabs.length) % tabs.length, Home: 0, End: tabs.length - 1 }[event.key];
       const target = to === undefined ? undefined : tabs[to];
       if (to === undefined || !target) return;
@@ -319,25 +301,28 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
       show(to, true);
     });
   });
+  panels.forEach((panel, i) => {
+    panel.setAttribute('role', 'tabpanel');
+    panel.setAttribute('aria-labelledby', tabs[i]?.id ?? '');
+  });
   // Back and Forward, or an address typed with a different #tab
   window.addEventListener('popstate', () => {
-    if (WIDE.matches && fromHash() !== current) show(fromHash(), true);
+    if (fromHash() !== current) show(fromHash(), true);
   });
-  WIDE.addEventListener('change', setMode);
 
   if (tree && !REDUCED.matches) {
     tree.classList.add('is-waiting');
     new IntersectionObserver((entries) => entries.some((entry) => entry.isIntersecting) && drawTree(), { threshold: 0.3 }).observe(tree);
   }
-  setMode();
+  // the panel the address asked for is already the one showing: this only marks it
+  show(fromHash(), false);
+  document.documentElement.classList.add('tabbed');
 </script>
 
 <style is:global>
-  html:has(.profile) {
-    scroll-behavior: smooth;
-  }
-
-  /* ===== phones and tablets: one stacked page, the tabs are links that jump down it ===== */
+  /* ===== phones and tablets: header, the tab bar, then the one panel showing. The bar is
+     part of the page (not pinned) and the panel scrolls with it. The photo and name belong
+     to the Profile tab. ===== */
 
   .profile-body {
     display: flex;
@@ -409,11 +394,18 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
     color: var(--gold);
   }
 
+  /* the right column's two parts become items of the page's own column, so the tab bar can
+     sit first, straight under the header */
   .profile-main {
+    display: contents;
+  }
+
+  .panels {
     min-width: 0;
   }
 
   .tabs {
+    order: -1;
     display: flex;
     justify-content: space-between;
     gap: 8px;
@@ -446,8 +438,24 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
   }
 
   .panel {
-    padding-top: 32px;
-    scroll-margin-top: 8px;
+    display: none;
+    padding-top: 12px;
+  }
+
+  /* The script marks the panel to show. Before it runs, and without JavaScript, the address
+     decides (#experience), and with no #tab the Profile panel shows. */
+  .panel.is-active,
+  .panel.is-leaving,
+  html:not(.tabbed) .panel:target,
+  html:not(.tabbed) .panels:not(:has(.panel:target)) #profile {
+    display: block;
+  }
+
+  @media (max-width: 1199px) {
+    .profile-body[data-tab]:not([data-tab='profile']) .profile-side,
+    html:not(.tabbed) .profile-body:has(.panel:target:not(#profile)) .profile-side {
+      display: none;
+    }
   }
 
   .panel h2 {
@@ -775,6 +783,15 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
       padding-top: 64px;
     }
 
+    .profile-main {
+      display: block;
+      min-width: 0;
+    }
+
+    .tabs {
+      order: 0;
+    }
+
     .profile-ring {
       --d: 380px;
     }
@@ -789,13 +806,12 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
     }
 
     .panel {
+      display: block;
       grid-area: 1 / 1;
       padding-top: 30px;
       visibility: hidden;
     }
 
-    /* the script marks the panel to show; before it runs, and without JavaScript, the
-       address decides (#experience), and with no #tab the Profile panel shows */
     .panel.is-active,
     .panel.is-leaving,
     html:not(.tabbed) .panel:target,
@@ -854,12 +870,6 @@ const description = metaDescription(`${person.bio} ${person.status}.`);
 
     .courses li {
       font-size: 16px;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    html:has(.profile) {
-      scroll-behavior: auto;
     }
   }
 </style>
