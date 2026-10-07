@@ -13,7 +13,7 @@ const { alt = '', class: className = '', eager = false } = Astro.props;
 ---
 
 <span class={`cube ${className}`}>
-  <img class="cube-still px" src={still.src} alt={alt} width="252" height="252" loading={eager ? 'eager' : 'lazy'} decoding="async" />
+  <img class="cube-still px" src={still.src} alt={alt} width="252" height="252" loading={eager ? 'eager' : 'lazy'} decoding={eager ? 'sync' : 'async'} />
   <canvas class="cube-live px" width="252" height="252" data-cube data-atlas={atlas.src} aria-hidden="true"></canvas>
 </span>
 

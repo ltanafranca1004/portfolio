@@ -13,7 +13,10 @@ interface Props {
 }
 
 const { hero = false } = Astro.props;
+// On the map the card is on the first screen only in the wide layout (see layouts/Base.astro).
 const loading = hero ? 'eager' : 'lazy';
+const decoding = hero ? 'sync' : 'async';
+const eagerWide = hero ? undefined : '';
 const file = (width: number) => getImage({ src: hd, width, format: 'webp', quality: 88 });
 const set = async (widths: number[], unit: (w: number, i: number) => string) => (await Promise.all(widths.map(file))).map((img, i) => `${img.src} ${unit(widths[i]!, i)}`).join(', ');
 
@@ -31,7 +34,7 @@ const loupeSizes = hero ? '(min-width: 1200px) 804px, (min-width: 640px) 650px, 
 
 <div class="lens-card" aria-hidden="true">
   <div class="lens-tilt">
-    <img class="lens-shot" src={fallback.src} srcset={cardSet} sizes={cardSizes} alt="" width="190" height="85" loading={loading} decoding="async" fetchpriority={hero ? 'high' : undefined} />
-    <div class="loupe"><img class="loupe-img" src={loupe.src} srcset={loupeSet} sizes={loupeSizes} alt="" width="342" height="153" loading={loading} decoding="async" /></div>
+    <img class="lens-shot" src={fallback.src} srcset={cardSet} sizes={cardSizes} alt="" width="190" height="85" loading={loading} decoding={decoding} fetchpriority={hero ? 'high' : undefined} data-eager-wide={eagerWide} />
+    <div class="loupe"><img class="loupe-img" src={loupe.src} srcset={loupeSet} sizes={loupeSizes} alt="" width="342" height="153" loading={loading} decoding={decoding} data-eager-wide={eagerWide} /></div>
   </div>
 </div>

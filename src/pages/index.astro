@@ -51,7 +51,7 @@ const jsonLd = {
     }
   </script>
   <div class="page map staged">
-    <Sky priority />
+    <Sky />
     <div class="stage-wrap">
       <div class="stage">
         <Orbits class="only-desktop" />
@@ -77,14 +77,14 @@ const jsonLd = {
               <div class="connector only-mobile" aria-hidden="true"><span></span><i></i><span></span></div>
               <World id="unify" href={projectUrl(unify.slug)} title={unify.name} blurb={unify.mapBlurb} blurbPhone={unify.mapBlurbPhone} chips={unify.chips} order={2} float="float2" level={3}>
                 <img slot="frame" class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
-                <Pic class="unify-hero" src={asset('assets/d-unify-hero.webp')} width={255} alt={unify.heroAlt} />
+                <Pic class="unify-hero" src={asset('assets/d-unify-hero.webp')} width={255} alt={unify.heroAlt} loading="eager" />
               </World>
             </li>
             <li role="listitem">
               <div class="connector only-mobile" aria-hidden="true"><span></span><i></i><span></span></div>
               <World id="cubic" href={projectUrl(cubic.slug)} title={cubic.name} blurb={cubic.mapBlurb} blurbPhone={cubic.mapBlurbPhone} chips={cubic.chips} order={3} float="float2" level={3}>
                 <img slot="frame" class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
-                <CubeCanvas class="world-cube" />
+                <CubeCanvas class="world-cube" eager />
               </World>
             </li>
             <li role="listitem">
@@ -105,11 +105,11 @@ const jsonLd = {
                 otherProjects.map((project) => (
                   <li class="mini">
                     <div class="ring mini-ring float only-desktop" aria-hidden="true">
-                      <img class="ring-frame spin" src={frame.src} alt="" width="320" height="320" loading="lazy" />
+                      <img class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
                       {project.slug === 'turtle-trips' && (
                         <>
-                          <div class="turtle-card"><img src={turtleCard.src} alt="" width="84" height="67" loading="lazy" /></div>
-                          <img class="turtle-mascot" src={turtleMascot.src} alt="" width="40" height="62" loading="lazy" />
+                          <div class="turtle-card"><img src={turtleCard.src} alt="" width="84" height="67" loading="lazy" decoding="async" data-eager-wide /></div>
+                          <img class="turtle-mascot" src={turtleMascot.src} alt="" width="40" height="62" loading="lazy" decoding="async" data-eager-wide />
                         </>
                       )}
                       {project.slug === 'amenity-recommender' && (
@@ -131,7 +131,7 @@ const jsonLd = {
                       {project.slug === 'nutrifit' && (
                         <div class="recipe">
                           <div>
-                            <img src={nutrifitBanner.src} alt="" width="76" height="16" loading="lazy" />
+                            <img src={nutrifitBanner.src} alt="" width="76" height="16" loading="lazy" decoding="async" data-eager-wide />
                             <p><span></span><span></span><span></span></p>
                           </div>
                         </div>

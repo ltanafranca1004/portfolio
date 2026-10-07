@@ -15,12 +15,14 @@ interface Props {
   sizes?: string;
   class?: string;
   loading?: 'lazy' | 'eager';
+  /** On the first screen only in the wide layout: lazy in the HTML, made eager there (layouts/Base.astro). */
+  eagerWide?: boolean;
   fetchpriority?: 'high' | 'auto';
   /** Pixel art and small text: compress less. */
   crisp?: boolean;
 }
 
-const { src, alt, width, densities = [1, 2, 3], widths, sizes, class: className, loading = 'lazy', fetchpriority, crisp = false } = Astro.props;
+const { src, alt, width, densities = [1, 2, 3], widths, sizes, class: className, loading = 'lazy', eagerWide = false, fetchpriority, crisp = false } = Astro.props;
 const quality = { avif: crisp ? 72 : 62, webp: crisp ? 90 : 84 };
 
 // never ask for more pixels than the source has
@@ -37,5 +39,5 @@ const height = Math.round((width * src.height) / src.width);
 <picture>
   <source type="image/avif" srcset={avif} sizes={widths ? sizes : undefined} />
   <source type="image/webp" srcset={webp} sizes={widths ? sizes : undefined} />
-  <img class={className} src={fallback.src} alt={alt} width={width} height={height} loading={loading} decoding="async" fetchpriority={fetchpriority} />
+  <img class={className} src={fallback.src} alt={alt} width={width} height={height} loading={loading} decoding={loading === 'eager' ? 'sync' : 'async'} fetchpriority={fetchpriority} data-eager-wide={eagerWide ? '' : undefined} />
 </picture>
