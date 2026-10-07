@@ -19,14 +19,14 @@ const file = (width: number) => getImage({ src: hd, width, format: 'webp', quali
 // card: 190 CSS px on the map (up to 238 when the map is scaled up), 446 on the Lens page
 const card = await Promise.all((hero ? [892, 1340] : [238, 476, 714]).map(file));
 const cardSet = hero ? `${card[0]!.src} 1x, ${card[1]!.src} 2x` : `${card[0]!.src} 1x, ${card[1]!.src} 2x, ${card[2]!.src} 3x`;
-// loupe layer: 342 CSS px on the map, 804 on the Lens page
-const loupe = await Promise.all((hero ? [1340] : [1026, 1340]).map(file));
-const loupeSet = hero ? undefined : `${loupe[0]!.src} 1x, ${loupe[1]!.src} 2x`;
+// loupe layer: 342 CSS px on the map (one file at three times that covers 2x screens and the
+// scaled-up map), 804 on the Lens page (the whole source)
+const loupe = await file(hero ? 1340 : 1026);
 ---
 
 <div class="lens-card" aria-hidden="true">
   <div class="lens-tilt">
     <img class="lens-shot" src={card[0]!.src} srcset={cardSet} alt="" width="190" height="85" loading={loading} decoding="async" fetchpriority={hero ? 'high' : undefined} />
-    <div class="loupe"><img class="loupe-img" src={loupe[0]!.src} srcset={loupeSet} alt="" width="342" height="153" loading={loading} decoding="async" /></div>
+    <div class="loupe"><img class="loupe-img" src={loupe.src} alt="" width="342" height="153" loading={loading} decoding="async" /></div>
   </div>
 </div>
