@@ -1,0 +1,44 @@
+---
+// A 2-wide, 5-stage pipeline with instructions stepping through it (viewBox 100 x 64).
+interface Props {
+  width: number;
+  /** Given a label the drawing is announced as an image; without one it is decorative. */
+  label?: string;
+}
+
+const { width, label } = Astro.props;
+const height = Math.round(width * 0.64 * 10) / 10;
+const STAGES = ['IF', 'ID', 'EX', 'MEM', 'WB'];
+const TOKENS = [
+  { fill: '#7aa7d9', y: 18 },
+  { fill: '#c28aa8', y: 38 },
+  { fill: '#c9a64e', y: 18 },
+  { fill: '#7bb58a', y: 38 },
+  { fill: '#b9a6ff', y: 18 },
+];
+---
+
+<svg class="pipeline" width={width} height={height} viewBox="0 0 100 64" role={label ? 'img' : undefined} aria-label={label} aria-hidden={label ? undefined : 'true'}>
+  {
+    STAGES.map((name, i) => {
+      const x = 4 + i * 19;
+      return (
+        <g>
+          <text x={x + 7} y="10" text-anchor="middle" font-size="6" letter-spacing="0.5" fill="#E8C27A">{name}</text>
+          <rect x={x} y="15" width="14" height="14" rx="2" fill="rgba(5,8,21,0.7)" stroke="#E8C27A" stroke-width="0.8" />
+          <rect x={x} y="35" width="14" height="14" rx="2" fill="rgba(5,8,21,0.7)" stroke="#E8C27A" stroke-width="0.8" />
+          {i < 4 && <path d={`M${x + 15} 22 H${x + 18} M${x + 15} 42 H${x + 18}`} stroke="#E8C27A" stroke-opacity="0.6" stroke-width="0.8" />}
+        </g>
+      );
+    })
+  }
+  {TOKENS.map((t, i) => <rect class="tok" x="6" y={t.y} width="10" height="8" rx="1.5" fill={t.fill} style={`animation-delay: ${-i}s`} />)}
+  <text x="50" y="62" text-anchor="middle" font-size="5" fill="#AEB2C8" letter-spacing="0.4">2-WIDE · 5 STAGES</text>
+</svg>
+
+<style>
+  .pipeline {
+    display: block;
+    font-family: var(--font);
+  }
+</style>

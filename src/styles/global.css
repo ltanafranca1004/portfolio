@@ -1,0 +1,453 @@
+@font-face {
+  font-family: 'Jost';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('@fontsource-variable/jost/files/jost-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  --sky: #050815;
+  --text: #f3eee2;
+  --text-muted: #aeb2c8;
+  --body: #d9dceb;
+  --gold: #e8c27a;
+  --gold-deep: #c9a24e;
+  --route-line: #f3d99a;
+  --ink: #10131f;
+  --gold-rgb: 232 194 122;
+  --sky-rgb: 5 8 21;
+  --cream-rgb: 243 238 226;
+  --font: 'Jost', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: dark;
+}
+
+html {
+  background-color: var(--sky);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--text);
+  background-color: var(--sky);
+}
+
+a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--gold);
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+img {
+  max-width: 100%;
+}
+
+/* ---------- page shell ---------- */
+
+.page {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow-x: clip;
+}
+
+.sky {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.sky img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center top;
+}
+
+@media (min-width: 1200px) {
+  .sky img {
+    object-position: var(--sky-position, center);
+  }
+}
+
+/* ---------- header and main nav ---------- */
+
+.site-header {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 34px 64px 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand:hover {
+  color: var(--text);
+}
+
+.brand-pin {
+  flex: none;
+  width: 30px;
+  height: 38px;
+  stroke: var(--gold);
+  stroke-width: 1.6;
+}
+
+.brand-kicker {
+  display: block;
+  font-size: 15px;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+}
+
+.brand-name {
+  display: block;
+  margin: 0;
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  line-height: 1.445;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+  font-size: 15px;
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgb(var(--gold-rgb) / 0.4);
+  background: rgb(var(--sky-rgb) / 0.45);
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 0 22px;
+  border-radius: 22px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.pill-ghost {
+  border: 1px solid rgb(var(--gold-rgb) / 0.55);
+  background: rgb(var(--sky-rgb) / 0.45);
+  color: var(--text);
+}
+
+.pill-solid {
+  border: 1px solid var(--text);
+  background: var(--text);
+  color: var(--ink);
+}
+
+.pill-solid:hover {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--ink);
+}
+
+@media (max-width: 639px) {
+  .site-header {
+    display: block;
+    padding: 22px 20px 0;
+  }
+
+  .brand {
+    gap: 10px;
+    min-height: 44px;
+    padding-right: 110px;
+  }
+
+  .brand-pin {
+    width: 22px;
+    height: 28px;
+    stroke-width: 1.8;
+  }
+
+  .brand-kicker {
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+
+  .brand-name {
+    font-size: 19px;
+    letter-spacing: 0;
+  }
+
+  .site-nav {
+    justify-content: center;
+    margin-top: 22px;
+    font-size: 14px;
+  }
+
+  .site-nav .pill-ghost {
+    order: -1;
+    padding: 0 20px;
+  }
+
+  .site-nav .pill-solid {
+    position: absolute;
+    right: 20px;
+    top: 22px;
+    padding: 0 18px;
+  }
+}
+
+/* ---------- the spinning gold ring ---------- */
+
+.ring {
+  position: relative;
+  flex: none;
+  width: var(--d);
+  height: var(--d);
+}
+
+.ring-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.float {
+  animation: fl 7s ease-in-out infinite;
+}
+
+.float2 {
+  animation: fl 8s ease-in-out -3s infinite;
+}
+
+.spin {
+  animation: sp 120s linear infinite;
+}
+
+@keyframes fl {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(var(--float-rise, -8px));
+  }
+}
+
+@keyframes sp {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.px {
+  image-rendering: pixelated;
+}
+
+/* ---------- the live cube ---------- */
+
+.cube {
+  position: absolute;
+  display: block;
+}
+
+.cube-still,
+.cube-live {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.cube.is-live .cube-still {
+  visibility: hidden;
+}
+
+/* ---------- the Lens card and its loupe ---------- */
+
+.lens-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 190px;
+  height: 85px;
+  margin: -43px 0 0 -95px;
+  perspective: 700px;
+}
+
+.lens-tilt {
+  position: absolute;
+  inset: 0;
+  transform: rotateX(10deg) rotateY(-14deg) rotateZ(2deg);
+}
+
+.lens-shot {
+  position: absolute;
+  inset: 0;
+  width: 190px;
+  height: 85px;
+  border-radius: 6px;
+  box-shadow: 0 12px 30px rgb(0 0 0 / 0.5);
+}
+
+.loupe {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #f8f9fc;
+  border: 3px solid var(--gold-deep);
+  box-shadow: 0 10px 18px rgb(10 15 30 / 0.45);
+  animation: glide 14s ease-in-out infinite;
+}
+
+.loupe-img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 342px;
+  height: 153px;
+  max-width: none;
+  animation: glide-img 14s ease-in-out infinite;
+}
+
+.loupe::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 0 14px rgb(90 120 170 / 0.4);
+  background:
+    radial-gradient(circle at 30% 25%, rgb(255 255 255 / 0.75), rgb(255 255 255 / 0) 22%),
+    radial-gradient(circle at 50% 50%, rgb(255 255 255 / 0) 60%, rgb(140 170 220 / 0.35));
+}
+
+/* The loupe moves, and the magnified copy under it moves the other way to stay in register. */
+@keyframes glide {
+  0%,
+  100% {
+    transform: translate(10px, 40px);
+  }
+  33% {
+    transform: translate(110px, 46px);
+  }
+  66% {
+    transform: translate(60px, 12px);
+  }
+}
+
+@keyframes glide-img {
+  0%,
+  100% {
+    transform: translate(-46px, -100px);
+  }
+  33% {
+    transform: translate(-226px, -110px);
+  }
+  66% {
+    transform: translate(-136px, -49px);
+  }
+}
+
+/* ---------- the pipeline world ---------- */
+
+.tok {
+  animation: tok 5s steps(5, jump-none) infinite;
+}
+
+@keyframes tok {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(76px);
+  }
+}
+
+/* ---------- utilities ---------- */
+
+.chip {
+  padding: 3px 9px;
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (min-width: 1200px) {
+  .only-mobile {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1199px) {
+  .only-desktop {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float,
+  .float2,
+  .spin,
+  .tok {
+    animation: none;
+  }
+
+  .loupe {
+    animation: none;
+    transform: translate(60px, 30px);
+  }
+
+  .loupe-img {
+    animation: none;
+    transform: translate(-136px, -80px);
+  }
+}

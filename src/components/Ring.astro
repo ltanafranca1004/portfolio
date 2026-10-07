@@ -1,0 +1,16 @@
+---
+import frame from '../assets/frame.svg';
+
+interface Props {
+  class?: string;
+  /** Decorative rings (the art repeats what the label says) are hidden from assistive tech. */
+  decorative?: boolean;
+}
+
+const { class: className = '', decorative = false } = Astro.props;
+---
+
+<div class={`ring ${className}`} aria-hidden={decorative ? 'true' : undefined}>
+  <img class="ring-frame spin" src={frame.src} alt="" width="320" height="320" decoding="async" />
+  <slot />
+</div>
