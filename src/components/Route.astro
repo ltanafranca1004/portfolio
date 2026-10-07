@@ -1,0 +1,143 @@
+---
+// The gold route across the map, in stage coordinates (1440 x 900). It runs through the
+// centre of each world in order: About, Unify, Cubic, Lens. Compared with the mockup the
+// curve is bent so it stays clear of the Unify and Lens text.
+const MAIN = 'M -20 340 C 100 300, 160 280, 230 275 S 415 224, 560 200 S 800 470, 870 462 S 1100 250, 1200 245 S 1380 190, 1470 160';
+// Off-stage ends, only seen when the window is wider than the stage.
+const LEAD_IN = 'M -600 470 C -400 440, -140 380, -20 340';
+const LEAD_OUT = 'M 1470 160 C 1560 130, 1800 90, 2040 60';
+---
+
+<div class="routewrap only-desktop" aria-hidden="true">
+  <svg viewBox="-600 0 2640 900" width="2640" height="900" fill="none">
+    <g class="lead">
+      <path class="glow" d={LEAD_IN}></path>
+      <path class="line" d={LEAD_IN}></path>
+    </g>
+    <path class="glow route-draw" d={MAIN}></path>
+    <path class="line route-draw" d={MAIN}></path>
+    <g class="lead lead-out">
+      <path class="glow" d={LEAD_OUT}></path>
+      <path class="line" d={LEAD_OUT}></path>
+    </g>
+  </svg>
+  <div class="comet-origin"><div class="comet" style={`offset-path: path('${MAIN}')`}></div></div>
+</div>
+
+<style>
+  /* The wrapper is wider than the stage (600px each side) because a mask also clips. */
+  .routewrap {
+    position: absolute;
+    left: -600px;
+    top: 0;
+    width: 2640px;
+    height: 900px;
+    pointer-events: none;
+    /* Holes over each world's art, so the route and the comet pass behind it. */
+    --holes:
+      radial-gradient(circle 90px at 830px 275px, transparent 88px, #000 90px),
+      radial-gradient(ellipse 106px 84px at 1160px 222px, transparent 104px, #000 106px),
+      radial-gradient(circle 84px at 1470px 456px, transparent 82px, #000 84px),
+      radial-gradient(ellipse 104px 56px at 1800px 244px, transparent 102px, #000 104px);
+    -webkit-mask-image: var(--holes);
+    mask-image: var(--holes);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+
+  svg {
+    position: absolute;
+    inset: 0;
+  }
+
+  .glow {
+    stroke: var(--gold);
+    stroke-width: 7;
+    stroke-opacity: 0.18;
+    stroke-linecap: round;
+  }
+
+  .line {
+    stroke: var(--route-line);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+
+  .route-draw {
+    stroke-dasharray: 1900;
+    stroke-dashoffset: 1900;
+    animation: draw 1.6s cubic-bezier(0.65, 0, 0.35, 1) 0.1s forwards;
+  }
+
+  .lead-out {
+    opacity: 0;
+    animation: lead 0.4s ease-out 1.5s forwards;
+  }
+
+  .comet-origin {
+    position: absolute;
+    left: 600px;
+    top: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .comet {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 14px;
+    height: 14px;
+    margin: -7px 0 0 -7px;
+    border-radius: 50%;
+    background: #fff6dd;
+    box-shadow:
+      0 0 12px 4px rgb(255 236 190 / 0.9),
+      0 0 40px 12px rgb(232 194 122 / 0.55);
+    offset-rotate: 0deg;
+    opacity: 0;
+    animation: ride 1.6s cubic-bezier(0.65, 0, 0.35, 1) 0.1s forwards;
+  }
+
+  @keyframes draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes lead {
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes ride {
+    0% {
+      offset-distance: 0%;
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      offset-distance: 100%;
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .route-draw {
+      animation: none;
+      stroke-dashoffset: 0;
+    }
+
+    .lead-out {
+      animation: none;
+      opacity: 1;
+    }
+
+    .comet {
+      animation: none;
+    }
+  }
+</style>

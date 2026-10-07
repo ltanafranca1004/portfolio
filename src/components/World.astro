@@ -1,0 +1,34 @@
+---
+interface Props {
+  id: string;
+  href: string;
+  title: string;
+  blurb: string;
+  blurbPhone: string;
+  chips?: string[];
+  /** Position in the arrival sequence, 1 to 4. */
+  order: number;
+  float?: 'float' | 'float2';
+}
+
+const { id, href, title, blurb, blurbPhone, chips = [], order, float = 'float' } = Astro.props;
+---
+
+<article class={`world world-${id} in${order}`}>
+  <div class={`ring ${float}`}>
+    <slot name="frame" />
+    <slot />
+  </div>
+  <div class="world-text">
+    <div class="divider" aria-hidden="true"><span></span><i></i><span></span></div>
+    <div class="world-title">
+      <h2><a class="world-link" href={href} data-track="world" data-world={id}>{title}</a></h2>
+      {chips.map((chip) => <span class="chip">{chip}</span>)}
+    </div>
+    <div class="rule only-desktop" aria-hidden="true"></div>
+    <p>
+      <span class="only-desktop">{blurb}</span>
+      <span class="only-mobile">{blurbPhone}</span>
+    </p>
+  </div>
+</article>

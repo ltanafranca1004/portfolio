@@ -1,0 +1,69 @@
+---
+// The orbit lines behind the map, from redesign/assets/orbits2.svg (metadata stripped).
+// Lines that ended at the 1440 x 900 artboard edge are extended so they keep going when the
+// window is wider or taller than the stage. One dotted orbit is moved: it used to run
+// through the Amenity Recommender label, and now passes between the worlds instead.
+---
+
+<svg class="orbits only-desktop" viewBox="0 0 1440 900" width="1440" height="900" fill="none" aria-hidden="true">
+  <g stroke="#D9B46A" stroke-linecap="round">
+    <circle cx="760" cy="420" r="560" stroke-width="1.6" opacity="0.55"></circle>
+    <circle cx="760" cy="420" r="548" stroke-width="0.8" opacity="0.3"></circle>
+    <circle cx="1240" cy="140" r="330" stroke-width="1.2" opacity="0.4"></circle>
+    <circle cx="140" cy="880" r="300" stroke-width="1.2" opacity="0.35"></circle>
+    <circle cx="560" cy="200" r="250" stroke-width="2.4" stroke-dasharray="1 9" opacity="0.6"></circle>
+    <circle cx="1160" cy="760" r="230" stroke-width="2.4" stroke-dasharray="1 9" opacity="0.5"></circle>
+    <path d="M-700 800 C -500 780, -190 630, -40 520 C 260 300, 620 640, 980 380 S 1380 300, 1500 160 C 1620 20, 1800 -120, 2140 -300" stroke-width="1.1" opacity="0.5"></path>
+    <path d="M-700 -60 C -500 0, -210 80, -40 140 C 300 260, 520 40, 900 120" stroke-width="0.9" opacity="0.35"></path>
+    <circle cx="1360" cy="560" r="120" stroke-width="1" opacity="0.4"></circle>
+    <circle cx="1360" cy="560" r="60" stroke-width="1" opacity="0.5"></circle>
+    <circle cx="80" cy="160" r="70" stroke-width="1" opacity="0.4"></circle>
+    <circle cx="80" cy="160" r="34" stroke-width="1" opacity="0.5"></circle>
+  </g>
+  <g stroke="#9fb3cc" stroke-width="0.8" opacity="0.28">
+    <path d="M-153 -400 L1203 1300" stroke-dasharray="6 7"></path>
+    <path d="M1350 -400 L590 1300" stroke-dasharray="6 7"></path>
+    <path d="M-700 89 L2140 971"></path>
+    <path d="M-23 -400 L1423 1300" opacity="0.6"></path>
+    <path d="M-700 505 H2140" stroke="#D9B46A" opacity="0.5"></path>
+  </g>
+  <g stroke="#C9A46A" stroke-linecap="round">
+    <path d="M2140 371 A760 760 0 0 0 701.6 800" stroke-width="3.2" stroke-dasharray="0.1 15" opacity="0.7"></path>
+    <circle cx="1098.5" cy="954.8" r="980" stroke-width="1" opacity="0.35"></circle>
+  </g>
+  <g stroke="#C9A46A" stroke-width="1.2" opacity="0.7">
+    <circle cx="1290" cy="650" r="34"></circle>
+    <circle cx="1290" cy="650" r="12"></circle>
+    <circle cx="1290" cy="650" r="5" fill="#C9A46A"></circle>
+    <circle cx="1360" cy="880" r="40"></circle>
+    <circle cx="1330" cy="853" r="4" fill="#07091A"></circle>
+  </g>
+  <g fill="#07091A" stroke="#E8C27A" stroke-width="1.4">
+    <circle cx="420" cy="560" r="9"></circle>
+    <circle cx="420" cy="560" r="3.5" fill="#E8C27A"></circle>
+    <circle cx="1010" cy="330" r="9"></circle>
+    <circle cx="1010" cy="330" r="3.5" fill="#E8C27A"></circle>
+    <circle cx="1350" cy="420" r="7"></circle>
+    <circle cx="1350" cy="420" r="2.5" fill="#E8C27A"></circle>
+    <circle cx="640" cy="520" r="7"></circle>
+    <circle cx="640" cy="520" r="2.5" fill="#E8C27A"></circle>
+    <circle cx="701.6" cy="800" r="7"></circle>
+    <circle cx="701.6" cy="800" r="2.5" fill="#E8C27A"></circle>
+  </g>
+  <g stroke="#D9B46A" stroke-width="1" opacity="0.6">
+    <path d="M24 24 h60 M24 24 v60 M36 36 h28 M36 36 v28"></path>
+    <path d="M1416 24 h-60 M1416 24 v60 M1404 36 h-28 M1404 36 v28"></path>
+    <path d="M24 876 h60 M24 876 v-60 M36 864 h28 M36 864 v-28"></path>
+    <path d="M1416 876 h-60 M1416 876 v-60 M1404 864 h-28 M1404 864 v-28"></path>
+    <path d="M-700 8 H2140 M-700 892 H2140" opacity="0.35"></path>
+  </g>
+</svg>
+
+<style>
+  .orbits {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+    pointer-events: none;
+  }
+</style>

@@ -1,0 +1,758 @@
+---
+import { getImage, Picture } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import CubeCanvas from '../components/CubeCanvas.astro';
+import LensCard from '../components/LensCard.astro';
+import Orbits from '../components/Orbits.astro';
+import PipelineArt from '../components/PipelineArt.astro';
+import Route from '../components/Route.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import Sky from '../components/Sky.astro';
+import World from '../components/World.astro';
+import frame from '../assets/frame.svg';
+import { asset, destinations, otherProjects, person, projectUrl, PROFILE_URL } from '../lib/content';
+
+const [unify, cubic, lens] = destinations;
+if (!unify || !cubic || !lens) throw new Error('content.json needs three destinations');
+
+const webp = (path: string, width: number) => getImage({ src: asset(path), width, format: 'webp' });
+const [turtleCard, turtleMascot, amenityMap, nutrifitBanner] = await Promise.all([
+  webp('assets/mini-turtle-card.webp', 168),
+  webp('assets/mini-turtle-mascot.webp', 80),
+  webp('assets/d-amenity-tour.webp', 192),
+  webp('assets/mini-nf-recipe-banner.webp', 176),
+]);
+
+const description = `${person.name}, ${person.title.toLowerCase()} in ${person.location}. ${person.status}. A map of my work: Unify Social, Cubic, Lens and more.`;
+---
+
+<Base title={`${person.name} | ${person.title}`} description={description}>
+  <div class="page map">
+    <Sky />
+    <div class="stage-wrap">
+      <div class="stage">
+        <Orbits />
+        <Route />
+        <div class="phone-orbit phone-orbit-1 only-mobile" aria-hidden="true"></div>
+        <div class="phone-orbit phone-orbit-2 only-mobile" aria-hidden="true"></div>
+
+        <SiteHeader home />
+
+        <main class="worlds">
+          <World id="about" href={PROFILE_URL} title="About me" blurb={person.mapBlurb} blurbPhone={person.mapBlurbPhone} order={1}>
+            <img slot="frame" class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
+            <Picture class="photo" src={asset(person.photo)} formats={['avif', 'webp']} width={420} height={420} alt={person.name} loading="eager" />
+          </World>
+
+          <div class="connector only-mobile" aria-hidden="true"><span></span><i></i><span></span></div>
+
+          <World id="unify" href={projectUrl(unify.slug)} title={unify.name} blurb={unify.mapBlurb} blurbPhone={unify.mapBlurbPhone} chips={unify.chips} order={2} float="float2">
+            <img slot="frame" class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
+            <Picture class="unify-hero" src={asset('assets/d-unify-hero.webp')} formats={['avif', 'webp']} width={420} alt={unify.heroAlt} loading="eager" />
+          </World>
+
+          <div class="connector only-mobile" aria-hidden="true"><span></span><i></i><span></span></div>
+
+          <World id="cubic" href={projectUrl(cubic.slug)} title={cubic.name} blurb={cubic.mapBlurb} blurbPhone={cubic.mapBlurbPhone} chips={cubic.chips} order={3} float="float2">
+            <img slot="frame" class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
+            <CubeCanvas class="world-cube" />
+          </World>
+
+          <div class="connector only-mobile" aria-hidden="true"><span></span><i></i><span></span></div>
+
+          <World id="lens" href={projectUrl(lens.slug)} title={lens.name} blurb={lens.mapBlurb} blurbPhone={lens.mapBlurbPhone} chips={lens.chips} order={4}>
+            <img slot="frame" class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
+            <LensCard />
+          </World>
+
+          <div class="connector only-mobile" aria-hidden="true"><span></span><i></i><span></span></div>
+
+          <section class="others in5" aria-labelledby="others-heading">
+            <h2 id="others-heading" class="others-label">Other projects</h2>
+            <ul class="minis">
+              {
+                otherProjects.map((project) => (
+                  <li class="mini">
+                    <div class="ring mini-ring float only-desktop" aria-hidden="true">
+                      <img class="ring-frame spin" src={frame.src} alt="" width="320" height="320" loading="lazy" />
+                      {project.slug === 'turtle-trips' && (
+                        <>
+                          <div class="turtle-card"><img src={turtleCard.src} alt="" width="84" height="67" loading="lazy" /></div>
+                          <img class="turtle-mascot" src={turtleMascot.src} alt="" width="40" height="62" loading="lazy" />
+                        </>
+                      )}
+                      {project.slug === 'amenity-recommender' && (
+                        <>
+                          <div class="fold-map" style={`--map: url(${amenityMap.src})`}><div><i></i><i></i><i></i></div></div>
+                          {[
+                            [36, 26],
+                            [62, 36],
+                            [80, 22],
+                          ].map(([left, top]) => (
+                            <svg class="map-pin" width="12" height="16" viewBox="0 0 12 16" style={`left: ${left}px; top: ${top}px`}>
+                              <path d="M6 16S0 9 0 6a6 6 0 0 1 12 0c0 3-6 10-6 10z" fill="#3b82f6" stroke="#fff" stroke-width="1" />
+                              <circle cx="6" cy="6" r="2" fill="#fff" />
+                            </svg>
+                          ))}
+                        </>
+                      )}
+                      {project.slug === 'pipeline-simulator' && <div class="mini-pipeline"><PipelineArt width={100} /></div>}
+                      {project.slug === 'nutrifit' && (
+                        <div class="recipe">
+                          <div>
+                            <img src={nutrifitBanner.src} alt="" width="76" height="16" loading="lazy" />
+                            <p><span></span><span></span><span></span></p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <i class="mini-dot only-mobile" aria-hidden="true"></i>
+                    <h3 class="mini-name">
+                      <a class="mini-link" href={projectUrl(project.slug)} data-track="world" data-world={project.slug}>
+                        <span class="only-desktop">{project.name}</span>
+                        <span class="only-mobile">{'fullName' in project ? project.fullName : project.name}</span>
+                      </a>
+                    </h3>
+                    <span class="mini-tag only-desktop">{project.tag}</span>
+                  </li>
+                ))
+              }
+            </ul>
+          </section>
+        </main>
+
+        <p class="hint only-desktop">Select a destination</p>
+        <p class="id-line only-desktop">ID: {person.email}</p>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style is:global>
+  /* ===== phone and tablet: one centred column (design/Mobile.html) ===== */
+
+  .map .stage {
+    position: relative;
+    --float-rise: -6px;
+  }
+
+  .phone-orbit {
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .phone-orbit-1 {
+    left: -160px;
+    top: 520px;
+    border: 1px solid rgb(var(--gold-rgb) / 0.3);
+  }
+
+  .phone-orbit-2 {
+    right: -200px;
+    top: 1220px;
+    border: 2px dotted rgb(var(--gold-rgb) / 0.4);
+  }
+
+  .worlds {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 28px 24px 40px;
+  }
+
+  .world {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+  }
+
+  .world .ring {
+    --d: 170px;
+  }
+
+  .world-cubic .ring {
+    --d: 190px;
+  }
+
+  .world-text {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+  }
+
+  /* A soft dark glow behind each text block, so orbit and route lines never cut through letters. */
+  .world-text::before,
+  .others::before {
+    content: '';
+    position: absolute;
+    inset: 12px 18px;
+    z-index: -1;
+    border-radius: 36px;
+    background: rgb(var(--sky-rgb) / 0.8);
+    box-shadow: 0 0 30px 26px rgb(var(--sky-rgb) / 0.8);
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 260px;
+  }
+
+  .divider span {
+    flex: 1;
+    height: 1px;
+    background: rgb(var(--gold-rgb) / 0.5);
+  }
+
+  .divider i {
+    width: 6px;
+    height: 6px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+  }
+
+  .world-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .world-title h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+  }
+
+  .world-title .chip {
+    padding: 3px 10px;
+    background: var(--sky);
+  }
+
+  /* The whole world is the link target; the heading holds the link itself. */
+  .world-link::after,
+  .mini-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .world-link:focus-visible,
+  .mini-link:focus-visible {
+    outline: none;
+  }
+
+  .world:has(.world-link:focus-visible),
+  .mini:has(.mini-link:focus-visible) {
+    outline: 2px solid var(--gold);
+    outline-offset: 6px;
+    border-radius: 12px;
+  }
+
+  .world p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--body);
+    text-shadow: 0 0 12px var(--sky);
+  }
+
+  .photo {
+    position: absolute;
+    left: 10.5%;
+    top: 10.5%;
+    width: 79%;
+    height: 79%;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow:
+      0 0 0 2px rgb(var(--gold-rgb) / 0.85),
+      0 0 36px rgb(var(--gold-rgb) / 0.35);
+  }
+
+  .unify-hero {
+    position: absolute;
+    left: 1.4%;
+    top: 24.8%;
+    width: 97.2%;
+    height: auto;
+  }
+
+  .world-cube {
+    left: 11.8%;
+    top: 10%;
+    width: 76.4%;
+    height: 76.4%;
+  }
+
+  .connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .connector span {
+    width: 1px;
+    height: 44px;
+    background: rgb(var(--gold-rgb) / 0.55);
+  }
+
+  .connector i {
+    width: 9px;
+    height: 9px;
+    border: 1.5px solid var(--gold);
+    border-radius: 50%;
+  }
+
+  .others {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+    background: rgb(var(--sky-rgb) / 0.7);
+    border: 1px solid rgb(var(--gold-rgb) / 0.3);
+  }
+
+  .others::before {
+    display: none;
+  }
+
+  .others-label {
+    margin: 0 0 6px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .minis {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .mini {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+  }
+
+  .mini-dot {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--gold);
+    border-radius: 50%;
+  }
+
+  .mini-name {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 400;
+  }
+
+  /* ===== desktop: the 1440 x 900 map, scaled as one piece (design/Main.html) ===== */
+
+  @media (min-width: 1200px) {
+    .map {
+      display: grid;
+      place-items: center;
+      overflow: clip;
+    }
+
+    .stage-wrap {
+      --s: 1;
+      width: calc(1440px * var(--s));
+      height: calc(900px * var(--s));
+    }
+
+    /* Fit the width, but never let the three main worlds (790px of the design) fall below the fold. */
+    @supports (width: calc(1px * tan(atan2(1px, 1px)))) {
+      .stage-wrap {
+        --s: clamp(0.83, min(tan(atan2(100vw, 1440px)), tan(atan2(100vh, 790px))), 1.25);
+      }
+    }
+
+    .map .stage {
+      width: 1440px;
+      height: 900px;
+      transform: scale(var(--s));
+      transform-origin: 0 0;
+      --float-rise: -8px;
+    }
+
+    .map .site-header {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      z-index: 2;
+    }
+
+    .worlds {
+      position: static;
+      display: block;
+      padding: 0;
+    }
+
+    .world {
+      position: absolute;
+      width: 300px;
+      max-width: none;
+      gap: 12px;
+      transition: transform 0.35s ease;
+    }
+
+    .world:hover {
+      transform: translateY(-6px);
+    }
+
+    .world:hover .world-link,
+    .mini:hover .mini-link {
+      color: var(--gold);
+    }
+
+    .world .ring {
+      --d: 210px;
+    }
+
+    .world-cubic .ring {
+      --d: 220px;
+    }
+
+    .world-about {
+      left: 80px;
+      top: 170px;
+    }
+
+    .world-unify {
+      left: 410px;
+      top: 92px;
+    }
+
+    .world-cubic {
+      left: 720px;
+      top: 350px;
+    }
+
+    .world-lens {
+      left: 1050px;
+      top: 140px;
+    }
+
+    .world-text {
+      gap: 12px;
+    }
+
+    .divider {
+      width: 300px;
+    }
+
+    .rule {
+      width: 300px;
+      height: 1px;
+      background: rgb(var(--gold-rgb) / 0.5);
+    }
+
+    .world-title {
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px 10px;
+    }
+
+    .world-title h2 {
+      font-size: 27px;
+      letter-spacing: 0.03em;
+    }
+
+    .world-title .chip {
+      padding: 3px 9px;
+      background: none;
+    }
+
+    .world-title h2,
+    .world p {
+      text-shadow:
+        0 0 10px var(--sky),
+        0 0 22px var(--sky);
+    }
+
+    /* worlds arrive one by one as the comet passes */
+    .in1,
+    .in2,
+    .in3,
+    .in4,
+    .in5 {
+      opacity: 0;
+      animation: arrive 0.6s ease-out forwards;
+    }
+
+    .in1 {
+      animation-delay: 0.35s;
+    }
+
+    .in2 {
+      animation-delay: 0.6s;
+    }
+
+    .in3 {
+      animation-delay: 0.85s;
+    }
+
+    .in4 {
+      animation-delay: 1.1s;
+    }
+
+    .in5 {
+      animation-delay: 1.3s;
+    }
+
+    .others {
+      position: absolute;
+      left: 64px;
+      top: 638px;
+      width: auto;
+      max-width: none;
+      padding: 0;
+      background: none;
+      border: 0;
+    }
+
+    .others::before {
+      display: block;
+      inset: 6px 4px;
+    }
+
+    .others-label {
+      margin-bottom: 8px;
+    }
+
+    .minis {
+      flex-direction: row;
+      gap: 24px;
+    }
+
+    .mini {
+      flex-direction: column;
+      gap: 6px;
+      width: 120px;
+      min-height: 0;
+      text-align: center;
+      transition: transform 0.35s ease;
+    }
+
+    .mini:hover {
+      transform: translateY(-6px);
+    }
+
+    .mini-ring {
+      --d: 120px;
+    }
+
+    .mini-name {
+      font-size: 14px;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .mini-tag {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .turtle-card {
+      position: absolute;
+      left: 26px;
+      top: 30px;
+      width: 84px;
+      perspective: 400px;
+    }
+
+    .turtle-card img {
+      display: block;
+      width: 84px;
+      height: auto;
+      border-radius: 5px;
+      box-shadow: 0 6px 14px rgb(0 0 0 / 0.5);
+      transform: rotateY(-14deg) rotateZ(5deg);
+    }
+
+    .turtle-mascot {
+      position: absolute;
+      left: 4px;
+      top: 50px;
+      width: auto;
+      height: 62px;
+    }
+
+    .fold-map {
+      position: absolute;
+      left: 12px;
+      top: 34px;
+      perspective: 300px;
+    }
+
+    .fold-map div {
+      display: flex;
+      transform: rotateX(28deg);
+      box-shadow: 0 10px 16px rgb(0 0 0 / 0.45);
+    }
+
+    .fold-map i {
+      width: 32px;
+      height: 58px;
+      background: var(--map) 0 0 / 96px 58px;
+      transform: rotateY(22deg);
+      transform-origin: right;
+      box-shadow: inset 0 0 0 100px rgb(255 255 255 / 0.1);
+    }
+
+    .fold-map i:nth-child(2) {
+      background-position: -32px 0;
+      transform: rotateY(-22deg);
+      transform-origin: center;
+      box-shadow: inset 0 0 0 100px rgb(0 0 0 / 0.22);
+    }
+
+    .fold-map i:nth-child(3) {
+      background-position: -64px 0;
+      transform-origin: left;
+    }
+
+    .map-pin {
+      position: absolute;
+      filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.5));
+    }
+
+    .mini-pipeline {
+      position: absolute;
+      left: 10px;
+      top: 28px;
+    }
+
+    .recipe {
+      position: absolute;
+      left: 16px;
+      top: 30px;
+      width: 88px;
+      perspective: 400px;
+    }
+
+    .recipe > div {
+      overflow: hidden;
+      border-radius: 5px;
+      background: #fff;
+      box-shadow: 0 6px 14px rgb(0 0 0 / 0.5);
+      transform: rotateY(-14deg) rotateZ(-4deg);
+    }
+
+    .recipe img {
+      display: block;
+      box-sizing: border-box;
+      width: 88px;
+      height: auto;
+      padding: 6px 6px 2px;
+    }
+
+    .recipe p {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin: 0;
+      padding: 3px 7px 7px;
+    }
+
+    .recipe p span {
+      height: 5px;
+      border-radius: 2px;
+      background: #dfe7e2;
+    }
+
+    .recipe p span:nth-child(2) {
+      width: 70%;
+    }
+
+    .recipe p span:nth-child(3) {
+      align-self: flex-start;
+      width: 26px;
+      height: 7px;
+      border-radius: 3px;
+      background: #7fae95;
+    }
+
+    .hint {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 30px;
+      margin: 0;
+      text-align: center;
+      font-size: 14px;
+      letter-spacing: 0.14em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+
+    .id-line {
+      position: absolute;
+      left: 104px;
+      bottom: 30px;
+      margin: 0;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      color: rgb(217 220 235 / 0.7);
+    }
+  }
+
+  @keyframes arrive {
+    from {
+      opacity: 0;
+      translate: 0 10px;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .world,
+    .mini {
+      transition: none;
+    }
+
+    .in1,
+    .in2,
+    .in3,
+    .in4,
+    .in5 {
+      animation: none;
+      opacity: 1;
+    }
+  }
+</style>
