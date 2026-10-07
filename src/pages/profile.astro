@@ -6,6 +6,7 @@ import SiteHeader from '../components/SiteHeader.astro';
 import Sky from '../components/Sky.astro';
 import frame from '../assets/frame.svg';
 import { asset, content, person, projectUrl, RESUME_URL } from '../lib/content';
+import { metaDescription } from '../lib/site';
 
 const { experience, skills, education } = content;
 
@@ -47,10 +48,10 @@ const treeLabel = `Skills. ${Object.entries(skills)
   .map(([group, items]) => `${group}: ${items.join(', ')}`)
   .join('. ')}.`;
 
-const description = `${person.bio} ${person.status}.`;
+const description = metaDescription(`${person.bio} ${person.status}.`);
 ---
 
-<Base title={`About ${person.name} | ${person.title}`} description={description}>
+<Base title={`About ${person.name} | Profile, experience and skills`} description={description} ogType="profile">
   <div class="page profile">
     <Sky />
     <Orbits class="orbits-backdrop orbits-top" />
@@ -61,12 +62,12 @@ const description = `${person.bio} ${person.status}.`;
       <aside class="profile-side">
         <div class="ring float profile-ring">
           <img class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
-          <Picture class="profile-photo" src={asset(person.photo)} formats={['avif', 'webp']} fallbackFormat="webp" width={660} height={660} alt={person.name} loading="eager" />
+          <Picture class="profile-photo" src={asset(person.photo)} formats={['avif', 'webp']} fallbackFormat="webp" width={660} height={660} alt={person.name} loading="eager" fetchpriority="high" />
         </div>
         <div class="identity">
           <h1>{person.name}</h1>
           <p class="identity-title">{person.title}</p>
-          <p class="identity-where">{person.location} · <a href={`mailto:${person.email}`}>{person.email}</a></p>
+          <p class="identity-where">{person.location} · <a href={`mailto:${person.email}`} data-event="email_click" data-placement="profile">{person.email}</a></p>
         </div>
         <a class="back profile-back back-wide" href="/">
           <span class="back-btn" aria-hidden="true">
@@ -130,7 +131,7 @@ const description = `${person.bio} ${person.status}.`;
                     <div class="job-awards">
                       {job.awards.map((award) => <span class="chip award">{award}</span>)}
                       {'project' in job && job.project && (
-                        <a class="see-project" href={projectUrl(job.project)}>
+                        <a class="see-project" href={projectUrl(job.project)} data-event="project_open" data-slug={job.project} data-placement="profile">
                           See the project <span aria-hidden="true">→</span>
                         </a>
                       )}
@@ -139,7 +140,7 @@ const description = `${person.bio} ${person.status}.`;
                 </article>
               ))
             }
-            <a class="resume-link" href={RESUME_URL} data-track="resume">
+            <a class="resume-link" href={RESUME_URL} data-event="resume_open" data-placement="profile">
               View full resume (PDF) <span aria-hidden="true">→</span>
             </a>
           </section>
@@ -213,8 +214,8 @@ const description = `${person.bio} ${person.status}.`;
             <h2 id="cta-heading">{person.status}.</h2>
             <p>The fastest way to reach me is email.</p>
           </div>
-          <a class="pill pill-solid" href={`mailto:${person.email}`} data-track="email">Email me</a>
-          <a class="pill pill-ghost" href={RESUME_URL} data-track="resume">Resume</a>
+          <a class="pill pill-solid" href={`mailto:${person.email}`} data-event="email_click" data-placement="profile_cta">Email me</a>
+          <a class="pill pill-ghost" href={RESUME_URL} data-event="resume_open" data-placement="profile_cta">Resume</a>
         </section>
         <a class="back profile-back back-narrow" href="/">
           <span class="back-btn" aria-hidden="true">
@@ -739,6 +740,7 @@ const description = `${person.bio} ${person.status}.`;
       gap: 40px;
       margin: 0;
       padding: 0;
+      overflow-x: visible;
     }
 
     .tabs a {
@@ -778,7 +780,7 @@ const description = `${person.bio} ${person.status}.`;
 
     /* shrink the photo on short windows so the pinned column always fits */
     .profile-ring {
-      --d: clamp(200px, min(100%, 100vh - 330px), 420px);
+      --d: clamp(200px, min(100%, 100vh - 410px), 420px);
     }
 
     .identity {

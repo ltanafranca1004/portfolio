@@ -10,6 +10,7 @@ import Sky from '../../components/Sky.astro';
 import frame from '../../assets/frame.svg';
 import { asset, person } from '../../lib/content';
 import { highlight, projects, type Project } from '../../lib/projects';
+import { metaDescription } from '../../lib/site';
 
 export function getStaticPaths() {
   return projects.map((project) => ({ params: { slug: project.slug }, props: { project } }));
@@ -23,7 +24,8 @@ const { project } = Astro.props;
 const hero = project.hero ? asset(project.hero) : undefined;
 // The tilted screenshots are 440px wide in the mockups, the widest one 460px.
 const tiltWidth = hero && hero.width / hero.height > 2.05 ? 460 : 440;
-const description = project.description.length > 158 ? `${project.description.slice(0, 155).replace(/\s+\S*$/, '')}...` : project.description;
+const description = metaDescription(project.description);
+const isGitHub = (url: string): boolean => new URL(url).hostname === 'github.com';
 ---
 
 <Base title={`${project.title} | ${person.name}`} description={description}>
@@ -41,21 +43,21 @@ const description = project.description.length > 158 ? `${project.description.sl
           <img class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
           {
             project.heroKind === 'image' && hero && (
-              <Picture class="hero-flat" src={hero} formats={['avif', 'webp']} fallbackFormat="webp" widths={[480, 960]} sizes="(min-width: 1000px) 468px, 80vw" alt={project.heroAlt} loading="eager" />
+              <Picture class="hero-flat" src={hero} formats={['avif', 'webp']} fallbackFormat="webp" widths={[480, 960]} sizes="(min-width: 1000px) 468px, 80vw" alt={project.heroAlt} loading="eager" fetchpriority="high" />
             )
           }
-          {project.heroKind === 'cube' && <CubeCanvas class="hero-cube" alt={project.heroAlt} />}
+          {project.heroKind === 'cube' && <CubeCanvas class="hero-cube" alt={project.heroAlt} eager />}
           {
             project.heroKind === 'lens' && (
               <div class="hero-lens" role="img" aria-label={project.heroAlt}>
-                <LensCard />
+                <LensCard eager />
               </div>
             )
           }
           {
             project.heroKind === 'tilted' && hero && (
               <div class="hero-tilt" style={`width: ${tiltWidth}px; aspect-ratio: ${hero.width} / ${hero.height}`}>
-                <Picture src={hero} formats={['avif', 'webp']} fallbackFormat="webp" widths={[460, 920]} sizes="(min-width: 1000px) 460px, 80vw" alt={project.heroAlt} loading="eager" />
+                <Picture src={hero} formats={['avif', 'webp']} fallbackFormat="webp" widths={[460, 920]} sizes="(min-width: 1000px) 460px, 80vw" alt={project.heroAlt} loading="eager" fetchpriority="high" />
               </div>
             )
           }
@@ -134,8 +136,8 @@ const description = project.description.length > 158 ? `${project.description.sl
         </span>
       </a>
       <div class="actions">
-        {project.links.map(([label, url]) => <a class="text-link" href={url} rel="noopener" data-track="project-link">{label}</a>)}
-        <a class="primary" href={project.primary[1]} rel="noopener" data-track="project-primary" data-world={project.slug}>{project.primary[0]}</a>
+        {project.links.map(([label, url]) => <a class="text-link" href={url} rel="noopener" data-event={isGitHub(url) ? 'github_click' : undefined} data-slug={isGitHub(url) ? project.slug : undefined} data-placement={isGitHub(url) ? 'project' : undefined}>{label}</a>)}
+        <a class="primary" href={project.primary[1]} rel="noopener" data-event={isGitHub(project.primary[1]) ? 'github_click' : undefined} data-slug={isGitHub(project.primary[1]) ? project.slug : undefined} data-placement={isGitHub(project.primary[1]) ? 'project' : undefined}>{project.primary[0]}</a>
       </div>
     </footer>
   </div>

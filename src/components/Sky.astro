@@ -3,6 +3,16 @@ import { getImage } from 'astro:assets';
 import skySource from '../../redesign/assets/sky-source-2880.jpg';
 import skyPhone from '../assets/sky-phone.jpg';
 
+interface Props {
+  /**
+   * Fetch the sky first. True on the map, where it is the main picture. Pages with a hero
+   * image leave it off so the hero (their largest paint) gets the priority instead.
+   */
+  priority?: boolean;
+}
+
+const { priority = false } = Astro.props;
+
 // The star field. Phones get a narrow crop of the same sky; wide screens pick a width.
 const WIDTHS = [1280, 1920, 2880];
 const wide = async (format: 'avif' | 'webp') =>
@@ -23,5 +33,5 @@ const sizes = '(max-width: 1199px) 3200px, 100vw';
   <source media="(max-width: 600px)" type="image/webp" srcset={phoneWebp} />
   <source type="image/avif" srcset={wideAvif} sizes={sizes} />
   <source type="image/webp" srcset={wideWebp} sizes={sizes} />
-  <img src={fallback.src} alt="" width="1920" height="1200" decoding="async" fetchpriority="high" />
+  <img src={fallback.src} alt="" width="1920" height="1200" decoding="async" fetchpriority={priority ? 'high' : 'auto'} />
 </picture>

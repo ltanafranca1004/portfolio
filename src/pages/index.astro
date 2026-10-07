@@ -10,7 +10,8 @@ import SiteHeader from '../components/SiteHeader.astro';
 import Sky from '../components/Sky.astro';
 import World from '../components/World.astro';
 import frame from '../assets/frame.svg';
-import { asset, destinations, otherProjects, person, projectUrl, PROFILE_URL } from '../lib/content';
+import { asset, content, destinations, otherProjects, person, projectUrl, PROFILE_URL } from '../lib/content';
+import { absoluteUrl, metaDescription, OG_IMAGE } from '../lib/site';
 
 const [unify, cubic, lens] = destinations;
 if (!unify || !cubic || !lens) throw new Error('content.json needs three destinations');
@@ -23,12 +24,23 @@ const [turtleCard, turtleMascot, amenityMap, nutrifitBanner] = await Promise.all
   webp('assets/mini-nf-recipe-banner.webp', 176),
 ]);
 
-const description = `${person.name}, ${person.title.toLowerCase()} in ${person.location}. ${person.status}. A map of my work: Unify Social, Cubic, Lens and more.`;
+const description = metaDescription(`${person.title} in ${person.location}. ${person.status}. ${person.bio}`);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: person.name,
+  jobTitle: person.title,
+  url: absoluteUrl('/'),
+  image: absoluteUrl(OG_IMAGE.path),
+  alumniOf: { '@type': 'CollegeOrUniversity', name: content.education.school },
+  sameAs: [person.github, person.linkedin],
+};
 ---
 
-<Base title={`${person.name} | ${person.title}`} description={description}>
+<Base title={`${person.name} | ${person.title}`} description={description} jsonLd={jsonLd}>
   <div class="page map">
-    <Sky />
+    <Sky priority />
     <div class="stage-wrap">
       <div class="stage">
         <Orbits class="only-desktop" />
@@ -44,26 +56,30 @@ const description = `${person.name}, ${person.title.toLowerCase()} in ${person.l
             <Picture class="photo" src={asset(person.photo)} formats={['avif', 'webp']} fallbackFormat="webp" width={420} height={420} alt={person.name} loading="eager" />
           </World>
 
-          <div class="connector only-mobile" aria-hidden="true"><span></span><i></i><span></span></div>
-
-          <World id="unify" href={projectUrl(unify.slug)} title={unify.name} blurb={unify.mapBlurb} blurbPhone={unify.mapBlurbPhone} chips={unify.chips} order={2} float="float2">
-            <img slot="frame" class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
-            <Picture class="unify-hero" src={asset('assets/d-unify-hero.webp')} formats={['avif', 'webp']} fallbackFormat="webp" width={420} alt={unify.heroAlt} loading="eager" />
-          </World>
-
-          <div class="connector only-mobile" aria-hidden="true"><span></span><i></i><span></span></div>
-
-          <World id="cubic" href={projectUrl(cubic.slug)} title={cubic.name} blurb={cubic.mapBlurb} blurbPhone={cubic.mapBlurbPhone} chips={cubic.chips} order={3} float="float2">
-            <img slot="frame" class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
-            <CubeCanvas class="world-cube" />
-          </World>
-
-          <div class="connector only-mobile" aria-hidden="true"><span></span><i></i><span></span></div>
-
-          <World id="lens" href={projectUrl(lens.slug)} title={lens.name} blurb={lens.mapBlurb} blurbPhone={lens.mapBlurbPhone} chips={lens.chips} order={4}>
-            <img slot="frame" class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
-            <LensCard />
-          </World>
+          <h2 class="sr-only" id="projects-heading">Projects</h2>
+          <ul class="world-list" role="list" aria-labelledby="projects-heading">
+            <li role="listitem">
+              <div class="connector only-mobile" aria-hidden="true"><span></span><i></i><span></span></div>
+              <World id="unify" href={projectUrl(unify.slug)} title={unify.name} blurb={unify.mapBlurb} blurbPhone={unify.mapBlurbPhone} chips={unify.chips} order={2} float="float2" level={3}>
+                <img slot="frame" class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
+                <Picture class="unify-hero" src={asset('assets/d-unify-hero.webp')} formats={['avif', 'webp']} fallbackFormat="webp" width={420} alt={unify.heroAlt} loading="lazy" />
+              </World>
+            </li>
+            <li role="listitem">
+              <div class="connector only-mobile" aria-hidden="true"><span></span><i></i><span></span></div>
+              <World id="cubic" href={projectUrl(cubic.slug)} title={cubic.name} blurb={cubic.mapBlurb} blurbPhone={cubic.mapBlurbPhone} chips={cubic.chips} order={3} float="float2" level={3}>
+                <img slot="frame" class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
+                <CubeCanvas class="world-cube" />
+              </World>
+            </li>
+            <li role="listitem">
+              <div class="connector only-mobile" aria-hidden="true"><span></span><i></i><span></span></div>
+              <World id="lens" href={projectUrl(lens.slug)} title={lens.name} blurb={lens.mapBlurb} blurbPhone={lens.mapBlurbPhone} chips={lens.chips} order={4} level={3}>
+                <img slot="frame" class="ring-frame spin" src={frame.src} alt="" width="320" height="320" />
+                <LensCard />
+              </World>
+            </li>
+          </ul>
 
           <div class="connector only-mobile" aria-hidden="true"><span></span><i></i><span></span></div>
 
@@ -108,7 +124,7 @@ const description = `${person.name}, ${person.title.toLowerCase()} in ${person.l
                     </div>
                     <i class="mini-dot only-mobile" aria-hidden="true"></i>
                     <h3 class="mini-name">
-                      <a class="mini-link" href={projectUrl(project.slug)} data-track="world" data-world={project.slug}>
+                      <a class="mini-link" href={projectUrl(project.slug)} data-event="project_open" data-slug={project.slug}>
                         <span class="only-desktop">{project.name}</span>
                         <span class="only-mobile">{'fullName' in project ? project.fullName : project.name}</span>
                       </a>
@@ -232,10 +248,16 @@ const description = `${person.name}, ${person.title.toLowerCase()} in ${person.l
     gap: 10px;
   }
 
-  .world-title h2 {
+  .world-name {
     margin: 0;
     font-size: 24px;
     font-weight: 500;
+  }
+
+  /* the list itself draws nothing: its items are laid out as part of the map */
+  .world-list,
+  .world-list > li {
+    display: contents;
   }
 
   .world-title .chip {
@@ -483,7 +505,7 @@ const description = `${person.name}, ${person.title.toLowerCase()} in ${person.l
       gap: 6px 10px;
     }
 
-    .world-title h2 {
+    .world-name {
       font-size: 27px;
       letter-spacing: 0.03em;
     }
@@ -493,7 +515,7 @@ const description = `${person.name}, ${person.title.toLowerCase()} in ${person.l
       background: none;
     }
 
-    .world-title h2,
+    .world-name,
     .world p {
       text-shadow:
         0 0 10px var(--sky),

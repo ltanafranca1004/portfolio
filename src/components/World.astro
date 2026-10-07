@@ -9,9 +9,12 @@ interface Props {
   /** Position in the arrival sequence, 1 to 4. */
   order: number;
   float?: 'float' | 'float2';
+  /** Heading level: the project worlds sit under a "Projects" heading. */
+  level?: 2 | 3;
 }
 
-const { id, href, title, blurb, blurbPhone, chips = [], order, float = 'float' } = Astro.props;
+const { id, href, title, blurb, blurbPhone, chips = [], order, float = 'float', level = 2 } = Astro.props;
+const Heading = `h${level}` as const;
 ---
 
 <article class={`world world-${id} in${order}`}>
@@ -22,7 +25,7 @@ const { id, href, title, blurb, blurbPhone, chips = [], order, float = 'float' }
   <div class="world-text">
     <div class="divider" aria-hidden="true"><span></span><i></i><span></span></div>
     <div class="world-title">
-      <h2><a class="world-link" href={href} data-track="world" data-world={id}>{title}</a></h2>
+      <Heading class="world-name"><a class="world-link" href={href} data-event={id === 'about' ? undefined : 'project_open'} data-slug={id === 'about' ? undefined : id}>{title}</a></Heading>
       {chips.map((chip) => <span class="chip">{chip}</span>)}
     </div>
     <div class="rule only-desktop" aria-hidden="true"></div>

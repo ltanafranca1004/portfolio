@@ -27,9 +27,9 @@ const avatar = await getImage({ src: asset(person.photo), width: 132, height: 13
       {
         contactPanel.replies.map(([label, href]) => {
           const isResume = href?.endsWith('resume.pdf');
-          const kind = href?.startsWith('mailto:') ? 'email' : isResume ? 'resume' : 'linkedin';
+          const event = href?.startsWith('mailto:') ? 'email_click' : isResume ? 'resume_open' : 'linkedin_click';
           return (
-            <a href={isResume ? RESUME_URL : href} rel={kind === 'linkedin' ? 'noopener' : undefined} data-track={`contact-${kind}`}>
+            <a href={isResume ? RESUME_URL : href} rel={event === 'linkedin_click' ? 'noopener' : undefined} data-event={event} data-placement="contact_panel">
               <span aria-hidden="true">◆</span>
               {label}
             </a>
@@ -55,6 +55,22 @@ const avatar = await getImage({ src: asset(person.photo), width: 132, height: 13
     // a click on the dimmed page around the panel closes it
     panel.addEventListener('click', (event) => {
       if (event.target === panel) panel.close();
+    });
+    // The browser already keeps focus off the page behind. This also stops Tab from
+    // leaving for the browser's own toolbar: it wraps from the last control to the first.
+    panel.addEventListener('keydown', (event) => {
+      if (event.key !== 'Tab') return;
+      const stops = [...panel.querySelectorAll<HTMLElement>('a[href], button')];
+      const first = stops[0];
+      const last = stops[stops.length - 1];
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     });
   }
 </script>
@@ -234,8 +250,9 @@ const avatar = await getImage({ src: asset(person.photo), width: 132, height: 13
     color: var(--gold);
   }
 
-  .contact :focus-visible {
-    outline-color: var(--gold-deep);
+  /* gold is too faint on cream, so focus rings inside the cream part of the panel are navy */
+  .contact-replies a:focus-visible {
+    outline-color: #1b2140;
   }
 
   @media (max-width: 639px) {
