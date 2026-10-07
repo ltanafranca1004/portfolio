@@ -25,6 +25,13 @@ const PAGES = ['/', '/profile/', '/projects/unify/', '/projects/cubic/', '/proje
 const ONLY_LINES = 'body, body * { visibility: hidden !important; } svg[data-keepout], svg[data-keepout] *, .routewrap, .routewrap * { visibility: visible !important; }';
 const BACKGROUND = [5, 8, 21]; // --sky, the page background
 
+// KEEPOUT_ONLY=1280x720:/projects/unify/ narrows a run to one size and page (either part may be left out)
+if (process.env.KEEPOUT_ONLY) {
+  const [size, url] = process.env.KEEPOUT_ONLY.split(':');
+  if (size) SIZES.splice(0, SIZES.length, ...SIZES.filter(([w, h]) => `${w}x${h}` === size));
+  if (url) PAGES.splice(0, PAGES.length, ...PAGES.filter((p) => p === url));
+}
+
 // --selftest: switch the keep-out mask off on the map and make sure the check then fails
 const SELFTEST = process.argv.includes('--selftest');
 if (SELFTEST) {
@@ -77,15 +84,19 @@ for (const [width, height] of SIZES) {
         const y0 = Math.max(0, Math.floor(box.top - KEEP_OUT));
         const y1 = Math.min(H - 1, Math.ceil(box.bottom + KEEP_OUT));
         let differing = 0;
+        let first = '';
         for (let py = y0; py <= y1; py++) {
           for (let px = x0; px <= x1; px++) {
             const i = (py * W + px) * C;
-            if (Math.abs(lines.data[i] - BACKGROUND[0]) > TOLERANCE || Math.abs(lines.data[i + 1] - BACKGROUND[1]) > TOLERANCE || Math.abs(lines.data[i + 2] - BACKGROUND[2]) > TOLERANCE) differing++;
+            if (Math.abs(lines.data[i] - BACKGROUND[0]) > TOLERANCE || Math.abs(lines.data[i + 1] - BACKGROUND[1]) > TOLERANCE || Math.abs(lines.data[i + 2] - BACKGROUND[2]) > TOLERANCE) {
+              differing++;
+              first ||= `first at ${px},${py}, text box ${Math.round(box.left)},${Math.round(box.top)} to ${Math.round(box.right)},${Math.round(box.bottom)}`;
+            }
           }
         }
         if (differing > 0) {
           bad++;
-          if (problems.length < 40) problems.push(`${width}x${height} ${url} scroll ${y}: "${box.text}" has ${differing} px of line or node within ${KEEP_OUT}px`);
+          if (problems.length < 40) problems.push(`${width}x${height} ${url} scroll ${y}: "${box.text}" has ${differing} px of line or node within ${KEEP_OUT}px (${first})`);
         }
       }
     }

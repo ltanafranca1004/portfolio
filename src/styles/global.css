@@ -303,6 +303,20 @@ img {
   }
 }
 
+/* Phones and tablets: the ring frames stand still (one turn took two minutes, and each
+   spinning frame was a layer the compositor had to redraw the whole time). */
+@media (max-width: 1199px), (pointer: coarse) {
+  .spin {
+    animation: none;
+  }
+}
+
+/* off screen (src/scripts/offscreen.ts): nothing inside keeps animating */
+.is-offscreen,
+.is-offscreen * {
+  animation-play-state: paused !important;
+}
+
 .px {
   image-rendering: pixelated;
 }
@@ -489,6 +503,13 @@ img {
 
 .js svg[data-keepout].is-ready .orbit-lines {
   opacity: 1;
+}
+
+/* the lines are masked, and a masked element is slow to animate on a phone: no fade there */
+@media (max-width: 1199px), (pointer: coarse) {
+  .js svg[data-keepout] .orbit-lines {
+    transition: none;
+  }
 }
 
 .project .orbits-backdrop,

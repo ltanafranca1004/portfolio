@@ -63,7 +63,9 @@ function tick(now: number): void {
   last = now;
   const step = Math.floor(((clock % TURN_MS) / TURN_MS) * TURN_STEPS) % TURN_STEPS;
   for (const live of lives) if (live.visible) draw(live, step);
-  schedule();
+  // Keep going from this frame's own time. (Restarting the clock here, as schedule() does,
+  // dropped the time spent inside each frame: on a busy phone the cube ran slow and uneven.)
+  if (lives.some((l) => l.visible) && !reduced.matches) frame = requestAnimationFrame(tick);
 }
 
 function schedule(): void {
@@ -75,8 +77,11 @@ function schedule(): void {
     for (const live of lives) if (live.visible) draw(live, 0);
     return;
   }
-  last = performance.now();
-  frame = requestAnimationFrame(tick);
+  // starting, or starting again after a pause: time counts from the next frame
+  frame = requestAnimationFrame((now) => {
+    last = now;
+    tick(now);
+  });
 }
 
 function start(url: string): void {
@@ -102,6 +107,18 @@ for (const canvas of document.querySelectorAll<HTMLCanvasElement>('canvas[data-c
   if (!g) continue;
   lives.push({ canvas, g, image: g.createImageData(SIZE, SIZE), visible: false, step: -1 });
   seen.observe(canvas);
+}
+
+// Fetch and cut the face textures once the page has loaded and the browser is idle, so that
+// work never lands in the middle of a scroll as a cube comes into view.
+const first = lives[0]?.canvas.dataset.atlas;
+if (first) {
+  const warm = (): void => {
+    const idle = window.requestIdleCallback ?? ((run: () => void) => window.setTimeout(run, 600));
+    idle(() => start(first));
+  };
+  if (document.readyState === 'complete') warm();
+  else window.addEventListener('load', warm, { once: true });
 }
 
 reduced.addEventListener('change', () => {

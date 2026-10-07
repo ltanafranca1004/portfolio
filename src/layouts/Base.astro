@@ -45,11 +45,23 @@ const imageAlt = `${person.name}, ${person.title}: a gold route map over a navy 
       document.documentElement.classList.add('js');
       // The window size as plain numbers (--vw, --vh), so CSS can work out the stage scale with
       // ordinary division. The CSS-only way, tan(atan2(100vw, 1440px)), is wrong in Safari 18.
+      // Only the wide layout uses them. Below it nothing is set, so a phone's toolbar hiding
+      // and showing (a change of height on every scroll) costs no restyle.
       (() => {
         const root = document.documentElement;
+        let last = '';
         const size = () => {
-          root.style.setProperty('--vw', String(root.clientWidth || innerWidth));
-          root.style.setProperty('--vh', String(innerHeight));
+          const w = root.clientWidth || innerWidth;
+          const next = w >= 1200 ? `${w}x${innerHeight}` : '';
+          if (next === last) return;
+          last = next;
+          if (next) {
+            root.style.setProperty('--vw', String(w));
+            root.style.setProperty('--vh', String(innerHeight));
+          } else {
+            root.style.removeProperty('--vw');
+            root.style.removeProperty('--vh');
+          }
         };
         size();
         for (const type of ['resize', 'pageshow', 'DOMContentLoaded']) addEventListener(type, size);
@@ -91,6 +103,7 @@ const imageAlt = `${person.name}, ${person.title}: a gold route map over a navy 
     <ContactPanel />
     <script>
       import '../scripts/keepout';
+      import '../scripts/offscreen';
       import '../scripts/analytics';
     </script>
   </body>
