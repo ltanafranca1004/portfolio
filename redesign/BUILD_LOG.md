@@ -568,9 +568,10 @@ SEO is 69 because of the intended noindex on the preview. CLS 0 and blocking tim
 ## Session 7: stability (2026-10-07)
 
 No new features. Measured first, then fixed or removed. `content.json` is untouched. Pushed to
-`redesign` (`40a6593` to `e8b2614`). **Not deployed:** the deploy step was refused by the
-session's permission check, so the preview still shows Session 6. Run `npm run deploy` yourself
-(`wrangler whoami` showed only `3a459a47f63c6f049c3217b090c824dd` when I checked).
+`redesign` (`40a6593` to `e8b2614`). Luis ran `npm run deploy` himself (the session's permission
+check refused it for me); the account check passed for `3a459a47f63c6f049c3217b090c824dd`.
+Preview: https://redesign.luistanafranca.pages.dev. No production deploy, domain, DNS or GitHub
+Pages change.
 
 ### What could and could not be measured
 | | State |
@@ -696,6 +697,28 @@ this Mac, so the times are not like for like. Run it again after deploying.
 | `/projects/unify/` | desktop | 100 / 100 / 100 / 69, 0.52s | 100 / 100 / 100 / 69, 0.37s |
 | `/profile/` | mobile | 99 / 100 / 100 / 69, 1.82s | 100 / 100 / 100 / 69, 1.66s |
 | `/profile/` | desktop | 100 / 100 / 100 / 69, 0.44s | 100 / 100 / 100 / 69, 0.37s |
+
+After the deploy, on the preview itself (Lighthouse, then real Chrome):
+
+| Page | Form | Session 6: Perf / A11y / BP / SEO, LCP | Now: Perf / A11y / BP / SEO, LCP |
+|---|---|---|---|
+| `/` | mobile | 99 / 100 / 100 / 69, 1.99s | 100 / 100 / 100 / 69, 1.25s |
+| `/` | desktop | 100 / 100 / 100 / 69, 0.62s | 100 / 100 / 100 / 69, 0.45s |
+| `/projects/unify/` | mobile | 100 / 100 / 100 / 69, 1.76s | 100 / 100 / 100 / 69, 1.74s |
+| `/projects/unify/` | desktop | 100 / 100 / 100 / 69, 0.52s | 100 / 100 / 100 / 69, 0.53s |
+| `/profile/` | mobile | 99 / 100 / 100 / 69, 1.82s | 99 / 100 / 100 / 69, 1.89s |
+| `/profile/` | desktop | 100 / 100 / 100 / 69, 0.44s | 100 / 100 / 100 / 69, 0.43s |
+
+| Real Chrome on the preview | Session 6 | Now |
+|---|---|---|
+| Worst frame during a transition | 852ms (map to Unify), 67 to 84ms on the way back | 18ms |
+| Frames over 33ms during any transition | 10 across the journey | 0 |
+| Click to the new page's first frame | 46 to 129ms | 9 to 45ms |
+| First click into a project, click to settled | 1.17s | 0.33s |
+| Held frame at the click (see note 3) | not measured | 41 to 69ms |
+| Cold first paint: map / Unify / profile | 304 / 252 / 324ms | 316 / 396 / 248ms |
+
+Cold first paint moves 50 to 150ms from run to run on the real network, in both directions.
 
 CLS 0 everywhere. `astro check` and `eslint` clean. All nine check scripts pass (tabs 60,
 transitions 28, transition frames 24, accessibility 63, analytics, phone, worlds, viewports,
