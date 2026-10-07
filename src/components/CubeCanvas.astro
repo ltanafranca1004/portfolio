@@ -1,0 +1,20 @@
+---
+import atlas from '../assets/cube-faces.png';
+import still from '../assets/cube-still.png';
+
+interface Props {
+  alt?: string;
+  class?: string;
+}
+
+const { alt = '', class: className = '' } = Astro.props;
+---
+
+<span class={`cube ${className}`}>
+  <img class="cube-still px" src={still.src} alt={alt} width="252" height="252" decoding="async" />
+  <canvas class="cube-live px" width="252" height="252" data-cube data-atlas={atlas.src} aria-hidden="true"></canvas>
+</span>
+
+<script>
+  import '../scripts/cube/mount';
+</script>
