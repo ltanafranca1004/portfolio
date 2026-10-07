@@ -363,3 +363,204 @@ AVIF quality on screenshots full of small text.
 `map-before-after.jpg`, `profile-before-after.jpg`, `lens-before-after.jpg`,
 `loupe-before-after.png`, `transition-frames.png`, `transition-chromium.webm`,
 `transition-webkit.webm`, and `browsers/` for the cross-browser sheets.
+
+## Session 6: phone fixes, one screen, profile tabs, navigation, transitions (2026-10-06)
+
+Preview: https://redesign.luistanafranca.pages.dev (deployed through `scripts/deploy.sh` after each
+part; `wrangler whoami` showed only `3a459a47f63c6f049c3217b090c824dd` before every deploy). No
+production deploy, domain, DNS or GitHub Pages change. `content.json` is untouched.
+
+### 1. The broken project pages on iPhone
+- **Which way breaks:** a direct load. So it was the scaling, not the transition and not the
+  stored zoom centre.
+- **Cause:** the hero was scaled with `transform: scale(tan(atan2(100cqw, 520px)))`. Safari
+  works that out wrongly. Measured in four WebKit builds:
+
+  | WebKit | 390px-wide phone | 430px-wide phone | Should be |
+  |---|---|---|---|
+  | 17.4 | 0.19 | 0.19 | 0.67 / 0.69 |
+  | 18.0, 18.4, 26.0 | -0.70 (mirrored, off its box) | 0.14 | 0.67 / 0.69 |
+  | 26.6 (Playwright's current build) | 0.67 | 0.69 | 0.67 / 0.69 |
+
+  At 0.14 the 520px hero is drawn 72px wide in the top-left corner of its 360px box, with the
+  title below the empty box: what you saw. The map's `tan(atan2(100vw, 1440px))` was wrong in
+  the same builds (desktop Safari got a clamped, wrong scale).
+- **Reproducing it:** Playwright's own WebKit (26.6) does not have the bug, which is why
+  Sessions 4 and 5 saw nothing. I reproduced it in older Playwright WebKit builds installed in
+  the session's temp folder, outside the repo (nothing added to `package.json`).
+- **Fix:** no trigonometry in CSS any more. The hero's scale is measured by a few lines of
+  inline script inside `.hero` (its width / 520, kept current by a ResizeObserver). The stage
+  scale uses the window size as plain numbers (`--vw`, `--vh`, set in the head).
+- **Test:** `npm run test:phone` (iPhone emulation in WebKit and Chromium at 390x844, 390x664
+  and 430x932; every project page loaded directly and tapped from the map). The hero must be
+  centred, at least 70% of the screen wide and fully on the first screen with the title. It also
+  fails if any stylesheet uses `atan2()` again. `--selftest` puts Safari's 0.14 back and
+  confirms the check fails.
+
+### 2. Phone header and layout
+- Project pages below 1200px: the top row is the back control and Contact. Resume, GitHub and
+  LinkedIn are still in the contact panel, on the map and on the profile.
+- The badge sits small above the title. Previous and next are two buttons at the end of the
+  page with the neighbours' names.
+- First screen at 390x844: hero from 84 to 434px, title ends at 544px. It also fits 390x664
+  (Safari with its toolbars showing).
+
+### 3. Phone performance
+Measured with `npm run perf:phone` (`scripts/perf-phone.mjs`): Chromium at 390x844 with the CPU
+slowed 4x and real touch scrolling, and WebKit with iPhone emulation.
+
+| | Before | After |
+|---|---|---|
+| Chromium 4x: long tasks over 50ms while scrolling the map | 2 (longest 85ms) | 0 |
+| Chromium 4x: worst frame while scrolling the map | 100ms | 33ms |
+| Chromium 4x: cube frame rate, at rest / while scrolling | 13.3 / 12.6 fps | 15 / 14.9 fps |
+| Chromium 4x: longest gap between cube frames | 84 to 102ms | 68ms |
+| WebKit: toolbar hides and shows, map (frame rate / worst frame) | 3.8 fps / 435ms | 29.9 fps / 35ms |
+| WebKit: toolbar hides and shows, Cubic page | 2.8 fps / 467ms | 27.4 fps / 85ms |
+| WebKit: opening Cubic, first 2.5s (frame rate / worst frame) | 10.5 fps / 659ms | 23.5 fps / 184ms |
+| Animations running on the map (of those, off screen) | 10 (6) | 2 (0) |
+| Compositor layers on the map (Chromium) | 18 | 15 |
+
+Playwright's WebKit paints 30 frames a second at most, so 30 there is "no dropped frames".
+What changed, each backed by a number above:
+- **The cube ran slow and uneven.** Its clock restarted inside every frame and lost the time
+  the frame itself took. Fixed; it holds 15 fps under 4x slowdown, so the canvas stays (no
+  lower resolution or pre-rendered image needed). Its textures now load when the page is idle
+  instead of in the middle of a scroll.
+- **Safari's toolbar.** Hiding and showing it fires `resize` on every scroll. That re-ran the
+  keep-out measurement (and, after part 1, a restyle). Now nothing runs when only the height
+  changes below 1200px. The keep-out never ran on scroll itself.
+- **Keep-out masks** are plain shapes now. The blur filter inside each mask was the slow part
+  of repainting them.
+- **Ring frames stand still** below 1200px and on touch screens. Everything else pauses when
+  it is off screen (`src/scripts/offscreen.ts`).
+- **No animation on a masked element** on phones: the orbit lines appear without their fade.
+
+### 4. Tappable worlds
+The stretched link stopped at the text block, so the ring, screenshot, cube and photo did
+nothing, on every layout. Now each world is one link that covers its ring and text: one Tab
+stop, named by the title. `npm run test:worlds` checks the middle and all four edges of every
+ring on desktop, tablet and phone, follows the photo and the cube, and confirms the cube still
+animates.
+
+### 5. One screen on wide windows
+- From 1200px wide, the map, the seven project pages and the profile are each a 1440x900 stage
+  scaled by min(width / 1440, height / 900), kept within 0.75 to 1.25, centred. The sky and the
+  orbit lines belong to the page, so they fill what is left. Below 675px of height the stage
+  stays at 0.75 and the page scrolls down.
+- Everything fits at design size with nothing cut: the tallest project column (Unify) ends at
+  863px of 900.
+- `npm run test:viewports` checks 12 pages (every profile tab) at 1280x720, 1366x768, 1440x790,
+  1512x860, 1728x1000 and 1920x960: no scrolling, the right scale, centred, and every piece of
+  text, image, link and button fully inside the window. 75 of 75 pass. Keep-out passes on 72
+  page and size combinations.
+
+### 6. Profile as tabs
+- Four tabs: Profile, Experience, Skills, Education. Photo on the left, tabs at the top of the
+  right column, one panel on screen. Nothing is pinned and no panel scrolls.
+- Profile (the default) has the quote, the four facts, Email me and Resume.
+- Experience has all three jobs with every bullet. It fits at 1280x720 with Unify across the
+  full width and Spotwork and STEMA side by side, so nothing needed cutting.
+- ARIA tabs: one Tab stop; Left, Right, Home and End move between tabs; each tab has an address
+  (`/profile/#experience`) that opens it directly; a click adds a history entry, so Back and
+  Forward walk the tabs (arrow keys replace the entry instead of piling them up).
+- Switching cross-fades over 250ms with a 16px shift in the direction of travel. Nothing moves
+  under reduced motion. All four panels are always in the HTML.
+- Phones and tablets: one stacked page, and the same four links jump down it.
+- `npm run test:tabs`: 48 checks in Chromium, WebKit and Firefox.
+
+### 7. Back navigation
+- On project pages and the profile the header's left block is the back control: an arrow in a
+  circle, "Back to map", the name under it. The whole block is one link.
+- The bottom "Back to the map" link and its footnote are gone.
+- Esc goes back to the map. With the contact panel open, Esc only closes the panel.
+
+### 8. About me zoom
+Clicking About me (the title or the photo) grows the photo world into the profile's photo ring;
+Back, the header block and Esc reverse it. Same on phones.
+
+### 9. Transitions without the blink
+- **Measured first.** `npm run test:transition-frames` records every transition. Before:
+  2 to 5 dark frames on previous and next in Chromium (down to 49% of the page's brightness),
+  and a dip to 69% in WebKit.
+- **Fix.** The page layer (the sky) is never moved now: old and new cross-fade in place at full
+  strength, so there is no gap to see through. What moves is named only for the length of the
+  transition: the travelling world, and on wide screens the stage, or between two projects the
+  hero and text column, which cross-fade with a 20px shift over 280ms. Custom animations use
+  `mix-blend-mode: normal`. The zooms were changed the same way.
+- The page colour `#050815` is inline in the head, with the view-transition opt-in.
+- After: 0 dark frames in all 24 recordings (Chromium and WebKit, desktop 1512x860 and iPhone
+  emulation; next, previous, map to project and back, map to profile and back).
+
+### 10. Lens image
+Skipped: `redesign/assets/lens-capture-2x.png` and `turtle-capture-2x.png` are not there.
+
+### 11. Checks
+`astro check` and `eslint` clean. All check scripts pass: phone, worlds, viewports, tabs,
+transitions (26), transition frames (24), keep-out, accessibility (63), analytics.
+
+Lighthouse 13.5 on the deployed preview:
+
+| Page | Form | Perf / A11y / BP / SEO | LCP | First load |
+|---|---|---|---|---|
+| `/` | mobile | 100 / 100 / 100 / 69 | 1.70s | 239 KB, 15 requests |
+| `/` | desktop | 100 / 100 / 100 / 69 | 0.69s | 252 KB, 19 requests |
+| `/projects/unify/` | mobile | 100 / 100 / 100 / 69 | 1.70s | 103 KB, 11 requests |
+| `/projects/unify/` | desktop | 100 / 100 / 100 / 69 | 0.56s | 94 KB, 11 requests |
+| `/projects/pipeline-simulator/` | mobile | 100 / 100 / 100 / 69 | 1.72s | 82 KB, 10 requests |
+| `/projects/pipeline-simulator/` | desktop | 100 / 100 / 100 / 69 | 0.51s | 82 KB, 10 requests |
+| `/profile/` | mobile | 100 / 100 / 100 / 69 | 1.12s | 101 KB, 9 requests |
+| `/profile/` | desktop | 100 / 100 / 100 / 69 | 0.45s | 89 KB, 9 requests |
+| `/projects/lens/` | mobile | 98 / 100 / 100 / 69 | 2.39s | 205 KB, 12 requests |
+
+SEO is 69 because of the intended noindex on the preview. CLS 0 and blocking time 0ms everywhere.
+
+### Two faults found by the tests and fixed
+1. **Transitions were dropped about 1 time in 10 in Chromium.** The view-transition opt-in was
+   in the stylesheet, which sometimes loaded after the browser had decided the page had not
+   opted in. It is inline at the top of the head now: 0 of 30 round trips dropped.
+2. **A keep-out hole in the wrong place on the Pipeline page, about 1 load in 3.** Chromium
+   answered a Range over SVG text with the scale the drawing had before its hero was scaled.
+   SVG text is now measured by its element's box (30 of 30 loads correct).
+
+### Judgment calls and limits
+1. **Not checked on your iPhone.** The bug is reproduced and fixed in WebKit 17.4 to 26.0, but
+   those are Playwright builds on a Mac. Please open a project page on the phone.
+2. **Part 9 is not built exactly as written.** You asked for the sky and header to have their
+   own view-transition names with no animation. I left them in the page layer and stopped
+   moving that layer instead. The result is the same (they stay still), with fewer layers.
+3. **On phones only the travelling world moves in a zoom,** and previous and next is a plain
+   cross-fade with no 20px shift: a whole stacked page is too large to move as one picture.
+4. **Parts 7, 8 and 9 are one commit.** They all change the same transition script.
+5. **Text is smaller on small laptop windows.** One stage scaled to fit means 16px body text
+   is 12.8px at 1280x720 (0.8x) and 15.3px at 1512x860. That follows from the one-screen rule.
+6. **The map scales differently now:** min(width / 1440, height / 900) down to 0.75. It used
+   to fit the width and 790px of height, down to 0.83.
+7. **The profile between 1000 and 1199px wide is now the stacked page.** It used to be two
+   columns from 1000px.
+8. **Phone tabs** are not pinned and do not highlight the section in view any more.
+9. **Without JavaScript** the hero uses fixed scales (0.67 on phones, 0.81 on tablets), the
+   stage is not scaled to the window, and the profile's panels follow the address (`:target`).
+10. **The map's first load is 41 KB heavier** (239 KB on mobile, was 198 KB): the cube's
+    textures now load when the page is idle instead of when the cube scrolls into view.
+11. **Ring frames also stand still on touch laptops and tablets** of any width.
+12. **The keep-out edge** is three stepped rings instead of a blur. At 30% line opacity I
+    cannot see the difference.
+13. **`footnote` in `content.json` is no longer shown anywhere.** The field is still there.
+14. **Esc also goes back to the map from the 404 page.**
+15. **Performance was measured in emulation,** not on a phone. It shows main-thread work and
+    frame pacing, not what the phone's graphics chip is doing.
+16. **Lens on mobile is 2.39s LCP** in this run: under 2.5s, and still the closest to it.
+17. **Unify on mobile is 1.70s LCP** (1.25s in Session 5). The ring frame stands still on
+    phones now, so it counts as the largest paint; it is fetched with high priority.
+18. **The route's draw-in on the desktop map still animates inside a masked wrapper** for its
+    1.7 seconds. That is desktop only and I left it.
+
+### Files for review (`redesign/screenshots/`, git-ignored)
+- `session6/iphone-map.png`, `iphone-unify-direct.png`, `iphone-unify-tapped.png`
+- `session6/1512x860-*.png` and `session6/1280x720-*.png`: map, pipeline, profile,
+  profile-experience, profile-skills, profile-education
+- `transition-frames-chromium-desktop.png`, `-chromium-iphone.png`, `-webkit-desktop.png`,
+  `-webkit-iphone.png` (rows: map to project, next, previous, project to map, map to profile,
+  profile to map)
+- `perf-phone-before.json`, `perf-phone-after.json`
