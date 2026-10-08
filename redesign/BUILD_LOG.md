@@ -1,11 +1,12 @@
 # Build log
 
+Live: https://luistanafranca.pages.dev (production, since Session 9).
 Preview (always the latest deploy of the `redesign` branch): https://redesign.luistanafranca.pages.dev
 
 Deploys go through `npm run deploy` (`scripts/deploy.sh`) only. It aborts unless `wrangler whoami`
 shows exactly one account and it is `3a459a47f63c6f049c3217b090c824dd`.
 
-## Current state (after Session 8, 2026-10-07)
+## Current state (after Session 9, 2026-10-07)
 
 ### What the site does
 - **Map** (`/`): About me, three destinations (Unify Social, Cubic, Lens) and four other
@@ -23,14 +24,32 @@ shows exactly one account and it is `3a459a47f63c6f049c3217b090c824dd`.
 - **Content:** every fact, number and link is in `redesign/content.json`; images come from
   `redesign/assets/`. Nothing is duplicated in the source.
 - **Analytics:** PostHog, only on the host in `SITE_URL`, no cookies, `?ph_debug=1` to force.
-- **Not indexed yet:** every build except production carries noindex. There is no production
-  deploy and no domain. `redesign/LAUNCH.md` is the checklist for that session.
+- **Live at https://luistanafranca.pages.dev** (production, indexable, in the sitemap). There is
+  no custom domain. Preview builds carry noindex (meta tag and `X-Robots-Tag` header).
+- **The old address forwards here.** `https://ltanafranca1004.github.io/portfolio` and any
+  address under it land on the live site: git's `main` (what GitHub Pages serves) holds a
+  redirecting `index.html` and `404.html`. The old site is the tag `old-site-2026`. **Do not
+  merge `redesign` into `main`.**
 
 ### How to deploy
-`npm run deploy` (preview, https://redesign.luistanafranca.pages.dev). It runs `astro check`,
-`eslint` and the build, and refuses to run unless `wrangler whoami` shows only
-`3a459a47f63c6f049c3217b090c824dd`. Production is `npm run deploy -- main`: see `LAUNCH.md`
-first. Never deploy any other way.
+- **Preview:** `npm run deploy` (https://redesign.luistanafranca.pages.dev, noindex).
+- **Production:** `npm run deploy -- main` (https://luistanafranca.pages.dev). `main` is the
+  Pages project's production branch, only a label here: stay on `redesign` in git.
+
+Both run `astro check`, `eslint` and the build, and refuse to run unless `wrangler whoami`
+shows only `3a459a47f63c6f049c3217b090c824dd`. Never deploy any other way. Deploy a preview
+first, then production.
+
+### Rollback of the old-site redirect
+Puts the old GitHub Pages site back in one step (a new commit on `main` with the tagged
+contents, no force push):
+
+```bash
+git fetch origin --tags && git push origin "$(git commit-tree 'old-site-2026^{tree}' -p origin/main -m 'Restore the old site from old-site-2026')":main
+```
+
+`redesign/LAUNCH.md` has the check, how to put the redirect back, how to roll back a
+production deploy, and how to add a custom domain later and redirect `pages.dev` to it.
 
 ### How to run the tests
 1. `npm run check` and `npm run lint`.
@@ -54,9 +73,12 @@ Browsers are Playwright's, inside `node_modules` (`PLAYWRIGHT_BROWSERS_PATH=0`).
 - **Text is smaller on small laptop windows** (the one-screen stage is 0.8x at 1280 x 720).
 - **Without JavaScript** the orbit lines cross text, the stage is not scaled, and the map
   opens at its top on return.
-- **Share previews show no image yet,** and SEO is 69 in Lighthouse: both follow from there
-  being no production site. Both are fixed by the launch.
-- **PostHog has not received a real event yet.** It is only checked by intercepting requests.
+- **Share previews were not checked in a real app.** The share image is live and the tags
+  point at it; nobody has pasted the link into LinkedIn or a chat app yet.
+- **PostHog arrival is unconfirmed.** Real events were sent from production in Session 9 and
+  PostHog answered 200; Luis still has to see them in the PostHog Activity view.
+- **The old address forwards with a meta refresh and JavaScript,** not a 301 (GitHub Pages
+  cannot send one), and every old address lands on the map, not on a matching page.
 
 ## Session 1: setup, palette, fonts, map home (2026-10-06)
 
@@ -987,3 +1009,88 @@ preview. The two runs differ by network noise (the map on mobile: 1.99s, then 1.
 10. **Review screenshots** are in `redesign/screenshots/session8/` (git-ignored):
     `profile-1512x860.png`, `profile-390x844.png` (the whole page) and
     `profile-390x844-first-screen.png`.
+
+## Session 9: launch on the free address (2026-10-07)
+
+Decision: no custom domain. The site is live at https://luistanafranca.pages.dev and the old
+GitHub Pages address forwards to it. No code changed: `SITE_URL` was already
+`https://luistanafranca.pages.dev` and `scripts/deploy.sh` already took `main` as the
+production switch. No domain, DNS, Pages project setting or GitHub Pages setting was touched.
+`wrangler whoami` showed only `3a459a47f63c6f049c3217b090c824dd`.
+
+### 1. Before changing anything
+- `SITE_URL` in `astro.config.mjs`: `https://luistanafranca.pages.dev`.
+- Pages project `luistanafranca`: no production deployment existed (the address was a 404),
+  every earlier deploy was a Preview on `redesign`. wrangler does not print the production
+  branch; it was confirmed as `main` by the deploy below being listed as "Production".
+- GitHub Pages for `ltanafranca1004/portfolio`: branch `main`, folder `/`, classic build, no
+  custom 404, no `.nojekyll`.
+
+### 2. Production deploy
+`npm run deploy -- main` from the `redesign` branch at `864278b`: deployment `a37291c7`,
+Environment "Production". `redesign` was not merged into `main`.
+
+Checked on https://luistanafranca.pages.dev:
+
+| Check | Result |
+|---|---|
+| Pages load | `/`, `/profile/`, the 7 project pages and `/resume.pdf` return 200; an unknown address returns the 404 page with status 404; no broken image, script or stylesheet on any page |
+| No noindex | no `X-Robots-Tag` header on any address; no robots meta tag on the 9 pages (the 404 page keeps its own, as on every build) |
+| `robots.txt` | `Allow: /`, `Sitemap: https://luistanafranca.pages.dev/sitemap.xml` |
+| `sitemap.xml` | the 9 pages, all on `luistanafranca.pages.dev` |
+| Canonical, `og:url`, `og:image` | `https://luistanafranca.pages.dev/...` on every page; `/og.jpg` returns 200 |
+| JSON-LD | one Person block, on the map only; `url` and `image` on `luistanafranca.pages.dev` |
+| Preview still noindex | `redesign.luistanafranca.pages.dev` sends the meta tag and the header |
+
+Lighthouse 13.5 on production (`npm run lighthouse -- launch https://luistanafranca.pages.dev / /projects/unify/`):
+
+| Page | Form | Perf / A11y / BP / SEO | LCP | CLS | Blocking |
+|---|---|---|---|---|---|
+| `/` | mobile | 99 / 100 / 100 / 100 | 1.91s | 0 | 18ms |
+| `/` | desktop | 100 / 100 / 100 / 100 | 0.75s | 0 | 0ms |
+| `/projects/unify/` | mobile | 99 / 100 / 100 / 100 | 1.72s | 0 | 18ms |
+| `/projects/unify/` | desktop | 100 / 100 / 100 / 100 | 0.62s | 0 | 0ms |
+
+SEO is 100 (was 69 on the preview, from the intended noindex).
+
+### 3. PostHog
+- https://luistanafranca.pages.dev/?ph_debug=1 printed `[analytics] $pageview` and, after
+  pressing Contact, `[analytics] contact_open`. Both requests to `https://us.i.posthog.com/e/`
+  returned 200. These are real events (2026-10-07, about 17:12 Vancouver time, browser
+  "Claude"). A few more `$pageview` events followed from checking the pages and the redirect.
+- The preview address loaded no PostHog code and sent nothing.
+- Not checked here: that the events show in PostHog. That is Luis's step.
+
+### 4. The old GitHub Pages site
+- Tag `old-site-2026` on `755b7b1` (the old site as it was), pushed.
+- Commit `3d478c0` on `main`, pushed after Luis confirmed: `index.html` replaced and `404.html`
+  added, the same file, with a meta refresh, a canonical link and a `location.replace` to
+  `https://luistanafranca.pages.dev/`, and a visible "This site has moved" link. Nothing else
+  on `main` changed (the README and the old images are still there).
+- GitHub Pages built it in under two minutes. In a browser,
+  `https://ltanafranca1004.github.io/portfolio`, `.../portfolio/` and
+  `.../portfolio/made-up/deep/link?x=1` all land on https://luistanafranca.pages.dev/.
+- Rollback: see "Current state" above and `LAUNCH.md`. The command was tried without the push:
+  the commit it builds has exactly the contents of `old-site-2026`.
+
+### 5. Documents
+`redesign/LAUNCH.md` rewritten: how to deploy preview and production, the old-address
+redirect and its rollback, the checks, what is left for Luis, and how to add a custom domain
+later and redirect `pages.dev` to it.
+
+### Judgment calls and limits
+1. **The redirect page has no noindex tag.** The Session 8 template had one, but a noindex page
+   with a canonical link to another site gives search engines two different instructions. The
+   canonical alone asks them to replace the old address with the new one.
+2. **Only two files changed on `main`.** The old images and README were left, so the rollback
+   is small and nothing else on `main` was touched. The images are still served at their old
+   addresses; nothing links to them.
+3. **No `.nojekyll`.** There was none, so none was added. GitHub's Jekyll build copies the two
+   HTML files as they are.
+4. **Every old address lands on the map.** The old site was one page, so there is nothing to
+   map old paths to. The query string and any `#section` are dropped.
+5. **Local `main` was fast-forwarded** to the redirect commit so it matches `origin/main`.
+6. **The redirect commit was built without checking out `main`** (git plumbing on top of
+   `origin/main`), so the working folder never left `redesign`.
+7. **Search Console is not set up.** Without DNS it needs a verification tag or file added to
+   the site and deployed: listed in `LAUNCH.md` for a later session.
